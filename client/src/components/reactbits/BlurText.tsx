@@ -16,6 +16,14 @@ export const BlurText: React.FC<BlurTextProps> = ({
   animateBy = 'words',
   direction = 'top',
 }) => {
+  const isReduced =
+    typeof window !== 'undefined' &&
+    (window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerWidth < 768);
+
+  if (isReduced) {
+    return <span className={`inline-block ${className}`}>{text}</span>;
+  }
+
   const elements = animateBy === 'words' ? text.split(' ') : text.split('');
 
   return (

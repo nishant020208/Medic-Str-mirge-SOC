@@ -1,15 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { ToastContainer } from '../ui/Toast';
 import { ClickSpark } from './reactbits/ClickSpark';
-import { Silk } from './reactbits/Silk';
 import { useAuthStore } from '../store/authStore';
+
+// Lazy-load Silk background effect; drop from non-home routes for maximum performance
+const Silk = lazy(() => import('./reactbits/Silk').then((m) => ({ default: m.Silk })));
 
 export const Layout: React.FC = () => {
   const location = useLocation();
   const checkAuth = useAuthStore((s) => s.checkAuth);
+  const isHome = location.pathname === '/';
 
   useEffect(() => {
     checkAuth();
@@ -28,8 +31,12 @@ export const Layout: React.FC = () => {
           Skip to main temple sanctuary
         </a>
 
-        {/* Ambient Silk animated background */}
-        <Silk />
+        {/* Ambient Silk animated background - only on home route */}
+        {isHome && (
+          <Suspense fallback={null}>
+            <Silk />
+          </Suspense>
+        )}
 
         {/* Navigation Bar */}
         <Navbar />

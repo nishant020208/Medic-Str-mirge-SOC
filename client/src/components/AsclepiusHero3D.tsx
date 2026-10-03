@@ -1,7 +1,20 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+import {
+  Group,
+  Mesh,
+  Vector3,
+  CatmullRomCurve3,
+  TubeGeometry,
+  MeshStandardMaterial,
+  Color,
+  Points,
+  PointsMaterial,
+  AdditiveBlending,
+  MathUtils,
+} from 'three';
 import { useTheme } from '../store/themeStore';
+import { StaticAsclepiusHeroFallback } from './StaticAsclepiusHeroFallback';
 
 function getSceneTokens() {
   if (typeof window === 'undefined') {
@@ -27,12 +40,12 @@ function getSceneTokens() {
 
 // 3D Staff and Entwined Serpent Model
 function AsclepiusStaff({ tokens }: { tokens: ReturnType<typeof getSceneTokens> }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const snakeRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<Group>(null);
+  const snakeRef = useRef<Mesh>(null);
 
   // Generate smooth helical curve for the snake winding around the staff
   const snakeCurve = useMemo(() => {
-    const points: THREE.Vector3[] = [];
+    const points: Vector3[] = [];
     const height = 4.2;
     const turns = 3.5;
     const count = 120;
@@ -44,35 +57,35 @@ function AsclepiusStaff({ tokens }: { tokens: ReturnType<typeof getSceneTokens> 
       const radius = 0.38 + Math.sin(t * Math.PI) * 0.12;
       const x = Math.cos(angle) * radius;
       const z = Math.sin(angle) * radius;
-      points.push(new THREE.Vector3(x, y, z));
+      points.push(new Vector3(x, y, z));
     }
-    return new THREE.CatmullRomCurve3(points);
+    return new CatmullRomCurve3(points);
   }, []);
 
   const snakeGeo = useMemo(() => {
-    return new THREE.TubeGeometry(snakeCurve, 100, 0.08, 12, false);
+    return new TubeGeometry(snakeCurve, 100, 0.08, 12, false);
   }, [snakeCurve]);
 
   // Metallic materials that adapt dynamically to theme metal token
   const goldMaterial = useMemo(() => {
-    return new THREE.MeshStandardMaterial({
-      color: new THREE.Color(tokens.metal),
+    return new MeshStandardMaterial({
+      color: new Color(tokens.metal),
       metalness: 0.85,
       roughness: 0.25,
     });
   }, []);
 
   const staffMaterial = useMemo(() => {
-    return new THREE.MeshStandardMaterial({
-      color: new THREE.Color(tokens.metal),
+    return new MeshStandardMaterial({
+      color: new Color(tokens.metal),
       metalness: 0.65,
       roughness: 0.35,
     });
   }, []);
 
   const marbleMaterial = useMemo(() => {
-    return new THREE.MeshStandardMaterial({
-      color: new THREE.Color(tokens.fog),
+    return new MeshStandardMaterial({
+      color: new Color(tokens.fog),
       metalness: 0.1,
       roughness: 0.6,
     });
@@ -145,14 +158,14 @@ function ThemeParticles({ tokens }: { tokens: ReturnType<typeof getSceneTokens> 
     return pos;
   }, [particlesCount]);
 
-  const pointsRef = useRef<THREE.Points>(null);
+  const pointsRef = useRef<Points>(null);
   const particleMat = useMemo(() => {
-    return new THREE.PointsMaterial({
+    return new PointsMaterial({
       size: 0.06,
-      color: new THREE.Color(tokens.particle),
+      color: new Color(tokens.particle),
       transparent: true,
       opacity: 0.8,
-      blending: THREE.AdditiveBlending,
+      blending: AdditiveBlending,
     });
   }, []);
 
@@ -184,16 +197,16 @@ function SceneContainer({
   mousePos: { x: number; y: number };
   tokens: ReturnType<typeof getSceneTokens>;
 }) {
-  const sceneRef = useRef<THREE.Group>(null);
+  const sceneRef = useRef<Group>(null);
 
   useFrame(() => {
     if (sceneRef.current) {
-      sceneRef.current.rotation.x = THREE.MathUtils.lerp(
+      sceneRef.current.rotation.x = MathUtils.lerp(
         sceneRef.current.rotation.x,
         mousePos.y * 0.2,
         0.05
       );
-      sceneRef.current.rotation.y = THREE.MathUtils.lerp(
+      sceneRef.current.rotation.y = MathUtils.lerp(
         sceneRef.current.rotation.y,
         mousePos.x * 0.25,
         0.05
@@ -209,44 +222,7 @@ function SceneContainer({
   );
 }
 
-// Static SVG Fallback adapted for Light, Dark, and Aesthetic themes
-export const StaticAsclepiusHeroFallback: React.FC = () => {
-  const { theme } = useTheme();
-
-  return (
-    <div
-      data-testid="static-hero-fallback"
-      className="w-full h-full flex items-center justify-center relative"
-    >
-      <div
-        className={`w-64 h-64 sm:w-80 sm:h-80 rounded-full border-2 p-8 flex items-center justify-center shadow-glow animate-pulse-subtle ${
-          theme === 'aesthetic'
-            ? 'bg-surface-glass border-accent/60'
-            : theme === 'dark'
-            ? 'bg-surface border-primary/50'
-            : 'bg-surface border-accent/40'
-        }`}
-      >
-        <svg
-          viewBox="0 0 100 100"
-          className="w-full h-full text-accent themed-illustration"
-          fill="none"
-          stroke="currentColor"
-        >
-          <circle cx="50" cy="50" r="46" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
-          <line x1="50" y1="8" x2="50" y2="92" strokeWidth="4" strokeLinecap="round" />
-          <circle cx="50" cy="8" r="5" fill="currentColor" />
-          <path
-            d="M 40 84 C 25 76, 75 70, 50 52 C 25 36, 75 30, 50 18 C 45 15, 43 12, 50 12 C 57 12, 60 16, 56 22 C 50 32, 28 34, 48 54 C 70 72, 33 76, 50 88"
-            strokeWidth="3.5"
-            strokeLinecap="round"
-            stroke="currentColor"
-          />
-        </svg>
-      </div>
-    </div>
-  );
-};
+export { StaticAsclepiusHeroFallback };
 
 export const AsclepiusHero3D: React.FC = () => {
   const { theme } = useTheme();

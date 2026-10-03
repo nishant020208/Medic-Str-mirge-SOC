@@ -16,22 +16,25 @@ import { Badge } from '../ui/Badge';
 import { GreekDivider } from '../ui/GreekDivider';
 import { BlurText } from '../components/reactbits/BlurText';
 import { CountUp } from '../components/reactbits/CountUp';
-import { ScrollVelocity } from '../components/reactbits/ScrollVelocity';
 import { Magnet } from '../components/reactbits/Magnet';
 import { SpotlightCard } from '../components/reactbits/SpotlightCard';
-import { StaticAsclepiusHeroFallback } from '../components/AsclepiusHero3D';
+import { StaticAsclepiusHeroFallback } from '../components/StaticAsclepiusHeroFallback';
 import { Product } from '../types';
 import { useCartStore } from '../store/cartStore';
 import { toast } from '../ui/Toast';
 import { formatPrice } from '../lib/utils';
 
-// Lazy load the 3D Canvas to optimize initial load & total JS
+// Lazy load the 3D Canvas and ScrollVelocity to optimize initial load & keep mobile lightweight
 const AsclepiusHero3D = lazy(() =>
   import('../components/AsclepiusHero3D').then((m) => ({ default: m.AsclepiusHero3D }))
+);
+const ScrollVelocity = lazy(() =>
+  import('../components/reactbits/ScrollVelocity').then((m) => ({ default: m.ScrollVelocity }))
 );
 
 export const HomePage: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [mount3D, setMount3D] = useState(false);
   const addItem = useCartStore((s) => s.addItem);
 
   const sacredHerbs = [
@@ -59,6 +62,28 @@ export const HomePage: React.FC = () => {
       }
     };
     fetchFeatured();
+
+    // Render static SVG hero first; mount 3D canvas after first paint via requestIdleCallback/setTimeout
+    // Keep it hidden on mobile and low-end devices
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth < 768;
+      const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const isLowTier = (navigator.hardwareConcurrency || 4) <= 2;
+
+      if (!isMobile && !isReduced && !isLowTier) {
+        const handle = 'requestIdleCallback' in window
+          ? (window as any).requestIdleCallback(() => setMount3D(true), { timeout: 2000 })
+          : setTimeout(() => setMount3D(true), 1200);
+
+        return () => {
+          if ('cancelIdleCallback' in window) {
+            (window as any).cancelIdleCallback(handle);
+          } else {
+            clearTimeout(handle);
+          }
+        };
+      }
+    }
   }, []);
 
   const handleQuickAdd = (product: Product, e: React.MouseEvent) => {
@@ -69,7 +94,7 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="flex-grow flex flex-col">
-      {/* Hero Section with 3D Canvas */}
+      {/* Hero Section with Static SVG first, deferred 3D Canvas */}
       <section className="relative min-h-[90vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 overflow-hidden">
         {/* Decorative column flutes */}
         <div className="absolute inset-y-0 left-4 w-12 hidden md:block opacity-20 column-fluted pointer-events-none" />
@@ -109,18 +134,24 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: 3D Rod of Asclepius Emblem */}
+          {/* Right Column: 3D Rod of Asclepius Emblem (Deferred or Static) */}
           <div className="lg:col-span-5 h-[360px] sm:h-[450px] w-full flex items-center justify-center">
-            <Suspense fallback={<StaticAsclepiusHeroFallback />}>
-              <AsclepiusHero3D />
-            </Suspense>
+            {mount3D ? (
+              <Suspense fallback={<StaticAsclepiusHeroFallback />}>
+                <AsclepiusHero3D />
+              </Suspense>
+            ) : (
+              <StaticAsclepiusHeroFallback />
+            )}
           </div>
         </div>
       </section>
 
-      {/* Marquee of Herb Names (React Bits) */}
+      {/* Marquee of Herb Names (React Bits - Lazy Loaded) */}
       <section className="border-y border-border bg-surface-2 py-2">
-        <ScrollVelocity texts={sacredHerbs} />
+        <Suspense fallback={<div className="h-10" />}>
+          <ScrollVelocity texts={sacredHerbs} />
+        </Suspense>
       </section>
 
       {/* Stats Strip with CountUp (React Bits) */}

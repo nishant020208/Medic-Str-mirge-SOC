@@ -40,32 +40,15 @@ export const ClickSpark: React.FC<{ children: React.ReactNode }> = ({ children }
 
     const tokenColors = [accent, primary, textOnPrimary, border];
 
-    const handleClick = (e: MouseEvent) => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      const sparkCount = 10;
-      for (let i = 0; i < sparkCount; i++) {
-        const angle = (Math.PI * 2 * i) / sparkCount + (Math.random() - 0.5) * 0.5;
-        sparksRef.current.push({
-          x,
-          y,
-          angle,
-          speed: 2 + Math.random() * 3,
-          radius: 1.5 + Math.random() * 2,
-          alpha: 1,
-          color: tokenColors[Math.floor(Math.random() * tokenColors.length)],
-        });
-      }
-    };
-
-    window.addEventListener('click', handleClick);
+    let isRunning = false;
 
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (sparksRef.current.length === 0) {
+        isRunning = false;
+        return;
+      }
 
       sparksRef.current.forEach((spark, index) => {
         spark.x += Math.cos(spark.angle) * spark.speed;
@@ -86,10 +69,42 @@ export const ClickSpark: React.FC<{ children: React.ReactNode }> = ({ children }
         ctx.restore();
       });
 
-      animId = requestAnimationFrame(render);
+      if (sparksRef.current.length > 0) {
+        animId = requestAnimationFrame(render);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        isRunning = false;
+      }
     };
 
-    render();
+    const handleClick = (e: MouseEvent) => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.innerWidth < 768) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const sparkCount = 10;
+      for (let i = 0; i < sparkCount; i++) {
+        const angle = (Math.PI * 2 * i) / sparkCount + (Math.random() - 0.5) * 0.5;
+        sparksRef.current.push({
+          x,
+          y,
+          angle,
+          speed: 2 + Math.random() * 3,
+          radius: 1.5 + Math.random() * 2,
+          alpha: 1,
+          color: tokenColors[Math.floor(Math.random() * tokenColors.length)],
+        });
+      }
+
+      if (!isRunning) {
+        isRunning = true;
+        animId = requestAnimationFrame(render);
+      }
+    };
+
+    window.addEventListener('click', handleClick);
 
     return () => {
       window.removeEventListener('resize', resize);

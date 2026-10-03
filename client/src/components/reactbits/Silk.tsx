@@ -27,8 +27,9 @@ export const Silk: React.FC<{ className?: string }> = ({ className = '' }) => {
     const accent = styles.getPropertyValue('--accent').trim() || 'currentColor';
     const surface = styles.getPropertyValue('--surface').trim() || 'transparent';
 
-    // If reduced motion, draw static soft gradient
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // If reduced motion or mobile device, draw static soft gradient once without animation loop
+    const isMobile = window.innerWidth < 768;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || isMobile) {
       const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
       grad.addColorStop(0, surface);
       grad.addColorStop(1, primary);

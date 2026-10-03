@@ -1,6 +1,29 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
+  const consoleErrors: string[] = [];
+
+  test.beforeEach(async ({ page }) => {
+    consoleErrors.length = 0;
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        const text = msg.text();
+        // Ignore expected 404/401 network responses logged by browser
+        if (
+          !text.includes('Failed to load resource') &&
+          !text.includes('404') &&
+          !text.includes('401')
+        ) {
+          consoleErrors.push(text);
+        }
+      }
+    });
+  });
+
+  test.afterEach(async () => {
+    expect(consoleErrors).toEqual([]);
+  });
+
   test('1. Home page renders brand, 3D/fallback hero, and disclaimer', async ({ page }) => {
     await page.goto('/');
 
@@ -88,26 +111,48 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
     await expect(page.getByText('Hermes of Epidaurus').first()).toBeVisible();
   });
 
-  test('5. Customer & Pharmacist authentication and dashboard access control', async ({
-    page,
-  }) => {
-    // Attempting to visit /dashboard without login shows 403 / restricted sanctum
+  test('5. Customer login -> /dashboard shows themed 403', async ({ page }) => {
+    // Go to login page
+    await page.goto('/login');
+    await page.getByRole('button', { name: 'Customer' }).click(); // Fast-fill button
+    await page.getByRole('button', { name: /Enter Sanctuary/i }).click();
+
+    // Customer is redirected to /shop
+    await expect(page).toHaveURL(/.*\/shop/, { timeout: 10000 });
+
+    // Customer attempts to access pharmacist dashboard
     await page.goto('/dashboard');
     await expect(page.getByText(/The High Sanctum is Sealed/i)).toBeVisible();
+    await expect(page.getByText(/Access Prohibited · 403/i)).toBeVisible();
+  });
 
+  test('6. Pharmacist login -> dashboard loads', async ({ page }) => {
     // Go to login page
     await page.goto('/login');
     await page.getByRole('button', { name: 'Pharmacist' }).click(); // Fast-fill button
     await page.getByRole('button', { name: /Enter Sanctuary/i }).click();
 
-    // Should redirect to dashboard
+    // Should redirect directly to dashboard
     await expect(page).toHaveURL(/.*\/dashboard/, { timeout: 10000 });
     await expect(page.getByText(/Pharmacist Sanctum Dashboard/i)).toBeVisible();
     await expect(page.getByText(/Cumulative Tithe/i)).toBeVisible();
     await expect(page.getByText(/Inventory Register/i)).toBeVisible();
   });
 
-  test('6. Oracle consultation answers with scripted responses', async ({ page }) => {
+  test('7. Wallet mock login completes authentication successfully', async ({ page }) => {
+    await page.goto('/login');
+
+    // Click Web3 wallet button
+    const walletBtn = page.getByRole('button', { name: /Enter with Web3 Wallet/i });
+    await expect(walletBtn).toBeVisible();
+    await walletBtn.click();
+
+    // Mock SIWE signs and redirects to /shop
+    await expect(page).toHaveURL(/.*\/shop/, { timeout: 10000 });
+    await expect(page.getByText('The Apothecary Archives')).toBeVisible();
+  });
+
+  test('8. Oracle consultation answers with scripted responses', async ({ page }) => {
     await page.goto('/oracle');
     await expect(page.getByText(/The Oracle of Asclepius/i)).toBeVisible();
 
@@ -119,7 +164,7 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
     await expect(page.getByText(/Olympian Elderberry Elixir/i)).toBeVisible({ timeout: 6000 });
   });
 
-  test('7. Quest riddle page and Oracle Terminal retro UI', async ({ page }) => {
+  test('9. Quest riddle page and Oracle Terminal retro UI', async ({ page }) => {
     await page.goto('/quest');
     await expect(page.getByText(/The Riddle of the Broken Seal/i)).toBeVisible();
     await expect(page.getByText(/\/admin-old/i)).toBeVisible();
@@ -128,5 +173,24 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
     await page.getByRole('button', { name: /Open Oracle Console/i }).click();
     await expect(page).toHaveURL(/.*\/terminal/);
     await expect(page.getByText(/deploy@medistore-prod:~\$/i).first()).toBeVisible();
+  });
+
+  test('10. WebGL disabled triggers static Asclepius hero fallback', async ({ page }) => {
+    await page.addInitScript(() => {
+      // Simulate missing WebGL support
+      HTMLCanvasElement.prototype.getContext = function (type: string) {
+        if (type.includes('webgl')) return null;
+        return null;
+      };
+    });
+
+    await page.goto('/');
+    await expect(page.locator('[data-testid="static-hero-fallback"]')).toBeVisible();
+  });
+
+  test('11. prefers-reduced-motion triggers static Asclepius hero fallback', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    await expect(page.locator('[data-testid="static-hero-fallback"]')).toBeVisible();
   });
 });

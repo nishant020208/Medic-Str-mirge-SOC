@@ -24,11 +24,11 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: process.env.SERVER_URL || 'http://localhost:5000',
         changeOrigin: true,
       },
       '/healthz': {
-        target: 'http://localhost:5000',
+        target: process.env.SERVER_URL || 'http://localhost:5000',
         changeOrigin: true,
       },
     },

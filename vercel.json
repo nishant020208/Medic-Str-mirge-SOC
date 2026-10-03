@@ -1,0 +1,71 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "client": {
+      "root": "client",
+      "framework": "vite",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "server",
+          "format": "url",
+          "env": "SERVER_URL"
+        }
+      ]
+    },
+    "server": {
+      "root": "server",
+      "framework": "express"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "server"
+      }
+    },
+    {
+      "source": "/healthz",
+      "destination": {
+        "service": "server"
+      }
+    },
+    {
+      "source": "/admin-old(.*)",
+      "destination": {
+        "service": "server"
+      }
+    },
+    {
+      "source": "/.env",
+      "destination": {
+        "service": "server"
+      }
+    },
+    {
+      "source": "/backup.zip",
+      "destination": {
+        "service": "server"
+      }
+    },
+    {
+      "source": "/wp-login.php",
+      "destination": {
+        "service": "server"
+      }
+    },
+    {
+      "source": "/phpmyadmin(.*)",
+      "destination": {
+        "service": "server"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "client"
+      }
+    }
+  ]
+}

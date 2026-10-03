@@ -1,6 +1,6 @@
 # MirageSOC Integration & Hook Specification
 
-This document details the exact integration contracts for merging **MirageSOC** (security defense and honeypot firewall layer) into **MediStore: Temple of Asclepius**.
+This document details the exact integration contracts for merging **MirageSOC** (security defense and honeypot firewall layer) into **medistore-asclepius** (MediStore: Temple of Asclepius).
 
 ---
 

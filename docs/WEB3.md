@@ -1,6 +1,6 @@
 # Web3 Provenance & Batch Registry Guide
 
-MediStore: Temple of Asclepius integrates decentralized batch verification using Solidity smart contracts on the Ethereum Sepolia testnet, with an offline mock mode for demonstrations.
+**medistore-asclepius** (MediStore: Temple of Asclepius) integrates decentralized batch verification using Solidity smart contracts on the Ethereum Sepolia testnet, with an offline mock mode for demonstrations.
 
 ---
 

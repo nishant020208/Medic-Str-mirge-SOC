@@ -1,6 +1,6 @@
 # Production Deployment Guide (Render)
 
-This guide walks through deploying **MediStore: Temple of Asclepius** as a unified single web service on [Render](https://render.com).
+This guide walks through deploying **medistore-asclepius** (MediStore: Temple of Asclepius) as a unified single web service on [Render](https://render.com).
 
 ---
 

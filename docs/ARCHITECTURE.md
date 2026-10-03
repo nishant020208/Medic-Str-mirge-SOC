@@ -1,6 +1,6 @@
-# MediStore: Temple of Asclepius - System Architecture
+# medistore-asclepius — System Architecture
 
-MediStore is a high-craft full-stack pharmacy web application designed with an ancient Greek sanctuary aesthetic blended with modern Web3 cryptographic provenance and defensive security hooks. It functions as the victim web application for **MirageSOC**.
+**medistore-asclepius** (MediStore: Temple of Asclepius) is a high-craft full-stack pharmacy web application designed with an ancient Greek sanctuary aesthetic blended with modern Web3 cryptographic provenance and defensive security hooks. It functions as the victim web application for **MirageSOC**.
 
 ```
                    ┌────────────────────────────────────────┐

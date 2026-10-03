@@ -1,5 +1,5 @@
 {
-  "name": "medistore-server",
+  "name": "medistore-asclepius-server",
   "version": "1.0.0",
   "type": "module",
   "scripts": {

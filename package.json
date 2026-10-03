@@ -1,8 +1,12 @@
 {
-  "name": "medistore-monorepo",
+  "name": "medistore-asclepius",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "MediStore: Temple of Asclepius - Hackathon Victim Application",
+  "overrides": {
+    "braces": "^3.0.3"
+  },
   "workspaces": [
     "client",
     "server"
@@ -15,7 +19,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "lint": "npm run lint -w client && npm run lint -w server",
-    "seed": "npm run seed -w server"
+    "seed": "npm run seed -w server",
+    "audit:lighthouse": "node scripts/run-lighthouse.js"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

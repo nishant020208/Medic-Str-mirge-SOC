@@ -1,9 +1,32 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useTheme } from '../store/themeStore';
+
+function getSceneTokens() {
+  if (typeof window === 'undefined') {
+    return {
+      metal: 'gold',
+      particle: 'gold',
+      lightKey: 'white',
+      lightFill: 'lightblue',
+      bg: 'transparent',
+      fog: 'transparent',
+    };
+  }
+  const style = getComputedStyle(document.documentElement);
+  return {
+    metal: style.getPropertyValue('--scene-metal').trim() || 'gold',
+    particle: style.getPropertyValue('--particle').trim() || 'gold',
+    lightKey: style.getPropertyValue('--scene-light-key').trim() || 'white',
+    lightFill: style.getPropertyValue('--scene-light-fill').trim() || 'lightblue',
+    bg: style.getPropertyValue('--scene-bg').trim() || 'transparent',
+    fog: style.getPropertyValue('--scene-fog').trim() || 'transparent',
+  };
+}
 
 // 3D Staff and Entwined Serpent Model
-function AsclepiusStaff() {
+function AsclepiusStaff({ tokens }: { tokens: ReturnType<typeof getSceneTokens> }) {
   const groupRef = useRef<THREE.Group>(null);
   const snakeRef = useRef<THREE.Mesh>(null);
 
@@ -18,7 +41,6 @@ function AsclepiusStaff() {
       const t = i / count;
       const y = (t - 0.5) * height;
       const angle = t * Math.PI * 2 * turns;
-      // Radius varies slightly (wider in middle, narrower at top)
       const radius = 0.38 + Math.sin(t * Math.PI) * 0.12;
       const x = Math.cos(angle) * radius;
       const z = Math.sin(angle) * radius;
@@ -31,39 +53,40 @@ function AsclepiusStaff() {
     return new THREE.TubeGeometry(snakeCurve, 100, 0.08, 12, false);
   }, [snakeCurve]);
 
-  // Shiny gold metallic material
+  // Metallic materials that adapt dynamically to theme metal token
   const goldMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#D4AF37'),
+      color: new THREE.Color(tokens.metal),
       metalness: 0.85,
       roughness: 0.25,
-      emissive: new THREE.Color('#3A2A05'),
     });
   }, []);
 
-  // Soft polished staff material
   const staffMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#C9A227'),
+      color: new THREE.Color(tokens.metal),
       metalness: 0.65,
       roughness: 0.35,
     });
   }, []);
 
-  // Column fragment material
   const marbleMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#E8DFD0'),
+      color: new THREE.Color(tokens.fog),
       metalness: 0.1,
       roughness: 0.6,
     });
   }, []);
 
+  useEffect(() => {
+    goldMaterial.color.set(tokens.metal);
+    staffMaterial.color.set(tokens.metal);
+    marbleMaterial.color.set(tokens.fog);
+  }, [tokens, goldMaterial, staffMaterial, marbleMaterial]);
+
   useFrame((state, delta) => {
     if (groupRef.current) {
-      // Gentle continuous rotation
       groupRef.current.rotation.y += delta * 0.35;
-      // Subtle hovering bob
       groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.12;
     }
   });
@@ -109,8 +132,8 @@ function AsclepiusStaff() {
   );
 }
 
-// Gold Sparkle Particles Field
-function GoldParticles() {
+// Sparkle Particles Field responding to --particle token
+function ThemeParticles({ tokens }: { tokens: ReturnType<typeof getSceneTokens> }) {
   const particlesCount = 80;
   const positions = useMemo(() => {
     const pos = new Float32Array(particlesCount * 3);
@@ -123,6 +146,19 @@ function GoldParticles() {
   }, [particlesCount]);
 
   const pointsRef = useRef<THREE.Points>(null);
+  const particleMat = useMemo(() => {
+    return new THREE.PointsMaterial({
+      size: 0.06,
+      color: new THREE.Color(tokens.particle),
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+    });
+  }, []);
+
+  useEffect(() => {
+    particleMat.color.set(tokens.particle);
+  }, [tokens.particle, particleMat]);
 
   useFrame((_, delta) => {
     if (pointsRef.current) {
@@ -133,29 +169,25 @@ function GoldParticles() {
   return (
     <points ref={pointsRef}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial
-        size={0.06}
-        color="#F0D060"
-        transparent
-        opacity={0.8}
-        blending={THREE.AdditiveBlending}
-      />
+      <primitive object={particleMat} attach="material" />
     </points>
   );
 }
 
 // Parallax Scene Controller
-function SceneContainer({ mousePos }: { mousePos: { x: number; y: number } }) {
+function SceneContainer({
+  mousePos,
+  tokens,
+}: {
+  mousePos: { x: number; y: number };
+  tokens: ReturnType<typeof getSceneTokens>;
+}) {
   const sceneRef = useRef<THREE.Group>(null);
 
   useFrame(() => {
     if (sceneRef.current) {
-      // Smooth pointer parallax damping
       sceneRef.current.rotation.x = THREE.MathUtils.lerp(
         sceneRef.current.rotation.x,
         mousePos.y * 0.2,
@@ -171,42 +203,60 @@ function SceneContainer({ mousePos }: { mousePos: { x: number; y: number } }) {
 
   return (
     <group ref={sceneRef}>
-      <AsclepiusStaff />
-      <GoldParticles />
+      <AsclepiusStaff tokens={tokens} />
+      <ThemeParticles tokens={tokens} />
     </group>
   );
 }
 
-// Static SVG Fallback for low-end devices, reduced motion, or WebGL absence
-export const StaticAsclepiusHeroFallback: React.FC = () => (
-  <div
-    data-testid="static-hero-fallback"
-    className="w-full h-full flex items-center justify-center relative"
-  >
-    <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-gold-500/20 via-lapis-900/30 to-gold-500/10 border-2 border-gold-500/40 p-8 flex items-center justify-center shadow-gold-glow animate-pulse-subtle">
-      <svg
-        viewBox="0 0 100 100"
-        className="w-full h-full text-gold-500 filter drop-shadow-[0_0_15px_rgba(201,162,39,0.5)]"
-        fill="none"
-        stroke="currentColor"
+// Static SVG Fallback adapted for Light, Dark, and Aesthetic themes
+export const StaticAsclepiusHeroFallback: React.FC = () => {
+  const { theme } = useTheme();
+
+  return (
+    <div
+      data-testid="static-hero-fallback"
+      className="w-full h-full flex items-center justify-center relative"
+    >
+      <div
+        className={`w-64 h-64 sm:w-80 sm:h-80 rounded-full border-2 p-8 flex items-center justify-center shadow-glow animate-pulse-subtle ${
+          theme === 'aesthetic'
+            ? 'bg-surface-glass border-accent/60'
+            : theme === 'dark'
+            ? 'bg-surface border-primary/50'
+            : 'bg-surface border-accent/40'
+        }`}
       >
-        <circle cx="50" cy="50" r="46" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
-        <line x1="50" y1="8" x2="50" y2="92" strokeWidth="4" strokeLinecap="round" />
-        <circle cx="50" cy="8" r="5" fill="currentColor" />
-        <path
-          d="M 40 84 C 25 76, 75 70, 50 52 C 25 36, 75 30, 50 18 C 45 15, 43 12, 50 12 C 57 12, 60 16, 56 22 C 50 32, 28 34, 48 54 C 70 72, 33 76, 50 88"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          stroke="#E5C866"
-        />
-      </svg>
+        <svg
+          viewBox="0 0 100 100"
+          className="w-full h-full text-accent themed-illustration"
+          fill="none"
+          stroke="currentColor"
+        >
+          <circle cx="50" cy="50" r="46" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
+          <line x1="50" y1="8" x2="50" y2="92" strokeWidth="4" strokeLinecap="round" />
+          <circle cx="50" cy="8" r="5" fill="currentColor" />
+          <path
+            d="M 40 84 C 25 76, 75 70, 50 52 C 25 36, 75 30, 50 18 C 45 15, 43 12, 50 12 C 57 12, 60 16, 56 22 C 50 32, 28 34, 48 54 C 70 72, 33 76, 50 88"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            stroke="currentColor"
+          />
+        </svg>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const AsclepiusHero3D: React.FC = () => {
+  const { theme } = useTheme();
+  const [tokens, setTokens] = useState(getSceneTokens());
   const [shouldFallback, setShouldFallback] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    setTokens(getSceneTokens());
+  }, [theme]);
 
   useEffect(() => {
     // 1. Check prefers-reduced-motion
@@ -266,13 +316,13 @@ export const AsclepiusHero3D: React.FC = () => {
           gl={{ antialias: true, alpha: true }}
           frameloop="always"
         >
-          {/* Ancient Temple Lighting Scheme */}
-          <ambientLight intensity={0.7} color="#FFF8DC" />
-          <directionalLight position={[4, 5, 4]} intensity={1.5} color="#FFFFFF" />
-          <directionalLight position={[-4, -2, -3]} intensity={0.6} color="#1D3B82" />
-          <pointLight position={[0, 0, 2.5]} intensity={1.2} color="#FFD700" distance={6} />
+          {/* Dynamic Scene Lighting Scheme driven by --scene tokens */}
+          <ambientLight intensity={0.7} color={tokens.lightKey} />
+          <directionalLight position={[4, 5, 4]} intensity={1.5} color={tokens.lightKey} />
+          <directionalLight position={[-4, -2, -3]} intensity={0.6} color={tokens.lightFill} />
+          <pointLight position={[0, 0, 2.5]} intensity={1.2} color={tokens.metal} distance={6} />
 
-          <SceneContainer mousePos={mousePos} />
+          <SceneContainer mousePos={mousePos} tokens={tokens} />
         </Canvas>
       </Suspense>
     </div>

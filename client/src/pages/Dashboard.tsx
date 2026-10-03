@@ -79,7 +79,7 @@ export const DashboardPage: React.FC = () => {
   if (authLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center animate-pulse">
-        <div className="h-8 w-48 bg-marble-300 dark:bg-lapis-800 mx-auto rounded" />
+        <div className="h-8 w-48 bg-surface-2 mx-auto rounded" />
       </div>
     );
   }
@@ -87,23 +87,23 @@ export const DashboardPage: React.FC = () => {
   if (!user || user.role !== 'pharmacist') {
     return (
       <div className="max-w-lg mx-auto px-4 py-20 text-center flex-grow flex items-center justify-center">
-        <Card variant="marble" className="p-8 border-2 border-terracotta-500/50 shadow-2xl">
-          <div className="w-16 h-16 rounded-full bg-terracotta-500/10 text-terracotta-500 flex items-center justify-center mx-auto mb-4">
+        <Card variant="marble" className="p-8 border-2 border-danger shadow-theme">
+          <div className="w-16 h-16 rounded-full bg-surface-2 text-danger flex items-center justify-center mx-auto mb-4 border border-border">
             <Lock className="w-8 h-8" />
           </div>
-          <span className="font-cinzel text-xs uppercase tracking-widest text-terracotta-600 dark:text-terracotta-400 font-bold block mb-1">
+          <span className="font-cinzel text-xs uppercase tracking-widest text-danger font-bold block mb-1">
             Access Prohibited · 403
           </span>
-          <h1 className="font-cinzel text-2xl font-bold text-ink-950 dark:text-marble-100 mb-2">
+          <h1 className="font-cinzel text-2xl font-bold text-text mb-2">
             The High Sanctum is Sealed
           </h1>
-          <p className="font-cormorant text-base text-ink-700 dark:text-marble-300 leading-relaxed mb-6">
+          <p className="font-cormorant text-base text-text-muted leading-relaxed mb-6">
             Only initiated Temple Pharmacists possessing consecrated credentials may inspect the inner apothecary registers and dispensary manifests.
           </p>
           <GreekDivider />
           <div className="flex gap-3 justify-center mt-4">
             <Link to="/login">
-              <Button variant="gold" size="sm">
+              <Button variant="primary" size="sm">
                 Authenticate as Pharmacist
               </Button>
             </Link>
@@ -199,17 +199,17 @@ export const DashboardPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <span className="font-cinzel text-xs uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold block mb-1">
+          <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
             Initiate Level IV Access
           </span>
-          <h1 className="font-cinzel text-3xl font-bold text-ink-950 dark:text-marble-100">
+          <h1 className="font-cinzel text-3xl font-bold text-text">
             Pharmacist Sanctum Dashboard
           </h1>
-          <p className="font-cormorant text-sm text-ink-700 dark:text-marble-300">
+          <p className="font-cormorant text-sm text-text-muted">
             Consecrated administration: Inventory management, consignment manifests, and financial tithing.
           </p>
         </div>
-        <Badge variant="gold" size="md">
+        <Badge variant="primary" size="md">
           Chief Pharmacist
         </Badge>
       </div>
@@ -218,56 +218,56 @@ export const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card variant="marble" className="p-5 flex items-center justify-between">
           <div>
-            <span className="text-xs font-cinzel text-ink-600 dark:text-marble-400 uppercase tracking-wider block">
+            <span className="text-xs font-cinzel text-text-muted uppercase tracking-wider block">
               Cumulative Tithe
             </span>
-            <span className="font-cinzel text-2xl font-bold text-gold-600 dark:text-gold-400">
+            <span className="font-cinzel text-2xl font-bold text-accent-text">
               {formatPrice(totalRevenue)}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-gold-500/10 text-gold-500 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-surface-2 text-accent-text border border-border flex items-center justify-center">
             <TrendingUp className="w-6 h-6" />
           </div>
         </Card>
 
         <Card variant="marble" className="p-5 flex items-center justify-between">
           <div>
-            <span className="text-xs font-cinzel text-ink-600 dark:text-marble-400 uppercase tracking-wider block">
+            <span className="text-xs font-cinzel text-text-muted uppercase tracking-wider block">
               Consignments
             </span>
-            <span className="font-cinzel text-2xl font-bold text-ink-950 dark:text-marble-100">
+            <span className="font-cinzel text-2xl font-bold text-text">
               {orders.length}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-lapis-500/10 text-lapis-500 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-surface-2 text-primary border border-border flex items-center justify-center">
             <ShoppingCart className="w-6 h-6" />
           </div>
         </Card>
 
         <Card variant="marble" className="p-5 flex items-center justify-between">
           <div>
-            <span className="text-xs font-cinzel text-ink-600 dark:text-marble-400 uppercase tracking-wider block">
+            <span className="text-xs font-cinzel text-text-muted uppercase tracking-wider block">
               Stock Reserves
             </span>
-            <span className="font-cinzel text-2xl font-bold text-olive-600 dark:text-olive-400">
+            <span className="font-cinzel text-2xl font-bold text-success">
               {totalUnitsInStock}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-olive-500/10 text-olive-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-surface-2 text-success border border-border flex items-center justify-center">
             <Boxes className="w-6 h-6" />
           </div>
         </Card>
 
         <Card variant="marble" className="p-5 flex items-center justify-between">
           <div>
-            <span className="text-xs font-cinzel text-ink-600 dark:text-marble-400 uppercase tracking-wider block">
+            <span className="text-xs font-cinzel text-text-muted uppercase tracking-wider block">
               Low Stock Alerts
             </span>
-            <span className="font-cinzel text-2xl font-bold text-terracotta-500">
+            <span className="font-cinzel text-2xl font-bold text-danger">
               {lowStockItems.length}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-terracotta-500/10 text-terracotta-500 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-surface-2 text-danger border border-border flex items-center justify-center">
             <AlertTriangle className="w-6 h-6" />
           </div>
         </Card>
@@ -276,7 +276,7 @@ export const DashboardPage: React.FC = () => {
       {/* Analytics Charts (Recharts) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <Card variant="marble" className="p-6">
-          <h3 className="font-cinzel text-base font-bold text-ink-950 dark:text-marble-100 mb-4">
+          <h3 className="font-cinzel text-base font-bold text-text mb-4">
             Daily Tithe Flow (USD)
           </h3>
           <div className="h-64 w-full">
@@ -284,24 +284,25 @@ export const DashboardPage: React.FC = () => {
               <AreaChart data={salesByDay}>
                 <defs>
                   <linearGradient id="goldArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#C9A227" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#C9A227" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--chart-1)" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="day" stroke="#888888" fontSize={12} />
-                <YAxis stroke="#888888" fontSize={12} />
+                <XAxis dataKey="day" stroke="var(--text-muted)" fontSize={12} />
+                <YAxis stroke="var(--text-muted)" fontSize={12} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0B1F4B',
-                    borderColor: '#C9A227',
-                    color: '#F5F1E8',
+                    backgroundColor: 'var(--surface)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text)',
                     fontFamily: 'Cinzel',
+                    borderRadius: '8px',
                   }}
                 />
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#C9A227"
+                  stroke="var(--chart-1)"
                   fillOpacity={1}
                   fill="url(#goldArea)"
                 />
@@ -311,23 +312,24 @@ export const DashboardPage: React.FC = () => {
         </Card>
 
         <Card variant="marble" className="p-6">
-          <h3 className="font-cinzel text-base font-bold text-ink-950 dark:text-marble-100 mb-4">
+          <h3 className="font-cinzel text-base font-bold text-text mb-4">
             Formulation Categorization
           </h3>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={categoryBreakdown}>
-                <XAxis dataKey="category" stroke="#888888" fontSize={11} interval={0} angle={-15} textAnchor="end" height={45} />
-                <YAxis stroke="#888888" fontSize={12} />
+                <XAxis dataKey="category" stroke="var(--text-muted)" fontSize={11} interval={0} angle={-15} textAnchor="end" height={45} />
+                <YAxis stroke="var(--text-muted)" fontSize={12} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#0B1F4B',
-                    borderColor: '#C9A227',
-                    color: '#F5F1E8',
+                    backgroundColor: 'var(--surface)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text)',
                     fontFamily: 'Cinzel',
+                    borderRadius: '8px',
                   }}
                 />
-                <Bar dataKey="count" fill="#2A4FA3" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="var(--chart-2)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -352,7 +354,7 @@ export const DashboardPage: React.FC = () => {
         <Card variant="marble" className="p-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div className="w-full sm:w-80 relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-600 dark:text-marble-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
               <Input
                 placeholder="Search registry by name, category, batch..."
                 value={searchProduct}
@@ -360,7 +362,7 @@ export const DashboardPage: React.FC = () => {
                 className="pl-9 min-h-[38px] text-xs"
               />
             </div>
-            <span className="text-xs font-cinzel text-ink-600 dark:text-marble-400">
+            <span className="text-xs font-cinzel text-text-muted">
               Showing {filteredProducts.length} remedies
             </span>
           </div>
@@ -380,19 +382,19 @@ export const DashboardPage: React.FC = () => {
               {filteredProducts.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell className="font-bold font-cinzel">
-                    <Link to={`/shop/${p.id}`} className="hover:text-gold-500">
+                    <Link to={`/shop/${p.id}`} className="hover:text-accent-text">
                       {p.name}
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="lapis" size="sm">
+                    <Badge variant="secondary" size="sm">
                       {p.category}
                     </Badge>
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-ink-600 dark:text-marble-400">
+                  <TableCell className="font-mono text-xs text-text-muted">
                     {p.batchId}
                   </TableCell>
-                  <TableCell className="font-cinzel font-bold text-gold-600 dark:text-gold-400">
+                  <TableCell className="font-cinzel font-bold text-accent-text">
                     {formatPrice(p.price)}
                   </TableCell>
                   <TableCell>
@@ -402,17 +404,17 @@ export const DashboardPage: React.FC = () => {
                           type="number"
                           value={stockInputVal}
                           onChange={(e) => setStockInputVal(Number(e.target.value))}
-                          className="w-16 px-2 py-1 text-xs border rounded bg-marble-100 dark:bg-lapis-950 font-mono"
+                          className="w-16 px-2 py-1 text-xs border border-border rounded-card bg-surface-2 font-mono text-text"
                         />
                         <button
                           onClick={() => handleUpdateStock(p.id)}
-                          className="p-1 text-olive-600 hover:text-olive-700"
+                          className="p-1 text-success hover:opacity-80"
                         >
                           <Check className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setEditingStockId(null)}
-                          className="p-1 text-terracotta-500 hover:text-terracotta-600"
+                          className="p-1 text-danger hover:opacity-80"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -420,7 +422,7 @@ export const DashboardPage: React.FC = () => {
                     ) : (
                       <span
                         className={`font-mono text-xs font-bold ${
-                          p.stock < 15 ? 'text-terracotta-500' : 'text-olive-600 dark:text-olive-400'
+                          p.stock < 15 ? 'text-danger' : 'text-success'
                         }`}
                       >
                         {p.stock} units
@@ -467,28 +469,28 @@ export const DashboardPage: React.FC = () => {
               {orders.map((o) => (
                 <TableRow key={o.id}>
                   <TableCell className="font-mono text-xs font-bold">
-                    <Link to={`/order-confirmation/${o.id}`} className="hover:text-gold-500">
+                    <Link to={`/order-confirmation/${o.id}`} className="hover:text-accent-text">
                       {o.id}
                     </Link>
                   </TableCell>
                   <TableCell>
                     <span className="font-bold block text-xs">{o.customerName}</span>
-                    <span className="text-[11px] text-ink-600 dark:text-marble-400">{o.customerEmail}</span>
+                    <span className="text-[11px] text-text-muted">{o.customerEmail}</span>
                   </TableCell>
                   <TableCell className="text-xs">
                     {o.items.length} items ({o.items.map((i) => i.productName).join(', ')})
                   </TableCell>
-                  <TableCell className="font-cinzel font-bold text-gold-600 dark:text-gold-400">
+                  <TableCell className="font-cinzel font-bold text-accent-text">
                     {formatPrice(o.total)}
                   </TableCell>
                   <TableCell>
                     <Badge
                       variant={
                         o.status === 'Delivered'
-                          ? 'olive'
+                          ? 'success'
                           : o.status === 'Cancelled'
-                          ? 'terracotta'
-                          : 'gold'
+                          ? 'danger'
+                          : 'primary'
                       }
                       size="sm"
                     >
@@ -501,7 +503,7 @@ export const DashboardPage: React.FC = () => {
                       onChange={(e) =>
                         handleUpdateOrderStatus(o.id, e.target.value as Order['status'])
                       }
-                      className="text-xs px-2 py-1 rounded bg-marble-100 dark:bg-lapis-950 border border-marble-300 dark:border-lapis-700 font-cinzel"
+                      className="text-xs px-2 py-1 rounded-card bg-surface-2 border border-border font-cinzel text-text"
                     >
                       <option value="Pending">Pending</option>
                       <option value="Dispensed">Dispensed</option>
@@ -522,26 +524,26 @@ export const DashboardPage: React.FC = () => {
         <Card variant="marble" className="p-6">
           <div className="space-y-4">
             {lowStockItems.length === 0 ? (
-              <p className="text-sm text-olive-600">All sanctum apothecary stock levels are healthy.</p>
+              <p className="text-sm text-success">All sanctum apothecary stock levels are healthy.</p>
             ) : (
               lowStockItems.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between p-4 rounded border border-terracotta-500/30 bg-terracotta-500/5"
+                  className="flex items-center justify-between p-4 rounded-card border border-border bg-surface-2"
                 >
                   <div className="flex items-center gap-3">
-                    <AlertTriangle className="w-5 h-5 text-terracotta-500" />
+                    <AlertTriangle className="w-5 h-5 text-danger" />
                     <div>
-                      <h4 className="font-cinzel font-bold text-sm text-ink-950 dark:text-marble-100">
+                      <h4 className="font-cinzel font-bold text-sm text-text">
                         {item.name} ({item.category})
                       </h4>
-                      <p className="text-xs text-ink-700 dark:text-marble-300">
+                      <p className="text-xs text-text-muted">
                         Batch {item.batchId} has dropped to {item.stock} remaining doses.
                       </p>
                     </div>
                   </div>
                   <Button
-                    variant="terracotta"
+                    variant="danger"
                     size="sm"
                     onClick={() => {
                       setActiveTab('inventory');

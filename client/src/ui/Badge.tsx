@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '../lib/utils';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'gold' | 'olive' | 'terracotta' | 'lapis' | 'outline';
+  variant?: 'gold' | 'olive' | 'terracotta' | 'lapis' | 'outline' | 'success' | 'danger' | 'warning' | 'info' | 'primary' | 'secondary';
   size?: 'sm' | 'md';
 }
 
@@ -13,12 +13,18 @@ export const Badge: React.FC<BadgeProps> = ({
   children,
   ...props
 }) => {
-  const variants = {
-    gold: 'bg-gold-500/15 text-gold-700 dark:text-gold-300 border border-gold-500/30',
-    olive: 'bg-olive-500/15 text-olive-700 dark:text-olive-300 border border-olive-500/30',
-    terracotta: 'bg-terracotta-500/15 text-terracotta-700 dark:text-terracotta-300 border border-terracotta-500/30',
-    lapis: 'bg-lapis-500/15 text-lapis-800 dark:text-lapis-200 border border-lapis-500/30',
-    outline: 'border border-marble-300 dark:border-lapis-700 text-ink-800 dark:text-marble-200',
+  const variants: Record<string, string> = {
+    primary: 'bg-surface-2 text-accent-text border border-border font-bold',
+    secondary: 'bg-surface-2 text-info border border-border font-bold',
+    gold: 'bg-surface-2 text-accent-text border border-border font-bold',
+    olive: 'bg-surface-2 text-success border border-border font-bold',
+    success: 'bg-surface-2 text-success border border-border font-bold',
+    terracotta: 'bg-surface-2 text-danger border border-border font-bold',
+    danger: 'bg-surface-2 text-danger border border-border font-bold',
+    warning: 'bg-surface-2 text-warning border border-border font-bold',
+    lapis: 'bg-surface-2 text-info border border-border font-bold',
+    info: 'bg-surface-2 text-info border border-border font-bold',
+    outline: 'border border-border text-text font-medium bg-transparent',
   };
 
   const sizes = {
@@ -29,8 +35,8 @@ export const Badge: React.FC<BadgeProps> = ({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-sm font-cinzel uppercase transition-colors',
-        variants[variant],
+        'inline-flex items-center rounded-card font-cinzel uppercase transition-colors',
+        variants[variant] || variants.gold,
         sizes[size],
         className
       )}

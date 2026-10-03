@@ -37,8 +37,8 @@ const NotFoundPage = lazy(() =>
 const PageFallback: React.FC = () => (
   <div className="w-full min-h-[60vh] flex items-center justify-center p-12">
     <div className="flex flex-col items-center gap-3">
-      <div className="w-10 h-10 border-2 border-gold-500/20 border-t-gold-500 rounded-full animate-spin" />
-      <span className="font-cinzel text-xs text-gold-600 dark:text-gold-400 tracking-widest uppercase">
+      <div className="w-10 h-10 border-2 border-border border-t-primary rounded-full animate-spin" />
+      <span className="font-cinzel text-xs text-accent-text tracking-widest uppercase font-bold">
         Consulting Oracle...
       </span>
     </div>

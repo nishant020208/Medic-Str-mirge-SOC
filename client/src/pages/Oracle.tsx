@@ -101,31 +101,31 @@ export const OraclePage: React.FC = () => {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow flex flex-col">
       {/* Oracle Header */}
       <div className="text-center mb-6">
-        <div className="w-16 h-16 rounded-full bg-gold-500/10 border-2 border-gold-500/40 text-gold-500 flex items-center justify-center mx-auto mb-3 shadow-gold-glow animate-pulse-subtle">
+        <div className="w-16 h-16 rounded-full bg-surface-2 border-2 border-border text-accent-text flex items-center justify-center mx-auto mb-3 shadow-theme">
           <Sparkles className="w-8 h-8" />
         </div>
-        <span className="font-cinzel text-xs uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold block mb-1">
+        <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
           The Delphic Digital Hearth
         </span>
-        <h1 className="font-cinzel text-3xl font-bold text-ink-950 dark:text-marble-100">
+        <h1 className="font-cinzel text-3xl font-bold text-text">
           The Oracle of Asclepius
         </h1>
-        <p className="font-cormorant text-base text-ink-700 dark:text-marble-300 max-w-lg mx-auto mt-1">
+        <p className="font-cormorant text-base text-text-muted max-w-lg mx-auto mt-1">
           Pose your questions to the ancient consecrated intelligence. Scripted answers synthesized from the sacred codex.
         </p>
       </div>
 
       {/* Suggestion Chips */}
       <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-4 no-scrollbar">
-        <span className="text-xs font-cinzel text-ink-600 dark:text-marble-400 shrink-0 flex items-center gap-1 font-bold">
-          <HelpCircle className="w-3.5 h-3.5 text-gold-500" /> Prompts:
+        <span className="text-xs font-cinzel text-text-muted shrink-0 flex items-center gap-1 font-bold">
+          <HelpCircle className="w-3.5 h-3.5 text-accent-text" /> Prompts:
         </span>
         {suggestionChips.map((chip, idx) => (
           <button
             key={idx}
             type="button"
             onClick={() => handleSend(chip)}
-            className="px-3 py-1.5 text-xs font-cinzel rounded-full bg-marble-200/80 dark:bg-lapis-900/80 border border-marble-300 dark:border-lapis-700 hover:border-gold-500 text-ink-800 dark:text-marble-200 transition-colors whitespace-nowrap"
+            className="px-3 py-1.5 text-xs font-cinzel rounded-full bg-surface-2 border border-border hover:border-accent text-text transition-colors whitespace-nowrap"
           >
             {chip}
           </button>
@@ -135,7 +135,7 @@ export const OraclePage: React.FC = () => {
       {/* Chat Window */}
       <Card
         variant="papyrus"
-        className="flex-grow flex flex-col p-4 sm:p-6 min-h-[480px] max-h-[580px] border-2 border-gold-500/30 shadow-xl"
+        className="flex-grow flex flex-col p-4 sm:p-6 min-h-[480px] max-h-[580px] border-2 border-border shadow-theme"
       >
         <div className="flex-grow overflow-y-auto space-y-4 pr-2">
           {messages.map((m) => (
@@ -146,20 +146,20 @@ export const OraclePage: React.FC = () => {
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border border-border ${
                   m.sender === 'oracle'
-                    ? 'bg-lapis-900 border-gold-500/50 text-gold-400'
-                    : 'bg-gold-500 border-gold-600 text-ink-950 font-bold'
+                    ? 'bg-surface-2 text-accent-text'
+                    : 'bg-primary text-text-on-primary font-bold'
                 }`}
               >
                 {m.sender === 'oracle' ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
               </div>
 
               <div
-                className={`max-w-[80%] rounded-sm p-3.5 text-sm ${
+                className={`max-w-[80%] rounded-card p-3.5 text-sm ${
                   m.sender === 'oracle'
-                    ? 'bg-white/90 dark:bg-lapis-900/90 text-ink-900 dark:text-marble-100 border border-marble-200 dark:border-lapis-800'
-                    : 'bg-gold-500 text-ink-950 font-medium'
+                    ? 'bg-surface text-text border border-border'
+                    : 'bg-primary text-text-on-primary font-medium'
                 }`}
               >
                 <div className="flex items-center justify-between gap-4 mb-1 text-[10px] opacity-75 font-cinzel">
@@ -173,15 +173,15 @@ export const OraclePage: React.FC = () => {
 
           {isTyping && (
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-lapis-900 border border-gold-500/50 text-gold-400 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-full bg-surface-2 border border-border text-accent-text flex items-center justify-center shrink-0">
                 <Sparkles className="w-4 h-4 animate-spin" />
               </div>
-              <div className="p-3 bg-white/90 dark:bg-lapis-900/90 rounded-sm border border-marble-200 dark:border-lapis-800 text-xs font-cinzel text-gold-600 dark:text-gold-400 flex items-center gap-2">
+              <div className="p-3 bg-surface rounded-card border border-border text-xs font-cinzel text-accent-text flex items-center gap-2">
                 <span>The Oracle divines the stars...</span>
                 <span className="flex gap-1">
-                  <span className="w-1.5 h-1.5 bg-gold-500 rounded-full animate-bounce" />
-                  <span className="w-1.5 h-1.5 bg-gold-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-1.5 h-1.5 bg-gold-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                  <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" />
+                  <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce [animation-delay:0.2s]" />
+                  <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce [animation-delay:0.4s]" />
                 </span>
               </div>
             </div>
@@ -204,11 +204,11 @@ export const OraclePage: React.FC = () => {
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             placeholder="Inquire of remedies, shipping, batches, or myths..."
-            className="flex-grow min-h-[44px] px-4 py-2 text-sm bg-marble-100 dark:bg-lapis-950 border border-marble-300 dark:border-lapis-700 rounded-sm text-ink-900 dark:text-marble-100 focus:outline-none focus:ring-2 focus:ring-gold-500 font-sans"
+            className="flex-grow min-h-[44px] px-4 py-2 text-sm bg-surface-2 border border-border rounded-card text-text focus:outline-none focus:ring-2 focus:ring-ring font-sans"
           />
           <Button
             type="submit"
-            variant="gold"
+            variant="primary"
             size="md"
             disabled={!inputVal.trim() || isTyping}
             rightIcon={<Send className="w-4 h-4" />}
@@ -219,7 +219,7 @@ export const OraclePage: React.FC = () => {
       </Card>
 
       {/* Mandatory Disclaimer */}
-      <div className="text-center text-xs text-ink-600 dark:text-marble-400 mt-4">
+      <div className="text-center text-xs text-text-muted mt-4">
         Demo application. Not medical advice. No real orders.
       </div>
     </div>

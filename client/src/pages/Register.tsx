@@ -75,21 +75,21 @@ export const RegisterPage: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-16 w-full flex-grow flex flex-col justify-center">
-      <Card variant="marble" className="p-8 border-2 border-gold-500/40 shadow-2xl">
+      <Card variant="marble" className="p-8 border-2 border-border shadow-theme">
         <div className="text-center mb-6">
-          <div className="w-14 h-14 rounded-full bg-gold-500/10 border border-gold-500/40 text-gold-500 flex items-center justify-center mx-auto mb-3 shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-surface-2 border border-border text-accent-text flex items-center justify-center mx-auto mb-3 shadow-sm">
             <UserPlus className="w-7 h-7" />
           </div>
-          <span className="font-cinzel text-xs uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold block mb-1">
+          <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
             Initiate Devotion
           </span>
-          <h1 className="font-cinzel text-2xl font-bold text-ink-950 dark:text-marble-100">
+          <h1 className="font-cinzel text-2xl font-bold text-text">
             Sanctuary Inscription
           </h1>
         </div>
 
         {formError && (
-          <div className="mb-5 p-3 rounded-sm bg-terracotta-500/10 border border-terracotta-500/30 text-xs text-terracotta-600 dark:text-terracotta-400 font-medium text-center">
+          <div className="mb-5 p-3 rounded-card bg-surface-2 border border-danger text-xs text-danger font-medium text-center">
             {formError}
           </div>
         )}
@@ -121,7 +121,7 @@ export const RegisterPage: React.FC = () => {
 
           <Button
             type="submit"
-            variant="gold"
+            variant="primary"
             size="lg"
             className="w-full mt-2"
             isLoading={isSubmitting}
@@ -133,9 +133,9 @@ export const RegisterPage: React.FC = () => {
 
         <GreekDivider className="my-6" />
 
-        <div className="text-center text-xs text-ink-700 dark:text-marble-300">
+        <div className="text-center text-xs text-text-muted">
           <span>Already consecrated? </span>
-          <Link to="/login" className="font-cinzel text-gold-600 dark:text-gold-400 font-bold hover:underline">
+          <Link to="/login" className="font-cinzel text-accent-text font-bold hover:underline">
             Enter Sanctuary
           </Link>
         </div>

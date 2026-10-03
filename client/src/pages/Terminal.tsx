@@ -262,8 +262,8 @@ export const TerminalPage: React.FC = () => {
       {/* Header bar */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <TerminalIcon className="w-5 h-5 text-gold-500" />
-          <h1 className="font-cinzel text-lg font-bold text-ink-950 dark:text-marble-100">
+          <TerminalIcon className="w-5 h-5 text-accent-text" />
+          <h1 className="font-cinzel text-lg font-bold text-text">
             Oracle Administrative Console
           </h1>
         </div>
@@ -271,25 +271,25 @@ export const TerminalPage: React.FC = () => {
         {/* Connection status badge */}
         <div className="flex items-center gap-2">
           {connectionStatus === 'connected' && (
-            <Badge variant="olive" size="sm" className="flex items-center gap-1">
+            <Badge variant="success" size="sm" className="flex items-center gap-1">
               <Wifi className="w-3 h-3" />
               <span>Connected</span>
             </Badge>
           )}
           {connectionStatus === 'connecting' && (
-            <Badge variant="gold" size="sm" className="flex items-center gap-1">
+            <Badge variant="primary" size="sm" className="flex items-center gap-1">
               <span>Connecting...</span>
             </Badge>
           )}
           {connectionStatus === 'disconnected' && (
-            <Badge variant="terracotta" size="sm" className="flex items-center gap-1">
+            <Badge variant="danger" size="sm" className="flex items-center gap-1">
               <WifiOff className="w-3 h-3" />
               <span>Disconnected</span>
             </Badge>
           )}
           {connectionStatus === 'offline' && (
-            <Badge variant="outline" size="sm" className="flex items-center gap-1 text-ink-600 dark:text-marble-400">
-              <AlertTriangle className="w-3 h-3 text-gold-500" />
+            <Badge variant="outline" size="sm" className="flex items-center gap-1 text-text-muted">
+              <AlertTriangle className="w-3 h-3 text-accent-text" />
               <span>Console Offline</span>
             </Badge>
           )}
@@ -299,7 +299,7 @@ export const TerminalPage: React.FC = () => {
       {/* Retro Bronze Terminal Screen */}
       <div
         onClick={() => inputRef.current?.focus()}
-        className="flex-grow rounded-sm bg-[#1A1208] text-[#D8B452] p-5 font-mono text-sm shadow-2xl border-2 border-[#8E6D24] overflow-hidden flex flex-col min-h-[500px] cursor-text selection:bg-[#D8B452] selection:text-[#1A1208]"
+        className="flex-grow rounded-card bg-surface-2 text-text p-5 font-mono text-sm shadow-theme border-2 border-border overflow-hidden flex flex-col min-h-[500px] cursor-text selection:bg-accent selection:text-text-on-primary"
       >
         {/* Terminal output area */}
         <div className="flex-grow overflow-y-auto space-y-1.5 pr-2">
@@ -308,12 +308,12 @@ export const TerminalPage: React.FC = () => {
               key={line.id}
               className={`leading-relaxed whitespace-pre-wrap ${
                 line.type === 'input'
-                  ? 'text-[#F5F1E8] font-bold'
+                  ? 'text-text font-bold'
                   : line.type === 'system'
-                  ? 'text-[#8E6D24]'
+                  ? 'text-text-muted'
                   : line.type === 'error'
-                  ? 'text-[#E06C43]'
-                  : 'text-[#D8B452]'
+                  ? 'text-danger font-semibold'
+                  : 'text-accent-text'
               }`}
             >
               {line.text}
@@ -323,8 +323,8 @@ export const TerminalPage: React.FC = () => {
         </div>
 
         {/* Prompt line */}
-        <div className="flex items-center gap-2 pt-3 border-t border-[#8E6D24]/40 mt-2">
-          <span className="text-[#8E6D24] font-bold select-none whitespace-nowrap">
+        <div className="flex items-center gap-2 pt-3 border-t border-border mt-2">
+          <span className="text-accent-text font-bold select-none whitespace-nowrap">
             deploy@medistore-prod:~$
           </span>
           <input
@@ -334,18 +334,18 @@ export const TerminalPage: React.FC = () => {
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="flex-grow bg-transparent border-none outline-none text-[#F5F1E8] font-mono text-sm caret-[#D8B452]"
+            className="flex-grow bg-transparent border-none outline-none text-text font-mono text-sm caret-primary"
             autoFocus
             aria-label="Oracle Terminal Command Input"
           />
         </div>
       </div>
 
-      <div className="flex justify-between items-center text-xs text-ink-600 dark:text-marble-400 mt-3 font-mono">
+      <div className="flex justify-between items-center text-xs text-text-muted mt-3 font-mono">
         <span>Type "help" for commands · Max length 200 chars</span>
         <button
           onClick={() => setLines([])}
-          className="text-gold-600 dark:text-gold-400 hover:underline"
+          className="text-accent-text hover:underline"
         >
           Clear Screen
         </button>

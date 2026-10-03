@@ -50,7 +50,6 @@ export const CataloguePage: React.FC = () => {
           const data = await res.json();
           setProducts(data.products || []);
         } else {
-          // If server not yet running or demo fallback, fetch failed
           setProducts([]);
         }
       } catch {
@@ -83,22 +82,22 @@ export const CataloguePage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
       {/* Title */}
       <div className="text-center mb-8">
-        <span className="font-cinzel text-xs uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold block mb-1">
+        <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
           Sanctuary Dispensary
         </span>
-        <h1 className="font-cinzel text-3xl sm:text-4xl font-bold text-ink-950 dark:text-marble-100">
+        <h1 className="font-cinzel text-3xl sm:text-4xl font-bold text-text">
           The Apothecary Archives
         </h1>
-        <p className="font-cormorant text-base text-ink-700 dark:text-marble-300 max-w-xl mx-auto mt-2">
+        <p className="font-cormorant text-base text-text-muted max-w-xl mx-auto mt-2">
           Discover Hellenic-inspired therapeutic compounds, each cryptographically verified by the Oracle registry.
         </p>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-marble-200/50 dark:bg-lapis-900/50 p-4 rounded-sm border border-marble-300 dark:border-lapis-700/60 mb-8 space-y-4">
+      <div className="bg-surface-2 p-4 rounded-card border border-border mb-8 space-y-4 shadow-theme">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="w-full md:w-96 relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-600 dark:text-marble-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
             <Input
               type="text"
               placeholder="Search remedies, herbs, symptoms..."
@@ -109,14 +108,14 @@ export const CataloguePage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-            <span className="text-xs font-cinzel font-semibold text-ink-700 dark:text-marble-300 flex items-center gap-1">
-              <SlidersHorizontal className="w-3.5 h-3.5" /> Sort:
+            <span className="text-xs font-cinzel font-semibold text-text-muted flex items-center gap-1">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-accent" /> Sort:
             </span>
             <select
               aria-label="Sort remedies by"
               value={sort}
               onChange={(e) => updateFilter('sort', e.target.value)}
-              className="text-xs px-2.5 py-2 rounded-sm bg-marble-50 dark:bg-lapis-950 border border-marble-300 dark:border-lapis-700 text-ink-900 dark:text-marble-100 font-cinzel"
+              className="text-xs px-2.5 py-2 rounded-card bg-surface border border-border text-text font-cinzel shadow-inner"
             >
               <option value="featured">Featured</option>
               <option value="price-asc">Price: Low to High</option>
@@ -126,10 +125,10 @@ export const CataloguePage: React.FC = () => {
 
             <button
               onClick={() => updateFilter('rx', rxFilter ? null : 'true')}
-              className={`px-3 py-1.5 text-xs font-cinzel rounded-sm border transition-colors flex items-center gap-1 ${
+              className={`px-3 py-1.5 text-xs font-cinzel rounded-card border transition-colors flex items-center gap-1 ${
                 rxFilter
-                  ? 'bg-terracotta-500 text-white border-terracotta-600 font-bold'
-                  : 'bg-marble-100 dark:bg-lapis-950 border-marble-300 dark:border-lapis-700 text-ink-700 dark:text-marble-300'
+                  ? 'bg-danger text-text-on-primary border-border font-bold shadow-theme'
+                  : 'bg-surface border-border text-text-muted hover:text-text'
               }`}
             >
               {rxFilter && <Check className="w-3 h-3" />}
@@ -138,10 +137,10 @@ export const CataloguePage: React.FC = () => {
 
             <button
               onClick={() => updateFilter('inStock', inStockFilter ? null : 'true')}
-              className={`px-3 py-1.5 text-xs font-cinzel rounded-sm border transition-colors flex items-center gap-1 ${
+              className={`px-3 py-1.5 text-xs font-cinzel rounded-card border transition-colors flex items-center gap-1 ${
                 inStockFilter
-                  ? 'bg-olive-500 text-white border-olive-600 font-bold'
-                  : 'bg-marble-100 dark:bg-lapis-950 border-marble-300 dark:border-lapis-700 text-ink-700 dark:text-marble-300'
+                  ? 'bg-success text-text-on-primary border-border font-bold shadow-theme'
+                  : 'bg-surface border-border text-text-muted hover:text-text'
               }`}
             >
               {inStockFilter && <Check className="w-3 h-3" />}
@@ -154,10 +153,10 @@ export const CataloguePage: React.FC = () => {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           <button
             onClick={() => updateFilter('category', 'All')}
-            className={`px-3 py-1 text-xs font-cinzel uppercase tracking-wider rounded-sm transition-all whitespace-nowrap ${
+            className={`px-3 py-1 text-xs font-cinzel uppercase tracking-wider rounded-card transition-all whitespace-nowrap ${
               selectedCategory === 'All'
-                ? 'bg-gold-500 text-ink-950 font-bold shadow-sm'
-                : 'bg-marble-100 dark:bg-lapis-950 border border-marble-300 dark:border-lapis-700 text-ink-700 dark:text-marble-300 hover:text-gold-500'
+                ? 'bg-primary text-text-on-primary font-bold shadow-theme'
+                : 'bg-surface border border-border text-text-muted hover:text-text'
             }`}
           >
             All Remedials
@@ -166,10 +165,10 @@ export const CataloguePage: React.FC = () => {
             <button
               key={cat}
               onClick={() => updateFilter('category', cat)}
-              className={`px-3 py-1 text-xs font-cinzel uppercase tracking-wider rounded-sm transition-all whitespace-nowrap ${
+              className={`px-3 py-1 text-xs font-cinzel uppercase tracking-wider rounded-card transition-all whitespace-nowrap ${
                 selectedCategory === cat
-                  ? 'bg-gold-500 text-ink-950 font-bold shadow-sm'
-                  : 'bg-marble-100 dark:bg-lapis-950 border border-marble-300 dark:border-lapis-700 text-ink-700 dark:text-marble-300 hover:text-gold-500'
+                  ? 'bg-primary text-text-on-primary font-bold shadow-theme'
+                  : 'bg-surface border border-border text-text-muted hover:text-text'
               }`}
             >
               {cat}
@@ -185,7 +184,7 @@ export const CataloguePage: React.FC = () => {
           {[...Array(8)].map((_, i) => (
             <div
               key={i}
-              className="h-80 rounded-sm bg-marble-300/40 dark:bg-lapis-800/40 animate-pulse border border-marble-300/60"
+              className="h-80 rounded-card bg-surface-2 animate-pulse border border-border shadow-theme"
             />
           ))}
         </div>
@@ -203,23 +202,23 @@ export const CataloguePage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.map((product) => (
             <Link key={product.id} to={`/shop/${product.id}`} className="group block focus:outline-none">
-              <SpotlightCard className="h-full flex flex-col p-5 group-hover:border-gold-500 transition-colors">
+              <SpotlightCard className="h-full flex flex-col p-5 group-hover:border-accent transition-colors floating-card">
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <Badge variant="lapis" size="sm">
+                  <Badge variant="info" size="sm">
                     {product.category}
                   </Badge>
                   <div className="flex items-center gap-1">
                     {product.rx && (
-                      <Badge variant="terracotta" size="sm">
+                      <Badge variant="danger" size="sm">
                         Rx
                       </Badge>
                     )}
                     {product.stock > 0 ? (
-                      <Badge variant="olive" size="sm">
+                      <Badge variant="success" size="sm">
                         In Stock ({product.stock})
                       </Badge>
                     ) : (
-                      <Badge variant="terracotta" size="sm">
+                      <Badge variant="danger" size="sm">
                         Depleted
                       </Badge>
                     )}
@@ -227,34 +226,34 @@ export const CataloguePage: React.FC = () => {
                 </div>
 
                 {/* Illustration / Icon Box */}
-                <div className="w-full h-40 bg-gradient-to-br from-marble-100 to-marble-200 dark:from-lapis-950 dark:to-lapis-900 rounded-sm border border-marble-300/60 dark:border-lapis-800 flex items-center justify-center mb-4 group-hover:scale-[1.02] transition-transform">
-                  <div className="w-16 h-16 rounded-full bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 shadow-inner">
+                <div className="w-full h-40 bg-surface-2 rounded-card border border-border flex items-center justify-center mb-4 group-hover:scale-[1.02] transition-transform shadow-inner">
+                  <div className="w-16 h-16 rounded-full bg-surface border border-border flex items-center justify-center text-accent shadow-inner">
                     <ShieldCheck className="w-8 h-8" />
                   </div>
                 </div>
 
                 <div className="flex-grow flex flex-col justify-between">
                   <div>
-                    <h3 className="font-cinzel text-base font-bold text-ink-950 dark:text-marble-100 group-hover:text-gold-500 transition-colors line-clamp-1 mb-1">
+                    <h3 className="font-cinzel text-base font-bold text-text group-hover:text-accent-text transition-colors line-clamp-1 mb-1">
                       {product.name}
                     </h3>
-                    <p className="font-cormorant text-sm text-ink-700 dark:text-marble-300 line-clamp-2 leading-relaxed mb-3">
+                    <p className="font-cormorant text-sm text-text-muted line-clamp-2 leading-relaxed mb-3">
                       {product.description}
                     </p>
                   </div>
 
-                  <div className="pt-3 border-t border-marble-200 dark:border-lapis-800/80 flex items-center justify-between mt-auto">
+                  <div className="pt-3 border-t border-border flex items-center justify-between mt-auto">
                     <div>
-                      <span className="text-[10px] uppercase font-cinzel text-ink-600 dark:text-marble-400 block -mb-0.5">
+                      <span className="text-[10px] uppercase font-cinzel text-text-muted block -mb-0.5">
                         Tribute
                       </span>
-                      <span className="font-cinzel text-lg font-bold text-gold-600 dark:text-gold-400">
+                      <span className="font-cinzel text-lg font-bold text-accent-text">
                         {formatPrice(product.price)}
                       </span>
                     </div>
 
                     <Button
-                      variant="gold"
+                      variant="primary"
                       size="sm"
                       onClick={(e) => handleAddToCart(product, e)}
                       disabled={product.stock <= 0}
@@ -273,7 +272,7 @@ export const CataloguePage: React.FC = () => {
       <GreekDivider className="my-12" />
 
       {/* Footer Disclaimer */}
-      <div className="text-center text-xs text-ink-600 dark:text-marble-400">
+      <div className="text-center text-xs text-text-muted">
         Demo application. Not medical advice. No real orders.
       </div>
     </div>

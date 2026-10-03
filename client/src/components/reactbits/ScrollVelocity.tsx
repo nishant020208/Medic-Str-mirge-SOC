@@ -18,10 +18,10 @@ export const ScrollVelocity: React.FC<ScrollVelocityProps> = ({
       <div className="flex animate-[marquee_30s_linear_infinite] will-change-transform gap-8 items-center">
         {duplicated.map((text, idx) => (
           <div key={idx} className="flex items-center gap-6">
-            <span className="font-cinzel text-xs tracking-widest uppercase font-bold text-gold-600 dark:text-gold-400">
+            <span className="font-cinzel text-xs tracking-widest uppercase font-bold text-accent-text">
               {text}
             </span>
-            <span className="text-gold-500/40 text-xs">❖</span>
+            <span className="text-accent/40 text-xs">❖</span>
           </div>
         ))}
       </div>

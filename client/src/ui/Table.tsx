@@ -6,7 +6,7 @@ export const Table: React.FC<React.TableHTMLAttributes<HTMLTableElement>> = ({
   children,
   ...props
 }) => (
-  <div className="w-full overflow-x-auto rounded-sm border border-marble-300 dark:border-lapis-700/80">
+  <div className="w-full overflow-x-auto rounded-card border border-border shadow-theme bg-surface">
     <table className={cn('w-full text-left text-sm', className)} {...props}>
       {children}
     </table>
@@ -20,7 +20,7 @@ export const TableHeader: React.FC<React.HTMLAttributes<HTMLTableSectionElement>
 }) => (
   <thead
     className={cn(
-      'bg-marble-200/60 dark:bg-lapis-950 border-b border-marble-300 dark:border-lapis-700/80 font-cinzel text-xs uppercase tracking-wider text-ink-900 dark:text-gold-300',
+      'bg-surface-2 border-b border-border font-cinzel text-xs uppercase tracking-wider text-text font-bold',
       className
     )}
     {...props}
@@ -34,7 +34,7 @@ export const TableBody: React.FC<React.HTMLAttributes<HTMLTableSectionElement>> 
   children,
   ...props
 }) => (
-  <tbody className={cn('divide-y divide-marble-200 dark:divide-lapis-800/60', className)} {...props}>
+  <tbody className={cn('divide-y divide-border', className)} {...props}>
     {children}
   </tbody>
 );
@@ -46,7 +46,7 @@ export const TableRow: React.FC<React.HTMLAttributes<HTMLTableRowElement>> = ({
 }) => (
   <tr
     className={cn(
-      'transition-colors hover:bg-gold-500/5 dark:hover:bg-lapis-800/40',
+      'transition-colors hover:bg-surface-2/70',
       className
     )}
     {...props}
@@ -70,7 +70,7 @@ export const TableCell: React.FC<React.TdHTMLAttributes<HTMLTableCellElement>> =
   children,
   ...props
 }) => (
-  <td className={cn('px-4 py-3 text-ink-800 dark:text-marble-200', className)} {...props}>
+  <td className={cn('px-4 py-3 text-text', className)} {...props}>
     {children}
   </td>
 );

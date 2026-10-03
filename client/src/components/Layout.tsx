@@ -6,12 +6,10 @@ import { ToastContainer } from '../ui/Toast';
 import { ClickSpark } from './reactbits/ClickSpark';
 import { Silk } from './reactbits/Silk';
 import { useAuthStore } from '../store/authStore';
-import { useUIStore } from '../store/uiStore';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
   const checkAuth = useAuthStore((s) => s.checkAuth);
-  const theme = useUIStore((s) => s.theme);
 
   useEffect(() => {
     checkAuth();
@@ -22,17 +20,9 @@ export const Layout: React.FC = () => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
-
   return (
     <ClickSpark>
-      <div className="min-h-screen flex flex-col relative overflow-x-hidden selection:bg-gold-500 selection:text-ink-950 font-sans">
+      <div className="min-h-screen flex flex-col relative overflow-x-hidden font-sans bg-bg text-text">
         {/* Skip to Content for Accessibility / WCAG AA */}
         <a href="#main-content" className="skip-to-content sr-only focus:not-sr-only">
           Skip to main temple sanctuary

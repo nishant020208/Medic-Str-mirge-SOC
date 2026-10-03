@@ -53,27 +53,24 @@ export const ToastContainer: React.FC = () => {
         <div
           key={t.id}
           className={cn(
-            'pointer-events-auto flex items-start gap-3 p-4 rounded-sm border shadow-lg transition-all duration-300 transform translate-y-0',
-            t.type === 'success' &&
-              'bg-[#F2F8F2] dark:bg-[#0E241B] border-olive-500/40 text-olive-900 dark:text-olive-200',
-            t.type === 'error' &&
-              'bg-[#FDF2F2] dark:bg-[#2A1215] border-terracotta-500/40 text-terracotta-900 dark:text-terracotta-200',
-            t.type === 'info' &&
-              'bg-[#F0F4FC] dark:bg-lapis-900 border-gold-500/40 text-lapis-950 dark:text-marble-100'
+            'pointer-events-auto flex items-start gap-3 p-4 rounded-card border border-border shadow-theme bg-surface text-text transition-all duration-300 transform translate-y-0',
+            t.type === 'success' && 'border-success/40',
+            t.type === 'error' && 'border-danger/40',
+            t.type === 'info' && 'border-border'
           )}
         >
-          {t.type === 'success' && <CheckCircle2 className="w-5 h-5 text-olive-600 shrink-0 mt-0.5" />}
-          {t.type === 'error' && <AlertCircle className="w-5 h-5 text-terracotta-600 shrink-0 mt-0.5" />}
-          {t.type === 'info' && <Info className="w-5 h-5 text-gold-500 shrink-0 mt-0.5" />}
+          {t.type === 'success' && <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />}
+          {t.type === 'error' && <AlertCircle className="w-5 h-5 text-danger shrink-0 mt-0.5" />}
+          {t.type === 'info' && <Info className="w-5 h-5 text-accent shrink-0 mt-0.5" />}
 
           <div className="flex-1 text-sm">
             {t.title && <h5 className="font-cinzel font-bold text-xs uppercase tracking-wider mb-0.5">{t.title}</h5>}
-            <p>{t.message}</p>
+            <p className="text-text">{t.message}</p>
           </div>
 
           <button
             onClick={() => removeToast(t.id)}
-            className="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 shrink-0"
+            className="p-1 rounded-card text-text-muted hover:text-text hover:bg-surface-2 shrink-0 transition-colors"
             aria-label="Dismiss toast"
           >
             <X className="w-4 h-4" />

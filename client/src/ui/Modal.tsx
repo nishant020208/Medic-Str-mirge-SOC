@@ -37,27 +37,27 @@ export const Modal: React.FC<ModalProps> = ({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-950/70 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay backdrop-blur-sm animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
         className={cn(
-          'relative w-full max-w-lg bg-[#FAF7F0] dark:bg-lapis-900 border border-gold-500/40 rounded-sm shadow-2xl overflow-hidden text-ink-900 dark:text-marble-100 p-6 max-h-[90vh] overflow-y-auto',
+          'relative w-full max-w-lg bg-surface border border-border rounded-card shadow-theme overflow-hidden text-text p-6 max-h-[90vh] overflow-y-auto floating-card',
           className
         )}
       >
-        <div className="flex items-center justify-between border-b border-marble-300 dark:border-lapis-700/60 pb-3 mb-4">
+        <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
           {title && (
-            <h3 className="font-cinzel text-lg font-bold text-ink-950 dark:text-gold-300 tracking-wider">
+            <h3 className="font-cinzel text-lg font-bold text-text tracking-wider">
               {title}
             </h3>
           )}
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-sm text-ink-700 dark:text-marble-300 hover:text-gold-600 dark:hover:text-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-500"
+            className="p-1 rounded-card text-text-muted hover:text-text hover:bg-surface-2 focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />

@@ -78,23 +78,23 @@ export const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
           {/* Left Column: Copy & Actions */}
           <div className="lg:col-span-7 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/30 text-gold-600 dark:text-gold-300 text-xs font-cinzel font-bold mb-6 tracking-widest uppercase">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-border text-accent-text text-xs font-cinzel font-bold mb-6 tracking-widest uppercase shadow-inner">
+              <Sparkles className="w-3.5 h-3.5 text-accent" />
               <span>Consecrated Apothecary &amp; Oracle Ledger</span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl font-cinzel font-bold text-ink-950 dark:text-marble-100 tracking-tight leading-tight mb-6">
+            <h1 className="text-4xl sm:text-6xl font-cinzel font-bold text-text tracking-tight leading-tight mb-6">
               <BlurText text="TEMPLE OF ASCLEPIUS" animateBy="words" />
             </h1>
 
-            <p className="font-cormorant text-xl sm:text-2xl text-ink-800 dark:text-marble-200 max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed italic">
+            <p className="font-cormorant text-xl sm:text-2xl text-text-muted max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed italic">
               "Let medicine be your offering, and healing your devotion." Ancient Hellenic herbal wisdom harmonized with immutable cryptographic batch authenticity.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
               <Magnet>
                 <Link to="/shop">
-                  <Button variant="gold" size="lg" rightIcon={<ArrowRight className="w-5 h-5" />}>
+                  <Button variant="primary" size="lg" rightIcon={<ArrowRight className="w-5 h-5" />}>
                     Explore Dispensary
                   </Button>
                 </Link>
@@ -119,42 +119,42 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Marquee of Herb Names (React Bits) */}
-      <section className="border-y border-gold-500/20 bg-marble-200/50 dark:bg-lapis-950/60 py-2">
+      <section className="border-y border-border bg-surface-2 py-2">
         <ScrollVelocity texts={sacredHerbs} />
       </section>
 
       {/* Stats Strip with CountUp (React Bits) */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div className="p-6 rounded-sm border border-marble-300 dark:border-lapis-800 bg-white/70 dark:bg-lapis-900/60 shadow-sm">
-            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-gold-500 mb-1">
+          <div className="p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
+            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-accent-text mb-1">
               <CountUp to={40} suffix="+" />
             </div>
-            <div className="font-cinzel text-xs uppercase tracking-wider text-ink-700 dark:text-marble-300">
+            <div className="font-cinzel text-xs uppercase tracking-wider text-text-muted font-bold">
               Formulated Remedies
             </div>
           </div>
-          <div className="p-6 rounded-sm border border-marble-300 dark:border-lapis-800 bg-white/70 dark:bg-lapis-900/60 shadow-sm">
-            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-gold-500 mb-1">
+          <div className="p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
+            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-accent-text mb-1">
               <CountUp to={100} suffix="%" />
             </div>
-            <div className="font-cinzel text-xs uppercase tracking-wider text-ink-700 dark:text-marble-300">
+            <div className="font-cinzel text-xs uppercase tracking-wider text-text-muted font-bold">
               On-Chain Batch Sealed
             </div>
           </div>
-          <div className="p-6 rounded-sm border border-marble-300 dark:border-lapis-800 bg-white/70 dark:bg-lapis-900/60 shadow-sm">
-            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-gold-500 mb-1">
+          <div className="p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
+            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-accent-text mb-1">
               <CountUp to={1250} prefix="" suffix=" BCE" />
             </div>
-            <div className="font-cinzel text-xs uppercase tracking-wider text-ink-700 dark:text-marble-300">
+            <div className="font-cinzel text-xs uppercase tracking-wider text-text-muted font-bold">
               Asclepeion Lineage
             </div>
           </div>
-          <div className="p-6 rounded-sm border border-marble-300 dark:border-lapis-800 bg-white/70 dark:bg-lapis-900/60 shadow-sm">
-            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-gold-500 mb-1">
+          <div className="p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
+            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-accent-text mb-1">
               <CountUp to={100} suffix="%" />
             </div>
-            <div className="font-cinzel text-xs uppercase tracking-wider text-ink-700 dark:text-marble-300">
+            <div className="font-cinzel text-xs uppercase tracking-wider text-text-muted font-bold">
               Sandbox Security
             </div>
           </div>
@@ -166,16 +166,16 @@ export const HomePage: React.FC = () => {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
             <div>
-              <span className="font-cinzel text-xs uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold block mb-1">
+              <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
                 Selected by the High Priests
               </span>
-              <h2 className="font-cinzel text-2xl sm:text-3xl font-bold text-ink-950 dark:text-marble-100">
+              <h2 className="font-cinzel text-2xl sm:text-3xl font-bold text-text">
                 Consecrated Dispensary Highlights
               </h2>
             </div>
             <Link
               to="/shop"
-              className="inline-flex items-center gap-1.5 font-cinzel text-xs font-bold text-gold-600 dark:text-gold-400 hover:underline"
+              className="inline-flex items-center gap-1.5 font-cinzel text-xs font-bold text-accent-text hover:underline"
             >
               <span>View Full Pharmacopeia</span>
               <ChevronRight className="w-4 h-4" />
@@ -185,38 +185,38 @@ export const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProducts.map((product) => (
               <Link key={product.id} to={`/shop/${product.id}`} className="group block focus:outline-none">
-                <SpotlightCard className="h-full flex flex-col p-5 group-hover:border-gold-500 transition-colors">
+                <SpotlightCard className="h-full flex flex-col p-5 group-hover:border-accent transition-colors">
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <Badge variant="lapis" size="sm">
+                    <Badge variant="info" size="sm">
                       {product.category}
                     </Badge>
-                    <Badge variant="olive" size="sm">
+                    <Badge variant="success" size="sm">
                       Sealed
                     </Badge>
                   </div>
 
-                  <div className="w-full h-36 bg-marble-100 dark:bg-lapis-950 rounded-sm border border-marble-300 dark:border-lapis-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                    <div className="w-14 h-14 rounded-full bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500">
+                  <div className="w-full h-36 bg-surface-2 rounded-card border border-border flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <div className="w-14 h-14 rounded-full bg-surface border border-border flex items-center justify-center text-accent shadow-inner">
                       <ShieldCheck className="w-7 h-7" />
                     </div>
                   </div>
 
                   <div className="flex-grow flex flex-col justify-between">
                     <div>
-                      <h3 className="font-cinzel text-sm font-bold text-ink-950 dark:text-marble-100 group-hover:text-gold-500 transition-colors line-clamp-1 mb-1">
+                      <h3 className="font-cinzel text-sm font-bold text-text group-hover:text-accent-text transition-colors line-clamp-1 mb-1">
                         {product.name}
                       </h3>
-                      <p className="font-cormorant text-xs text-ink-700 dark:text-marble-300 line-clamp-2 leading-relaxed mb-3">
+                      <p className="font-cormorant text-xs text-text-muted line-clamp-2 leading-relaxed mb-3">
                         {product.description}
                       </p>
                     </div>
 
-                    <div className="pt-3 border-t border-marble-200 dark:border-lapis-800 flex items-center justify-between mt-auto">
-                      <span className="font-cinzel font-bold text-gold-600 dark:text-gold-400 text-sm">
+                    <div className="pt-3 border-t border-border flex items-center justify-between mt-auto">
+                      <span className="font-cinzel font-bold text-accent-text text-sm">
                         {formatPrice(product.price)}
                       </span>
                       <Button
-                        variant="gold"
+                        variant="primary"
                         size="sm"
                         onClick={(e) => handleQuickAdd(product, e)}
                         leftIcon={<ShoppingCart className="w-3.5 h-3.5" />}
@@ -235,10 +235,10 @@ export const HomePage: React.FC = () => {
       {/* Why The Temple Pillars */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         <div className="text-center mb-12">
-          <span className="font-cinzel text-xs uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold block mb-2">
+          <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-2">
             The Three Sacred Oaths
           </span>
-          <h2 className="font-cinzel text-3xl font-bold text-ink-950 dark:text-marble-100">
+          <h2 className="font-cinzel text-3xl font-bold text-text">
             Why Seek The Temple
           </h2>
           <GreekDivider className="max-w-xs mx-auto" />
@@ -246,37 +246,37 @@ export const HomePage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <Card variant="marble">
-            <div className="w-12 h-12 rounded-full bg-gold-500/10 border border-gold-500/40 text-gold-500 flex items-center justify-center mb-5">
+            <div className="w-12 h-12 rounded-full bg-surface-2 border border-border text-accent flex items-center justify-center mb-5 shadow-inner">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <h3 className="font-cinzel text-lg font-bold text-ink-950 dark:text-marble-100 mb-2">
+            <h3 className="font-cinzel text-lg font-bold text-text mb-2">
               Cryptographic Provenance
             </h3>
-            <p className="font-cormorant text-base text-ink-700 dark:text-marble-300 leading-relaxed">
+            <p className="font-cormorant text-base text-text-muted leading-relaxed">
               Every apothecary batch is hashed into our Ethereum smart contract registry. Counterfeits crumble before the immutable ledger.
             </p>
           </Card>
 
           <Card variant="marble">
-            <div className="w-12 h-12 rounded-full bg-gold-500/10 border border-gold-500/40 text-gold-500 flex items-center justify-center mb-5">
+            <div className="w-12 h-12 rounded-full bg-surface-2 border border-border text-accent flex items-center justify-center mb-5 shadow-inner">
               <HeartHandshake className="w-6 h-6" />
             </div>
-            <h3 className="font-cinzel text-lg font-bold text-ink-950 dark:text-marble-100 mb-2">
+            <h3 className="font-cinzel text-lg font-bold text-text mb-2">
               Purity &amp; Epidaurus Heritage
             </h3>
-            <p className="font-cormorant text-base text-ink-700 dark:text-marble-300 leading-relaxed">
+            <p className="font-cormorant text-base text-text-muted leading-relaxed">
               Formulations curated under Asclepius traditions, balancing modern pharmaceutical rigor with sacred botanical essences.
             </p>
           </Card>
 
           <Card variant="marble">
-            <div className="w-12 h-12 rounded-full bg-gold-500/10 border border-gold-500/40 text-gold-500 flex items-center justify-center mb-5">
+            <div className="w-12 h-12 rounded-full bg-surface-2 border border-border text-accent flex items-center justify-center mb-5 shadow-inner">
               <Sparkles className="w-6 h-6" />
             </div>
-            <h3 className="font-cinzel text-lg font-bold text-ink-950 dark:text-marble-100 mb-2">
+            <h3 className="font-cinzel text-lg font-bold text-text mb-2">
               Oracle Guidance
             </h3>
-            <p className="font-cormorant text-base text-ink-700 dark:text-marble-300 leading-relaxed">
+            <p className="font-cormorant text-base text-text-muted leading-relaxed">
               The temple Pythia stands ready. Enquire regarding formulations, herbal synergies, and store requisitions in real time.
             </p>
           </Card>
@@ -284,18 +284,18 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Verified On-Chain Explainer */}
-      <section className="bg-marble-200/60 dark:bg-lapis-950/70 border-y border-marble-300 dark:border-lapis-800 py-16 px-4">
+      <section className="bg-surface-2 border-y border-border py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <History className="w-10 h-10 text-gold-500 mx-auto mb-4" />
-          <h2 className="font-cinzel text-2xl sm:text-3xl font-bold text-ink-950 dark:text-marble-100 mb-4">
+          <History className="w-10 h-10 text-accent mx-auto mb-4" />
+          <h2 className="font-cinzel text-2xl sm:text-3xl font-bold text-text mb-4">
             Zero-Trust Pharmaceutical Provenance
           </h2>
-          <p className="font-cormorant text-lg text-ink-700 dark:text-marble-300 leading-relaxed mb-6">
+          <p className="font-cormorant text-lg text-text-muted leading-relaxed mb-6">
             In antiquity, remedies were stamped with the sacred seal of the Epidaurus sanctuary. Today, MediStore combines Keccak-256 hash chains with the Sepolia testnet to safeguard human wellness without moving real funds.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link to="/shop">
-              <Button variant="gold" leftIcon={<ShoppingBag className="w-4 h-4" />}>
+              <Button variant="primary" leftIcon={<ShoppingBag className="w-4 h-4" />}>
                 Inspect The Registry
               </Button>
             </Link>

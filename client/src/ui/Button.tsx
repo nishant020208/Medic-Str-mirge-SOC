@@ -3,7 +3,7 @@ import { cn } from '../lib/utils';
 import { Loader2 } from 'lucide-react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'gold' | 'lapis' | 'outline' | 'ghost' | 'terracotta';
+  variant?: 'gold' | 'lapis' | 'outline' | 'ghost' | 'terracotta' | 'primary' | 'secondary' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -27,18 +27,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium uppercase tracking-wider transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none select-none active:scale-[0.98] font-cinzel rounded-sm';
+      'inline-flex items-center justify-center font-medium uppercase tracking-wider transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none select-none active:scale-[0.98] font-cinzel rounded-card';
 
-    const variants = {
-      gold: 'bg-gold-500 hover:bg-gold-600 text-ink-950 font-bold focus:ring-gold-500 shadow-sm hover:shadow-gold-glow border border-gold-400',
-      lapis:
-        'bg-lapis-900 hover:bg-lapis-800 text-marble-100 focus:ring-lapis-700 shadow-sm hover:shadow-lapis-glow border border-lapis-700 dark:border-gold-500/30',
-      outline:
-        'border-2 border-gold-500 text-gold-600 dark:text-gold-400 hover:bg-gold-500/10 focus:ring-gold-500 bg-transparent',
-      ghost:
-        'text-ink-800 dark:text-marble-200 hover:bg-gold-500/10 hover:text-gold-600 dark:hover:text-gold-400 focus:ring-gold-500',
-      terracotta:
-        'bg-terracotta-500 hover:bg-terracotta-600 text-white focus:ring-terracotta-400 shadow-sm border border-terracotta-400',
+    const variants: Record<string, string> = {
+      gold: 'bg-primary hover:bg-primary-hover text-text-on-primary font-bold focus:ring-ring shadow-theme hover:shadow-glow border border-border',
+      primary: 'bg-primary hover:bg-primary-hover text-text-on-primary font-bold focus:ring-ring shadow-theme hover:shadow-glow border border-border',
+      lapis: 'bg-surface-2 hover:bg-surface text-text focus:ring-ring border border-border shadow-theme',
+      secondary: 'bg-surface-2 hover:bg-surface text-text focus:ring-ring border border-border shadow-theme',
+      outline: 'border-2 border-border text-accent-text hover:bg-surface-2 focus:ring-ring bg-transparent',
+      ghost: 'text-text hover:bg-surface-2 hover:text-accent-text focus:ring-ring',
+      terracotta: 'bg-danger hover:opacity-90 text-text-on-primary focus:ring-ring shadow-theme border border-border font-bold',
+      danger: 'bg-danger hover:opacity-90 text-text-on-primary focus:ring-ring shadow-theme border border-border font-bold',
     };
 
     const sizes = {
@@ -51,7 +50,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         type={type}
-        className={cn(baseStyles, variants[variant], sizes[size], className)}
+        className={cn(baseStyles, variants[variant] || variants.gold, sizes[size], className)}
         disabled={disabled || isLoading}
         {...props}
       >

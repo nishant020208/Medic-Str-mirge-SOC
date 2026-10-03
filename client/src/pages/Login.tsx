@@ -99,21 +99,21 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-16 w-full flex-grow flex flex-col justify-center">
-      <Card variant="marble" className="p-8 border-2 border-gold-500/40 shadow-2xl">
+      <Card variant="marble" className="p-8 border-2 border-border shadow-theme">
         <div className="text-center mb-6">
-          <div className="w-14 h-14 rounded-full bg-gold-500/10 border border-gold-500/40 text-gold-500 flex items-center justify-center mx-auto mb-3 shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-surface-2 border border-border text-accent-text flex items-center justify-center mx-auto mb-3 shadow-sm">
             <KeyRound className="w-7 h-7" />
           </div>
-          <span className="font-cinzel text-xs uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold block mb-1">
+          <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
             Inner Sanctum Auth
           </span>
-          <h1 className="font-cinzel text-2xl font-bold text-ink-950 dark:text-marble-100">
+          <h1 className="font-cinzel text-2xl font-bold text-text">
             Enter The Asclepeion
           </h1>
         </div>
 
         {formError && (
-          <div className="mb-5 p-3 rounded-sm bg-terracotta-500/10 border border-terracotta-500/30 text-xs text-terracotta-600 dark:text-terracotta-400 font-medium text-center">
+          <div className="mb-5 p-3 rounded-card bg-surface-2 border border-danger text-xs text-danger font-medium text-center">
             {formError}
           </div>
         )}
@@ -137,7 +137,7 @@ export const LoginPage: React.FC = () => {
 
           <Button
             type="submit"
-            variant="gold"
+            variant="primary"
             size="lg"
             className="w-full mt-2"
             isLoading={isSubmitting}
@@ -153,46 +153,46 @@ export const LoginPage: React.FC = () => {
         <div>
           <Button
             type="button"
-            variant="lapis"
+            variant="secondary"
             size="md"
             className="w-full"
             onClick={handleWalletLogin}
             isLoading={isWalletConnecting}
-            leftIcon={<Wallet className="w-4 h-4 text-gold-400" />}
+            leftIcon={<Wallet className="w-4 h-4 text-accent-text" />}
           >
             Enter with Web3 Wallet
           </Button>
-          <span className="text-[10px] text-center text-ink-600 dark:text-marble-400 block mt-1.5 font-mono">
+          <span className="text-[10px] text-center text-text-muted block mt-1.5 font-mono">
             EIP-4361 / Nonce Sign-In (Mock / Sepolia)
           </span>
         </div>
 
         {/* Demo Fast-Fill helper */}
-        <div className="mt-6 pt-4 border-t border-marble-200 dark:border-lapis-800 text-center">
-          <span className="text-[11px] font-cinzel text-ink-600 dark:text-marble-400 uppercase tracking-wider block mb-2 font-bold">
+        <div className="mt-6 pt-4 border-t border-border text-center">
+          <span className="text-[11px] font-cinzel text-text-muted uppercase tracking-wider block mb-2 font-bold">
             Hackathon Fast Demo Fill
           </span>
           <div className="flex gap-2 justify-center">
             <button
               type="button"
               onClick={() => fillCredentials('pharmacist')}
-              className="px-2.5 py-1 text-xs font-mono bg-marble-200 dark:bg-lapis-950 rounded border border-marble-300 dark:border-lapis-700 hover:border-gold-500 text-ink-800 dark:text-marble-200"
+              className="px-2.5 py-1 text-xs font-mono bg-surface-2 rounded-card border border-border hover:border-accent text-text"
             >
               Pharmacist
             </button>
             <button
               type="button"
               onClick={() => fillCredentials('customer')}
-              className="px-2.5 py-1 text-xs font-mono bg-marble-200 dark:bg-lapis-950 rounded border border-marble-300 dark:border-lapis-700 hover:border-gold-500 text-ink-800 dark:text-marble-200"
+              className="px-2.5 py-1 text-xs font-mono bg-surface-2 rounded-card border border-border hover:border-accent text-text"
             >
               Customer
             </button>
           </div>
         </div>
 
-        <div className="mt-6 text-center text-xs text-ink-700 dark:text-marble-300">
+        <div className="mt-6 text-center text-xs text-text-muted">
           <span>Unregistered devotee? </span>
-          <Link to="/register" className="font-cinzel text-gold-600 dark:text-gold-400 font-bold hover:underline">
+          <Link to="/register" className="font-cinzel text-accent-text font-bold hover:underline">
             Consecrate Account
           </Link>
         </div>

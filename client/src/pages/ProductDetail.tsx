@@ -83,13 +83,13 @@ export const ProductDetailPage: React.FC = () => {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 w-full animate-pulse">
-        <div className="h-6 w-32 bg-marble-300 dark:bg-lapis-800 rounded mb-8" />
+        <div className="h-6 w-32 bg-surface-2 rounded mb-8" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div className="h-96 bg-marble-300 dark:bg-lapis-800 rounded" />
+          <div className="h-96 bg-surface-2 rounded-card" />
           <div className="space-y-4">
-            <div className="h-10 w-3/4 bg-marble-300 dark:bg-lapis-800 rounded" />
-            <div className="h-6 w-1/4 bg-marble-300 dark:bg-lapis-800 rounded" />
-            <div className="h-32 bg-marble-300 dark:bg-lapis-800 rounded" />
+            <div className="h-10 w-3/4 bg-surface-2 rounded" />
+            <div className="h-6 w-1/4 bg-surface-2 rounded" />
+            <div className="h-32 bg-surface-2 rounded" />
           </div>
         </div>
       </div>
@@ -99,9 +99,9 @@ export const ProductDetailPage: React.FC = () => {
   if (!product) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center">
-        <h2 className="font-cinzel text-2xl font-bold mb-4">Remedy Not Found in Archives</h2>
+        <h2 className="font-cinzel text-2xl font-bold mb-4 text-text">Remedy Not Found in Archives</h2>
         <Link to="/shop">
-          <Button variant="gold">Return to Apothecary</Button>
+          <Button variant="primary">Return to Apothecary</Button>
         </Link>
       </div>
     );
@@ -112,7 +112,7 @@ export const ProductDetailPage: React.FC = () => {
       {/* Back Link */}
       <Link
         to="/shop"
-        className="inline-flex items-center gap-2 text-xs font-cinzel font-bold text-ink-700 dark:text-marble-300 hover:text-gold-500 mb-8 transition-colors"
+        className="inline-flex items-center gap-2 text-xs font-cinzel font-bold text-text-muted hover:text-text mb-8 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Return to Apothecary Dispensary</span>
@@ -120,21 +120,21 @@ export const ProductDetailPage: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-16">
         {/* Left: Product Visual Presentation */}
-        <div className="rounded-sm border border-gold-500/40 bg-marble-50 dark:bg-lapis-900/80 p-8 shadow-xl relative overflow-hidden flex flex-col items-center justify-center min-h-[420px]">
+        <div className="rounded-card border border-border bg-surface p-8 shadow-theme relative overflow-hidden flex flex-col items-center justify-center min-h-[420px] floating-card">
           <div className="absolute top-4 left-4 flex gap-2">
-            <Badge variant="lapis">{product.category}</Badge>
-            {product.rx && <Badge variant="terracotta">Rx Prescription</Badge>}
+            <Badge variant="info">{product.category}</Badge>
+            {product.rx && <Badge variant="danger">Rx Prescription</Badge>}
           </div>
 
-          <div className="w-48 h-48 rounded-full bg-gold-500/10 border-2 border-gold-500/30 flex items-center justify-center text-gold-500 my-8 shadow-inner">
+          <div className="w-48 h-48 rounded-full bg-surface-2 border-2 border-border flex items-center justify-center text-accent my-8 shadow-inner">
             <ShieldCheck className="w-24 h-24" />
           </div>
 
           <div className="text-center">
-            <span className="font-mono text-xs text-gold-600 dark:text-gold-400 block tracking-wider">
+            <span className="font-mono text-xs text-accent-text font-bold block tracking-wider">
               Batch ID: {product.batchId}
             </span>
-            <span className="text-[11px] text-ink-600 dark:text-marble-400 block mt-0.5">
+            <span className="text-[11px] text-text-muted block mt-0.5">
               Consecrated under Sepolia Registry
             </span>
           </div>
@@ -143,62 +143,62 @@ export const ProductDetailPage: React.FC = () => {
         {/* Right: Info & Actions */}
         <div className="flex flex-col space-y-6">
           <div>
-            <span className="font-cinzel text-xs uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold block mb-1">
+            <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
               Sanctum Formulation
             </span>
-            <h1 className="font-cinzel text-3xl sm:text-4xl font-bold text-ink-950 dark:text-marble-100 mb-3">
+            <h1 className="font-cinzel text-3xl sm:text-4xl font-bold text-text mb-3">
               {product.name}
             </h1>
             <div className="flex items-center gap-4">
-              <span className="font-cinzel text-3xl font-bold text-gold-600 dark:text-gold-400">
+              <span className="font-cinzel text-3xl font-bold text-accent-text">
                 {formatPrice(product.price)}
               </span>
               {product.stock > 0 ? (
-                <Badge variant="olive">In Stock ({product.stock} available)</Badge>
+                <Badge variant="success">In Stock ({product.stock} available)</Badge>
               ) : (
-                <Badge variant="terracotta">Depleted</Badge>
+                <Badge variant="danger">Depleted</Badge>
               )}
             </div>
           </div>
 
           <Card variant="papyrus" className="p-4">
-            <h2 className="font-cinzel text-xs uppercase tracking-wider font-bold text-ink-900 dark:text-gold-300 mb-2">
+            <h2 className="font-cinzel text-xs uppercase tracking-wider font-bold text-text mb-2">
               Asclepeion Description
             </h2>
-            <p className="font-cormorant text-lg text-ink-800 dark:text-marble-200 leading-relaxed">
+            <p className="font-cormorant text-lg text-text leading-relaxed">
               {product.description}
             </p>
           </Card>
 
           {/* Dosage & Administration */}
-          <div className="p-4 rounded-sm border border-marble-300 dark:border-lapis-800 bg-white/60 dark:bg-lapis-950/60">
-            <h2 className="font-cinzel text-xs uppercase tracking-wider font-bold text-gold-700 dark:text-gold-300 mb-1">
+          <div className="p-4 rounded-card border border-border bg-surface-2">
+            <h2 className="font-cinzel text-xs uppercase tracking-wider font-bold text-accent-text mb-1">
               Ritual Dosage &amp; Protocol
             </h2>
-            <p className="text-xs text-ink-700 dark:text-marble-300 font-medium">
+            <p className="text-xs text-text font-medium">
               {product.dosage}
             </p>
           </div>
 
           {/* Quantity and Add to Cart */}
           <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center pt-2">
-            <div className="flex items-center border border-marble-300 dark:border-lapis-700 rounded-sm bg-marble-100 dark:bg-lapis-950">
+            <div className="flex items-center border border-border rounded-card bg-surface-2 shadow-inner">
               <button
                 type="button"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="p-3 text-ink-700 dark:text-marble-300 hover:text-gold-500 focus:outline-none"
+                className="p-3 text-text-muted hover:text-text focus:outline-none"
                 aria-label="Decrease quantity"
               >
                 <Minus className="w-4 h-4" />
               </button>
-              <span className="w-12 text-center font-cinzel font-bold text-sm">
+              <span className="w-12 text-center font-cinzel font-bold text-sm text-text">
                 {quantity}
               </span>
               <button
                 type="button"
                 onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
                 disabled={quantity >= product.stock}
-                className="p-3 text-ink-700 dark:text-marble-300 hover:text-gold-500 focus:outline-none disabled:opacity-30"
+                className="p-3 text-text-muted hover:text-text focus:outline-none disabled:opacity-30"
                 aria-label="Increase quantity"
               >
                 <Plus className="w-4 h-4" />
@@ -206,7 +206,7 @@ export const ProductDetailPage: React.FC = () => {
             </div>
 
             <Button
-              variant="gold"
+              variant="primary"
               size="lg"
               className="flex-1"
               onClick={handleAddToCart}
@@ -225,11 +225,11 @@ export const ProductDetailPage: React.FC = () => {
               className="w-full"
               onClick={handleVerify}
               isLoading={isVerifying}
-              leftIcon={<ShieldCheck className="w-4 h-4 text-gold-500" />}
+              leftIcon={<ShieldCheck className="w-4 h-4 text-accent" />}
             >
               Verify Authenticity On Chain (Ethereum / Mock)
             </Button>
-            <p className="text-[11px] text-center text-ink-600 dark:text-marble-400 mt-1 font-mono">
+            <p className="text-[11px] text-center text-text-muted mt-1 font-mono">
               Keccak-256 batch validation via smart contract
             </p>
           </div>
@@ -237,11 +237,11 @@ export const ProductDetailPage: React.FC = () => {
       </div>
 
       {/* Mandatory Medical Disclaimer Banner */}
-      <div className="p-4 rounded-sm border border-gold-500/30 bg-gold-500/5 text-center my-8">
-        <p className="font-cinzel text-xs uppercase tracking-wider font-bold text-gold-700 dark:text-gold-300 mb-1">
+      <div className="p-4 rounded-card border border-border bg-surface text-center my-8 shadow-theme">
+        <p className="font-cinzel text-xs uppercase tracking-wider font-bold text-accent-text mb-1">
           Temple Oracle Declaration
         </p>
-        <p className="text-xs text-ink-700 dark:text-marble-300 font-medium">
+        <p className="text-xs text-text-muted font-medium">
           Demo application. Not medical advice. No real orders.
         </p>
       </div>
@@ -249,29 +249,29 @@ export const ProductDetailPage: React.FC = () => {
       {/* Related Products */}
       {related.length > 0 && (
         <div className="mt-16">
-          <h2 className="font-cinzel text-xl font-bold text-ink-950 dark:text-marble-100 mb-6">
+          <h2 className="font-cinzel text-xl font-bold text-text mb-6">
             Harmonious Sanctum Remedies
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {related.map((item) => (
               <Link key={item.id} to={`/shop/${item.id}`} className="group block focus:outline-none">
-                <Card variant="marble" className="h-full flex flex-col justify-between group-hover:border-gold-500">
+                <Card variant="marble" className="h-full flex flex-col justify-between group-hover:border-accent">
                   <div>
-                    <Badge variant="lapis" size="sm" className="mb-2">
+                    <Badge variant="info" size="sm" className="mb-2">
                       {item.category}
                     </Badge>
-                    <h3 className="font-cinzel font-bold text-sm text-ink-950 dark:text-marble-100 group-hover:text-gold-500 mb-1">
+                    <h3 className="font-cinzel font-bold text-sm text-text group-hover:text-accent-text mb-1">
                       {item.name}
                     </h3>
-                    <p className="font-cormorant text-sm text-ink-700 dark:text-marble-300 line-clamp-2">
+                    <p className="font-cormorant text-sm text-text-muted line-clamp-2">
                       {item.description}
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-marble-200 dark:border-lapis-800 flex justify-between items-center">
-                    <span className="font-cinzel font-bold text-gold-700 dark:text-gold-300">
+                  <div className="mt-4 pt-3 border-t border-border flex justify-between items-center">
+                    <span className="font-cinzel font-bold text-accent-text">
                       {formatPrice(item.price)}
                     </span>
-                    <span className="text-xs font-cinzel text-gold-700 dark:text-gold-300 group-hover:underline">
+                    <span className="text-xs font-cinzel text-accent-text font-bold group-hover:underline">
                       Inspect →
                     </span>
                   </div>
@@ -291,52 +291,52 @@ export const ProductDetailPage: React.FC = () => {
         <div className="space-y-4">
           {isVerifying ? (
             <div className="py-8 text-center space-y-3">
-              <div className="w-12 h-12 rounded-full border-4 border-gold-500 border-t-transparent animate-spin mx-auto" />
-              <p className="font-cinzel text-sm font-bold text-ink-900 dark:text-marble-100">
+              <div className="w-12 h-12 rounded-full border-4 border-border border-t-primary animate-spin mx-auto" />
+              <p className="font-cinzel text-sm font-bold text-text">
                 Interrogating Ethereum Registry...
               </p>
-              <p className="text-xs text-ink-600 dark:text-marble-400 font-mono">
+              <p className="text-xs text-text-muted font-mono">
                 Hashing Batch: {product.batchId}
               </p>
             </div>
           ) : verificationResult?.isRegistered ? (
             <div className="text-center py-4 space-y-4">
               {/* Gold Stamp Animation */}
-              <div className="w-20 h-20 rounded-full bg-gold-500/15 border-2 border-gold-500 text-gold-500 flex items-center justify-center mx-auto shadow-gold-glow animate-bounce">
+              <div className="w-20 h-20 rounded-full bg-surface-2 border-2 border-border text-accent flex items-center justify-center mx-auto shadow-glow animate-bounce">
                 <CheckCircle2 className="w-12 h-12" />
               </div>
 
               <div>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-cinzel font-bold bg-gold-500/20 text-gold-600 dark:text-gold-300 uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-cinzel font-bold bg-surface-2 text-accent-text border border-border uppercase tracking-wider shadow-inner">
                   {verificationResult.network === 'mock' ? 'Demo Ledger' : 'Sepolia Confirmed'}
                 </span>
-                <h3 className="font-cinzel text-xl font-bold text-ink-950 dark:text-marble-100 mt-2">
+                <h3 className="font-cinzel text-xl font-bold text-text mt-2">
                   Sealed by the Oracle
                 </h3>
-                <p className="font-cormorant text-base text-ink-700 dark:text-marble-300 mt-1">
+                <p className="font-cormorant text-base text-text-muted mt-1">
                   This pharmaceutical batch hash is genuinely stamped into the Asclepius ledger. Zero adulteration detected.
                 </p>
               </div>
 
-              <div className="bg-marble-100 dark:bg-lapis-950 p-3 rounded-sm border border-marble-300 dark:border-lapis-800 text-left text-xs font-mono space-y-1">
+              <div className="bg-surface-2 p-3 rounded-card border border-border text-left text-xs font-mono space-y-1 shadow-inner">
                 <div>
-                  <span className="text-ink-600 dark:text-marble-400">Batch ID: </span>
-                  <span className="text-ink-950 dark:text-marble-100 font-bold">{verificationResult.batchId}</span>
+                  <span className="text-text-muted">Batch ID: </span>
+                  <span className="text-text font-bold">{verificationResult.batchId}</span>
                 </div>
                 <div className="truncate">
-                  <span className="text-ink-600 dark:text-marble-400">Keccak Hash: </span>
-                  <span className="text-gold-600 dark:text-gold-400">{verificationResult.hash}</span>
+                  <span className="text-text-muted">Keccak Hash: </span>
+                  <span className="text-accent-text font-bold">{verificationResult.hash}</span>
                 </div>
                 {verificationResult.contractAddress && (
                   <div className="truncate">
-                    <span className="text-ink-600 dark:text-marble-400">Contract: </span>
-                    <span className="text-ink-800 dark:text-marble-200">{verificationResult.contractAddress}</span>
+                    <span className="text-text-muted">Contract: </span>
+                    <span className="text-text">{verificationResult.contractAddress}</span>
                   </div>
                 )}
                 {verificationResult.txHash && (
                   <div className="truncate">
-                    <span className="text-ink-600 dark:text-marble-400">Tx Hash: </span>
-                    <span className="text-ink-800 dark:text-marble-200">{verificationResult.txHash}</span>
+                    <span className="text-text-muted">Tx Hash: </span>
+                    <span className="text-text">{verificationResult.txHash}</span>
                   </div>
                 )}
               </div>
@@ -346,7 +346,7 @@ export const ProductDetailPage: React.FC = () => {
                   href={`https://sepolia.etherscan.io/tx/${verificationResult.txHash}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-cinzel text-gold-600 hover:underline"
+                  className="inline-flex items-center gap-1.5 text-xs font-cinzel text-accent-text font-bold hover:underline"
                 >
                   <span>View Proof on Sepolia Etherscan</span>
                   <ExternalLink className="w-3.5 h-3.5" />
@@ -355,13 +355,13 @@ export const ProductDetailPage: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-4 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-terracotta-500/10 text-terracotta-500 flex items-center justify-center mx-auto">
+              <div className="w-16 h-16 rounded-full bg-surface-2 text-danger border border-danger/30 flex items-center justify-center mx-auto shadow-inner">
                 <AlertCircle className="w-10 h-10" />
               </div>
-              <h4 className="font-cinzel text-lg font-bold text-terracotta-600 dark:text-terracotta-400">
+              <h4 className="font-cinzel text-lg font-bold text-danger">
                 Not Found in the Temple Ledger
               </h4>
-              <p className="font-cormorant text-base text-ink-700 dark:text-marble-300">
+              <p className="font-cormorant text-base text-text-muted">
                 The cryptographic hash for batch {product.batchId} does not match any sealed consignment in the Asclepeion registry.
               </p>
             </div>
@@ -370,7 +370,7 @@ export const ProductDetailPage: React.FC = () => {
           <GreekDivider className="my-4" />
 
           <div className="flex justify-end">
-            <Button variant="gold" size="sm" onClick={() => setIsModalOpen(false)}>
+            <Button variant="primary" size="sm" onClick={() => setIsModalOpen(false)}>
               Close Sanctum Record
             </Button>
           </div>

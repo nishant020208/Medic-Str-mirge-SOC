@@ -1,7 +1,9 @@
 import React, { useEffect, useRef } from 'react';
+import { useTheme } from '../../store/themeStore';
 
 export const Silk: React.FC<{ className?: string }> = ({ className = '' }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -19,11 +21,17 @@ export const Silk: React.FC<{ className?: string }> = ({ className = '' }) => {
     resize();
     window.addEventListener('resize', resize);
 
-    // If reduced motion, draw static backdrop
+    // Read colors from active semantic tokens
+    const styles = getComputedStyle(document.documentElement);
+    const primary = styles.getPropertyValue('--primary').trim() || 'currentColor';
+    const accent = styles.getPropertyValue('--accent').trim() || 'currentColor';
+    const surface = styles.getPropertyValue('--surface').trim() || 'transparent';
+
+    // If reduced motion, draw static soft gradient
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      grad.addColorStop(0, '#0B1F4B');
-      grad.addColorStop(1, '#060F26');
+      grad.addColorStop(0, surface);
+      grad.addColorStop(1, primary);
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       return () => window.removeEventListener('resize', resize);
@@ -35,7 +43,7 @@ export const Silk: React.FC<{ className?: string }> = ({ className = '' }) => {
       const width = canvas.width;
       const height = canvas.height;
 
-      // Draw subtle luminous auroral silk waves
+      // Draw subtle luminous waves driven by token colors
       for (let i = 0; i < 3; i++) {
         ctx.beginPath();
         const yOffset = height * 0.4 + i * 80;
@@ -54,19 +62,13 @@ export const Silk: React.FC<{ className?: string }> = ({ className = '' }) => {
         ctx.closePath();
 
         const grad = ctx.createLinearGradient(0, yOffset - 50, width, height);
-        if (i === 0) {
-          grad.addColorStop(0, 'rgba(201, 162, 39, 0.06)'); // Gold
-          grad.addColorStop(1, 'rgba(11, 31, 75, 0.15)'); // Lapis
-        } else if (i === 1) {
-          grad.addColorStop(0, 'rgba(29, 59, 130, 0.08)'); // Lapis light
-          grad.addColorStop(1, 'rgba(229, 200, 102, 0.05)'); // Soft gold
-        } else {
-          grad.addColorStop(0, 'rgba(181, 83, 47, 0.04)'); // Terracotta faint
-          grad.addColorStop(1, 'rgba(6, 15, 38, 0.2)'); // Deep lapis
-        }
+        grad.addColorStop(0, i % 2 === 0 ? accent : primary);
+        grad.addColorStop(1, i % 2 === 0 ? primary : accent);
 
+        ctx.globalAlpha = 0.05 + i * 0.03;
         ctx.fillStyle = grad;
         ctx.fill();
+        ctx.globalAlpha = 1.0;
       }
 
       step++;
@@ -79,7 +81,7 @@ export const Silk: React.FC<{ className?: string }> = ({ className = '' }) => {
       window.removeEventListener('resize', resize);
       cancelAnimationFrame(animId);
     };
-  }, []);
+  }, [theme]);
 
   return (
     <canvas

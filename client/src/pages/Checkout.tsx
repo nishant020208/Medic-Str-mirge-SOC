@@ -61,9 +61,9 @@ export const CheckoutPage: React.FC = () => {
   if (items.length === 0) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center">
-        <h2 className="font-cinzel text-2xl font-bold mb-4">No Offerings in Basket</h2>
+        <h2 className="font-cinzel text-2xl font-bold mb-4 text-text">No Offerings in Basket</h2>
         <Link to="/shop">
-          <Button variant="gold">Return to Apothecary</Button>
+          <Button variant="primary">Return to Apothecary</Button>
         </Link>
       </div>
     );
@@ -125,17 +125,17 @@ export const CheckoutPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-grow">
       <Link
         to="/cart"
-        className="inline-flex items-center gap-2 text-xs font-cinzel font-bold text-ink-700 dark:text-marble-300 hover:text-gold-500 mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-xs font-cinzel font-bold text-text-muted hover:text-accent-text mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Modify Requisition Basket</span>
       </Link>
 
       <div className="text-center mb-8">
-        <span className="font-cinzel text-xs uppercase tracking-widest text-gold-600 dark:text-gold-400 font-bold block mb-1">
+        <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
           Final Rite
         </span>
-        <h1 className="font-cinzel text-3xl font-bold text-ink-950 dark:text-marble-100">
+        <h1 className="font-cinzel text-3xl font-bold text-text">
           Sanctuary Checkout &amp; Consecration
         </h1>
       </div>
@@ -146,7 +146,7 @@ export const CheckoutPage: React.FC = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Courier / Shipping Details */}
             <Card variant="marble" className="p-6 space-y-4">
-              <h3 className="font-cinzel text-base font-bold text-ink-950 dark:text-marble-100 flex items-center gap-2 border-b border-marble-200 dark:border-lapis-800 pb-2">
+              <h3 className="font-cinzel text-base font-bold text-text flex items-center gap-2 border-b border-border pb-2">
                 <span>1. Courier Consignment Details</span>
               </h3>
 
@@ -197,18 +197,18 @@ export const CheckoutPage: React.FC = () => {
 
             {/* Payment Details */}
             <Card variant="marble" className="p-6 space-y-4">
-              <div className="flex justify-between items-center border-b border-marble-200 dark:border-lapis-800 pb-2">
-                <h3 className="font-cinzel text-base font-bold text-ink-950 dark:text-marble-100 flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-gold-500" />
+              <div className="flex justify-between items-center border-b border-border pb-2">
+                <h3 className="font-cinzel text-base font-bold text-text flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-accent-text" />
                   <span>2. Tribute Payment (Sandbox Demo)</span>
                 </h3>
-                <span className="text-[10px] font-cinzel text-gold-600 dark:text-gold-400 bg-gold-500/10 px-2 py-0.5 rounded border border-gold-500/20">
+                <span className="text-[10px] font-cinzel text-accent-text bg-surface-2 px-2 py-0.5 rounded-card border border-border">
                   Zero Real Money
                 </span>
               </div>
 
-              <div className="p-3 rounded-sm bg-gold-500/10 border border-gold-500/30 text-xs text-ink-800 dark:text-marble-200 flex items-center gap-2">
-                <Lock className="w-4 h-4 text-gold-500 shrink-0" />
+              <div className="p-3 rounded-card bg-surface-2 border border-border text-xs text-text flex items-center gap-2">
+                <Lock className="w-4 h-4 text-accent-text shrink-0" />
                 <span>
                   Demo Mode: Pre-filled with synthetic test credentials. No actual card will be billed.
                 </span>
@@ -239,7 +239,7 @@ export const CheckoutPage: React.FC = () => {
 
             <Button
               type="submit"
-              variant="gold"
+              variant="primary"
               size="lg"
               className="w-full"
               isLoading={isSubmitting}
@@ -253,22 +253,22 @@ export const CheckoutPage: React.FC = () => {
         {/* Order Summary Column */}
         <div className="lg:col-span-5">
           <Card variant="papyrus" className="p-6">
-            <h3 className="font-cinzel text-base font-bold text-ink-950 dark:text-marble-100 mb-4 border-b border-marble-300 dark:border-lapis-700 pb-2">
+            <h3 className="font-cinzel text-base font-bold text-text mb-4 border-b border-border pb-2">
               Consignment Items ({items.length})
             </h3>
 
-            <div className="max-h-64 overflow-y-auto divide-y divide-marble-200 dark:divide-lapis-800 pr-1">
+            <div className="max-h-64 overflow-y-auto divide-y divide-border pr-1">
               {items.map(({ product, quantity }) => (
                 <div key={product.id} className="py-2.5 flex justify-between items-center text-xs">
                   <div>
-                    <span className="font-bold text-ink-950 dark:text-marble-100 block">
+                    <span className="font-bold text-text block">
                       {product.name}
                     </span>
-                    <span className="text-ink-600 dark:text-marble-400 font-mono">
+                    <span className="text-text-muted font-mono">
                       Qty: {quantity} × {formatPrice(product.price)}
                     </span>
                   </div>
-                  <span className="font-bold font-cinzel text-ink-900 dark:text-marble-100">
+                  <span className="font-bold font-cinzel text-text">
                     {formatPrice(product.price * quantity)}
                   </span>
                 </div>
@@ -278,21 +278,21 @@ export const CheckoutPage: React.FC = () => {
             <GreekDivider className="my-3" symbol={false} />
 
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between text-ink-700 dark:text-marble-300">
+              <div className="flex justify-between text-text-muted">
                 <span>Subtotal</span>
-                <span className="font-mono">{formatPrice(getSubtotal())}</span>
+                <span className="font-mono text-text">{formatPrice(getSubtotal())}</span>
               </div>
-              <div className="flex justify-between text-ink-700 dark:text-marble-300">
+              <div className="flex justify-between text-text-muted">
                 <span>Epidaurus Tithe (8%)</span>
-                <span className="font-mono">{formatPrice(getTax())}</span>
+                <span className="font-mono text-text">{formatPrice(getTax())}</span>
               </div>
-              <div className="flex justify-between text-ink-700 dark:text-marble-300">
+              <div className="flex justify-between text-text-muted">
                 <span>Courier Transmit</span>
-                <span className="font-mono">{formatPrice(getShipping())}</span>
+                <span className="font-mono text-text">{formatPrice(getShipping())}</span>
               </div>
-              <div className="flex justify-between text-sm font-bold pt-2 border-t border-marble-300 dark:border-lapis-700">
-                <span className="font-cinzel">Total Tithe</span>
-                <span className="font-cinzel text-gold-600 dark:text-gold-400 text-base">
+              <div className="flex justify-between text-sm font-bold pt-2 border-t border-border">
+                <span className="font-cinzel text-text">Total Tithe</span>
+                <span className="font-cinzel text-accent-text text-base">
                   {formatPrice(getTotal())}
                 </span>
               </div>

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { useTheme } from '../../store/themeStore';
 
 interface Spark {
   x: number;
@@ -13,6 +14,7 @@ interface Spark {
 export const ClickSpark: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const sparksRef = useRef<Spark[]>([]);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,10 +31,16 @@ export const ClickSpark: React.FC<{ children: React.ReactNode }> = ({ children }
     resize();
     window.addEventListener('resize', resize);
 
-    const colors = ['#C9A227', '#E5C866', '#FAF6EC', '#D4B33E'];
+    // Read colors from active semantic tokens
+    const styles = getComputedStyle(document.documentElement);
+    const accent = styles.getPropertyValue('--accent').trim() || 'currentColor';
+    const primary = styles.getPropertyValue('--primary').trim() || 'currentColor';
+    const textOnPrimary = styles.getPropertyValue('--text-on-primary').trim() || 'currentColor';
+    const border = styles.getPropertyValue('--border').trim() || 'currentColor';
+
+    const tokenColors = [accent, primary, textOnPrimary, border];
 
     const handleClick = (e: MouseEvent) => {
-      // Respect prefers-reduced-motion
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
       const rect = canvas.getBoundingClientRect();
@@ -49,7 +57,7 @@ export const ClickSpark: React.FC<{ children: React.ReactNode }> = ({ children }
           speed: 2 + Math.random() * 3,
           radius: 1.5 + Math.random() * 2,
           alpha: 1,
-          color: colors[Math.floor(Math.random() * colors.length)],
+          color: tokenColors[Math.floor(Math.random() * tokenColors.length)],
         });
       }
     };
@@ -88,7 +96,7 @@ export const ClickSpark: React.FC<{ children: React.ReactNode }> = ({ children }
       window.removeEventListener('click', handleClick);
       cancelAnimationFrame(animId);
     };
-  }, []);
+  }, [theme]);
 
   return (
     <>

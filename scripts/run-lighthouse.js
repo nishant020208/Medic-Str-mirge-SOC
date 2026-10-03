@@ -1,11 +1,15 @@
 import { spawn, execSync } from 'child_process';
-import http from 'http';
 import fs from 'fs';
 import path from 'path';
 
-const reportsDir = path.resolve(process.cwd(), 'docs/lighthouse');
-if (!fs.existsSync(reportsDir)) {
-  fs.mkdirSync(reportsDir, { recursive: true });
+const THEMES = ['light', 'dark', 'aesthetic'];
+
+const baseReportsDir = path.resolve(process.cwd(), 'docs/lighthouse');
+for (const th of THEMES) {
+  const dir = path.join(baseReportsDir, th);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
 }
 
 // 1. Start production server
@@ -32,55 +36,68 @@ async function waitForServer() {
 
 async function runAudit() {
   await waitForServer();
-  console.log('[Lighthouse Runner] Server ready. Commencing Lighthouse audits...');
+  console.log('[Lighthouse Runner] Server ready. Commencing Lighthouse mobile audits across 3 themes...');
 
   const pages = [
-    { name: 'home', url: 'http://127.0.0.1:5000/' },
-    { name: 'shop', url: 'http://127.0.0.1:5000/shop' },
-    { name: 'product', url: 'http://127.0.0.1:5000/shop/med-01' },
+    { name: 'home', path: '/' },
+    { name: 'shop', path: '/shop' },
+    { name: 'product', path: '/shop/med-01' },
   ];
 
-  const scores = {};
+  const allScores = {};
 
-  for (const page of pages) {
-    console.log(`\n--- Auditing ${page.name} (${page.url}) ---`);
-    const jsonPath = path.join(reportsDir, `${page.name}.report.json`);
-    const htmlPath = path.join(reportsDir, `${page.name}.report.html`);
+  for (const theme of THEMES) {
+    const themeReportsDir = path.join(baseReportsDir, theme);
+    console.log(`\n======================================================`);
+    console.log(`  AUDITING THEME: ${theme.toUpperCase()} (docs/lighthouse/${theme}/)`);
+    console.log(`======================================================`);
 
-    try {
-      execSync(
-        `npx lighthouse "${page.url}" --output=json,html --output-path="${path.join(
-          reportsDir,
-          page.name
-        )}" --chrome-flags="--headless=new --no-sandbox" --form-factor=mobile --screenEmulation.mobile=true --quiet`,
-        { stdio: 'inherit' }
-      );
+    for (const page of pages) {
+      const targetUrl = `http://127.0.0.1:5000${page.path}?theme=${theme}`;
+      console.log(`\n--- Auditing ${page.name} (${targetUrl}) ---`);
+      const outputBase = path.join(themeReportsDir, page.name);
+      const jsonPath = `${outputBase}.report.json`;
 
-      // Lighthouse outputs <name>.report.json and <name>.report.html
-      let reportData;
-      if (fs.existsSync(jsonPath)) {
-        reportData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-      } else {
-        const altJson = path.join(reportsDir, `${page.name}.report.json`);
-        reportData = JSON.parse(fs.readFileSync(altJson, 'utf8'));
+      try {
+        execSync(
+          `npx lighthouse "${targetUrl}" --output=json,html --output-path="${outputBase}" --chrome-flags="--headless=new --no-sandbox" --form-factor=mobile --screenEmulation.mobile=true --quiet`,
+          { stdio: 'inherit' }
+        );
+
+        let reportData;
+        if (fs.existsSync(jsonPath)) {
+          reportData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+        } else if (fs.existsSync(`${outputBase}.json`)) {
+          reportData = JSON.parse(fs.readFileSync(`${outputBase}.json`, 'utf8'));
+        }
+
+        if (reportData) {
+          const perf = Math.round((reportData.categories.performance?.score || 0) * 100);
+          const a11y = Math.round((reportData.categories.accessibility?.score || 0) * 100);
+          const bp = Math.round((reportData.categories['best-practices']?.score || 0) * 100);
+          const seo = Math.round((reportData.categories.seo?.score || 0) * 100);
+
+          const key = `${theme}-${page.name}`;
+          allScores[key] = {
+            Theme: theme,
+            Page: page.name,
+            Performance: perf,
+            Accessibility: a11y,
+            'Best Practices': bp,
+            SEO: seo,
+          };
+          console.log(`Scores for ${key}:`, allScores[key]);
+        }
+      } catch (err) {
+        console.error(`Audit failed for ${page.name} (${theme}):`, err.message);
       }
-
-      const perf = Math.round((reportData.categories.performance?.score || 0) * 100);
-      const a11y = Math.round((reportData.categories.accessibility?.score || 0) * 100);
-      const bp = Math.round((reportData.categories['best-practices']?.score || 0) * 100);
-      const seo = Math.round((reportData.categories.seo?.score || 0) * 100);
-
-      scores[page.name] = { Performance: perf, Accessibility: a11y, 'Best Practices': bp, SEO: seo };
-      console.log(`Scores for ${page.name}:`, scores[page.name]);
-    } catch (err) {
-      console.error(`Audit failed for ${page.name}:`, err.message);
     }
   }
 
-  console.log('\n========================================');
-  console.log('LIGHTHOUSE MOBILE AUDIT RESULTS SUMMARY');
-  console.log('========================================');
-  console.table(scores);
+  console.log('\n================================================================');
+  console.log('   LIGHTHOUSE MOBILE TRI-THEME AUDIT RESULTS SUMMARY');
+  console.log('================================================================');
+  console.table(allScores);
 
   serverProc.kill();
   process.exit(0);

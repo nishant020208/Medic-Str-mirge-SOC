@@ -2,16 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-// Self-hosted fonts to strictly maintain CSP with zero external CDN dependencies
-import '@fontsource/cinzel/400.css';
-import '@fontsource/cinzel/700.css';
-import '@fontsource/cormorant-garamond/400.css';
-import '@fontsource/cormorant-garamond/600.css';
-import '@fontsource/cormorant-garamond/700.css';
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/500.css';
-import '@fontsource/inter/600.css';
-import '@fontsource/inter/700.css';
+// Self-hosted fonts: Latin subsets only for maximum performance & minimal font payload
+// Note: Cinzel 600 and Inter 400 are declared in globals.css and preloaded in index.html
+import '@fontsource/cinzel/latin-700.css';
+import '@fontsource/cormorant-garamond/latin-400.css';
+import '@fontsource/cormorant-garamond/latin-600.css';
+import '@fontsource/cormorant-garamond/latin-700.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/inter/latin-600.css';
+import '@fontsource/inter/latin-700.css';
 
 import './styles/globals.css';
 

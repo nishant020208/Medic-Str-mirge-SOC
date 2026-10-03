@@ -19,7 +19,6 @@ import { GreekDivider } from '../ui/GreekDivider';
 import { useCartStore } from '../store/cartStore';
 import { toast } from '../ui/Toast';
 import { formatPrice } from '../lib/utils';
-import { verifyBatchOnChain } from '../web3/verifier';
 
 export const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,6 +57,7 @@ export const ProductDetailPage: React.FC = () => {
     setIsVerifying(true);
     setIsModalOpen(true);
     try {
+      const { verifyBatchOnChain } = await import('../web3/verifier');
       const result = await verifyBatchOnChain(product.batchId);
       setVerificationResult(result);
     } catch (err: any) {
@@ -82,14 +82,24 @@ export const ProductDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16 w-full animate-pulse">
-        <div className="h-6 w-32 bg-surface-2 rounded mb-8" />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div className="h-96 bg-surface-2 rounded-card" />
-          <div className="space-y-4">
-            <div className="h-10 w-3/4 bg-surface-2 rounded" />
-            <div className="h-6 w-1/4 bg-surface-2 rounded" />
-            <div className="h-32 bg-surface-2 rounded" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full animate-pulse">
+        <div className="inline-flex items-center gap-2 mb-8">
+          <div className="h-4 w-48 bg-surface-2 rounded" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-16">
+          <div className="rounded-card border border-border bg-surface p-8 min-h-[420px] flex flex-col items-center justify-center">
+            <div className="w-48 h-48 rounded-full bg-surface-2" />
+            <div className="h-4 w-32 bg-surface-2 rounded mt-8" />
+          </div>
+          <div className="flex flex-col space-y-6">
+            <div>
+              <div className="h-3 w-28 bg-surface-2 rounded mb-2" />
+              <div className="h-9 w-3/4 bg-surface-2 rounded mb-3" />
+              <div className="h-8 w-1/3 bg-surface-2 rounded" />
+            </div>
+            <div className="h-28 bg-surface-2 rounded-card" />
+            <div className="h-16 bg-surface-2 rounded-card" />
+            <div className="h-12 w-full bg-surface-2 rounded-card" />
           </div>
         </div>
       </div>

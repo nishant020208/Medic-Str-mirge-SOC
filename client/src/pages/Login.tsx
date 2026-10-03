@@ -10,7 +10,6 @@ import { Card } from '../ui/Card';
 import { GreekDivider } from '../ui/GreekDivider';
 import { useAuthStore } from '../store/authStore';
 import { toast } from '../ui/Toast';
-import { signInWithWallet } from '../web3/wallet';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid sanctum scroll email'),
@@ -75,6 +74,7 @@ export const LoginPage: React.FC = () => {
     try {
       setIsWalletConnecting(true);
       setFormError(null);
+      const { signInWithWallet } = await import('../web3/wallet');
       const user = await signInWithWallet();
       setUser(user);
       toast.success(`Wallet connected: ${user.email}`, 'Oracle Seal Verified');

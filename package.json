@@ -5,7 +5,8 @@
   "type": "module",
   "description": "MediStore: Temple of Asclepius - Hackathon Victim Application",
   "overrides": {
-    "braces": "^3.0.3"
+    "braces": "^3.0.3",
+    "@vitest/mocker": "^4.1.11"
   },
   "workspaces": [
     "client",
@@ -29,7 +30,7 @@
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.50.0",
     "concurrently": "^9.1.2",
-    "vitest": "^3.0.4"
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=20.0.0"

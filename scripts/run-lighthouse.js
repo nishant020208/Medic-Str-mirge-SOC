@@ -77,6 +77,11 @@ async function runAudit() {
           const bp = Math.round((reportData.categories['best-practices']?.score || 0) * 100);
           const seo = Math.round((reportData.categories.seo?.score || 0) * 100);
 
+          const lcp = reportData.audits?.['largest-contentful-paint']?.displayValue || '-';
+          const tbt = reportData.audits?.['total-blocking-time']?.displayValue || '-';
+          const cls = reportData.audits?.['cumulative-layout-shift']?.displayValue || '-';
+          const fcp = reportData.audits?.['first-contentful-paint']?.displayValue || '-';
+
           const key = `${theme}-${page.name}`;
           allScores[key] = {
             Theme: theme,
@@ -85,6 +90,10 @@ async function runAudit() {
             Accessibility: a11y,
             'Best Practices': bp,
             SEO: seo,
+            FCP: fcp,
+            LCP: lcp,
+            TBT: tbt,
+            CLS: cls,
           };
           console.log(`Scores for ${key}:`, allScores[key]);
         }

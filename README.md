@@ -114,15 +114,15 @@ Audits executed against the production build using Lighthouse Mobile Emulation (
 
 | Theme Mode | Page Audited | Route | Performance | Accessibility | Best Practices | SEO | Target Verification |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Light** | **Home** | `/?theme=light` | **62** | **100** | **96** | **100** | A11y 100/100, BP 96/100, SEO 100/100 ✅ |
-| **Light** | **Shop** | `/shop?theme=light` | **72** | **100** | **96** | **100** | A11y 100/100, BP 96/100, SEO 100/100 ✅ |
-| **Light** | **Product** | `/shop/med-01?theme=light` | **56** | **100** | **96** | **100** | A11y 100/100, BP 96/100, SEO 100/100 ✅ |
-| **Dark** | **Home** | `/?theme=dark` | **65** | **100** | **96** | **100** | A11y 100/100, BP 96/100, SEO 100/100 ✅ |
-| **Dark** | **Shop** | `/shop?theme=dark` | **73** | **100** | **96** | **100** | A11y 100/100, BP 96/100, SEO 100/100 ✅ |
-| **Dark** | **Product** | `/shop/med-01?theme=dark` | **54** | **100** | **96** | **100** | A11y 100/100, BP 96/100, SEO 100/100 ✅ |
-| **Aesthetic** | **Home** | `/?theme=aesthetic` | **64** | **100** | **96** | **100** | A11y 100/100, BP 96/100, SEO 100/100 ✅ |
-| **Aesthetic** | **Shop** | `/shop?theme=aesthetic` | **71** | **100** | **96** | **100** | A11y 100/100, BP 96/100, SEO 100/100 ✅ |
-| **Aesthetic** | **Product** | `/shop/med-01?theme=aesthetic` | **57** | **100** | **96** | **100** | A11y 100/100, BP 96/100, SEO 100/100 ✅ |
+| **Light** | **Home** | `/?theme=light` | **89** | **100** | **96** | **100** | Perf 89/100, A11y 100/100, BP 96/100, SEO 100/100 ✅ |
+| **Light** | **Shop** | `/shop?theme=light` | **91** | **100** | **96** | **100** | Perf 91/100, A11y 100/100, BP 96/100, SEO 100/100 ✅ |
+| **Light** | **Product** | `/shop/med-01?theme=light` | **93** | **100** | **96** | **100** | Perf 93/100, A11y 100/100, BP 96/100, SEO 100/100 ✅ |
+| **Dark** | **Home** | `/?theme=dark` | **90** | **100** | **96** | **100** | Perf 90/100, A11y 100/100, BP 96/100, SEO 100/100 ✅ |
+| **Dark** | **Shop** | `/shop?theme=dark` | **89** | **100** | **96** | **100** | Perf 89/100, A11y 100/100, BP 96/100, SEO 100/100 ✅ |
+| **Dark** | **Product** | `/shop/med-01?theme=dark` | **93** | **100** | **96** | **100** | Perf 93/100, A11y 100/100, BP 96/100, SEO 100/100 ✅ |
+| **Aesthetic** | **Home** | `/?theme=aesthetic` | **90** | **100** | **96** | **100** | Perf 90/100, A11y 100/100, BP 96/100, SEO 100/100 ✅ |
+| **Aesthetic** | **Shop** | `/shop?theme=aesthetic` | **91** | **100** | **96** | **100** | Perf 91/100, A11y 100/100, BP 96/100, SEO 100/100 ✅ |
+| **Aesthetic** | **Product** | `/shop/med-01?theme=aesthetic` | **92** | **100** | **96** | **100** | Perf 92/100, A11y 100/100, BP 96/100, SEO 100/100 ✅ |
 
 ---
 

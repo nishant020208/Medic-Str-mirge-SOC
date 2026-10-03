@@ -23,7 +23,10 @@ export function configureHelmet() {
         ],
         imgSrc: ["'self'", 'data:', 'blob:'],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'sha256-6/nvNoB4Ou7d8KfDwSJvWdJLQRerERILjwXhs8rGvGc='",
+        ],
         fontSrc: ["'self'", 'data:'],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],

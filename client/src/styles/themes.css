@@ -1,0 +1,301 @@
+/* client/src/styles/themes.css */
+/* Single Source of Truth for MediStore: Temple of Asclepius Semantic Tokens */
+
+/* 1. LIGHT THEME: "Marble Day" */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Backgrounds & Surfaces */
+  --bg: #F5F1E8;
+  --bg-gradient: linear-gradient(180deg, #F5F1E8 0%, #EDE6D6 100%);
+  --surface: #FBF8F1;
+  --surface-2: #EDE6D6;
+  --surface-glass: rgba(251, 248, 241, 0.85);
+
+  /* Borders & Dividers */
+  --border: #948565;
+
+  /* Typography */
+  --text: #14110D;
+  --text-muted: #5B5546;
+  --text-on-primary: #F5F1E8;
+
+  /* Brand & Actions */
+  --primary: #0B1F4B;
+  --primary-hover: #152E63;
+  --accent: #C9A227;
+  --accent-text: #7A5C00;
+
+  /* Semantic Feedback */
+  --success: #3F5A1F;
+  --warning: #7A5000;
+  --danger: #A3331A;
+  --info: #0B1F4B;
+
+  /* Interactive Focus & Depth */
+  --ring: #0B1F4B;
+  --overlay: rgba(20, 17, 13, 0.45);
+  --shadow: 0 4px 20px -2px rgba(20, 17, 13, 0.08);
+  --glow: 0 0 20px -3px rgba(201, 162, 39, 0.25);
+
+  /* Data Visualization */
+  --chart-1: #0B1F4B;
+  --chart-2: #7A5C00;
+  --chart-3: #A3331A;
+  --chart-4: #3F5A1F;
+  --chart-5: #C9A227;
+  --chart-6: #2A4FA3;
+
+  /* 3D Scene Parameters */
+  --scene-bg: #F5F1E8;
+  --scene-fog: #EDE6D6;
+  --scene-light-key: #FFF5D6;
+  --scene-light-fill: #B8CDED;
+  --scene-metal: #C9A227;
+  --particle: #D4B33E;
+
+  /* Radii & Effects */
+  --radius-card: 0.25rem;
+  --card-filter: none;
+}
+
+/* 2. DARK THEME: "Night Temple" */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Backgrounds & Surfaces (Never pure black) */
+  --bg: #070E1F;
+  --bg-gradient: linear-gradient(180deg, #070E1F 0%, #0E1A33 100%);
+  --surface: #0E1A33;
+  --surface-2: #162447;
+  --surface-glass: rgba(14, 26, 51, 0.85);
+
+  /* Elevation 1px borders instead of heavy shadows */
+  --border: #4E68AD;
+
+  /* Typography (Never pure white) */
+  --text: #F2EDE0;
+  --text-muted: #AEB6CC;
+  --text-on-primary: #0B1F4B;
+
+  /* Brand & Actions */
+  --primary: #E0B84A;
+  --primary-hover: #ECC86A;
+  --accent: #C9A227;
+  --accent-text: #E0B84A;
+
+  /* Semantic Feedback */
+  --success: #A7C46A;
+  --warning: #F0A742;
+  --danger: #FF8A70;
+  --info: #6CA0DC;
+
+  /* Interactive Focus & Soft Gold Glow */
+  --ring: #E0B84A;
+  --overlay: rgba(7, 14, 31, 0.75);
+  --shadow: 0 4px 25px -2px rgba(0, 0, 0, 0.5);
+  --glow: 0 0 25px -3px rgba(224, 184, 74, 0.35);
+
+  /* Data Visualization */
+  --chart-1: #E0B84A;
+  --chart-2: #6CA0DC;
+  --chart-3: #A7C46A;
+  --chart-4: #FF8A70;
+  --chart-5: #F0A742;
+  --chart-6: #B39DDB;
+
+  /* 3D Scene Parameters */
+  --scene-bg: #070E1F;
+  --scene-fog: #0E1A33;
+  --scene-light-key: #FFE6A3;
+  --scene-light-fill: #2A4FA3;
+  --scene-metal: #E0B84A;
+  --particle: #E0B84A;
+
+  /* Radii & Image Filter (Dim bright imagery by 8%) */
+  --radius-card: 0.25rem;
+  --card-filter: brightness(0.92);
+}
+
+/* 3. AESTHETIC THEME: "Olympus Dusk" */
+[data-theme="aesthetic"] {
+  color-scheme: light;
+
+  /* Backgrounds & Surfaces (Peach to Lavender gradient) */
+  --bg: #F6DFE7;
+  --bg-gradient: linear-gradient(135deg, #FDE9DC 0%, #E9D5F2 100%);
+  --surface: #FBF1F8;
+  --surface-2: #F2E0EF;
+  --surface-glass: rgba(255, 255, 255, 0.62);
+
+  /* Translucent rose-gold borders */
+  --border: #936D88;
+
+  /* Typography */
+  --text: #2B1B2F;
+  --text-muted: #644F6A;
+  --text-on-primary: #FFF7EE;
+
+  /* Brand & Actions (Rose-gold x deep crimson) */
+  --primary: #7A2E4D;
+  --primary-hover: #93375D;
+  --accent: #B76E79;
+  --accent-text: #7A2E4D;
+
+  /* Semantic Feedback */
+  --success: #285C34;
+  --warning: #7A4C00;
+  --danger: #9E2A2B;
+  --info: #3F51B5;
+
+  /* Interactive Focus & Depth */
+  --ring: #C0578A;
+  --overlay: rgba(43, 27, 47, 0.45);
+  --shadow: 0 8px 32px 0 rgba(122, 46, 77, 0.12);
+  --glow: 0 0 25px 0 rgba(183, 110, 121, 0.35);
+
+  /* Data Visualization */
+  --chart-1: #7A2E4D;
+  --chart-2: #B76E79;
+  --chart-3: #B8860B;
+  --chart-4: #285C34;
+  --chart-5: #8A4A55;
+  --chart-6: #9E2A2B;
+
+  /* 3D Scene Parameters (Rose-gold staff and dusk tones) */
+  --scene-bg: #F6DFE7;
+  --scene-fog: #E9D5F2;
+  --scene-light-key: #FFF0E5;
+  --scene-light-fill: #D4BBE8;
+  --scene-metal: #B76E79;
+  --particle: #B76E79;
+
+  /* Softer shadows & larger radii */
+  --radius-card: 0.75rem;
+  --card-filter: none;
+}
+
+/* Global Selection and Scrollbar Styles Driven by Tokens */
+::selection {
+  background-color: var(--accent);
+  color: var(--text-on-primary);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Base Body Styles */
+body {
+  background-color: var(--bg);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text);
+  min-height: 100vh;
+  transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation-duration: 0.001ms !important;
+  }
+}
+
+/* Aesthetic Mode Subtle CSS Grain Overlay (3% opacity) */
+[data-theme="aesthetic"]::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: radial-gradient(var(--text) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+
+/* Glass Card Helper */
+.glass-surface {
+  background-color: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius-card);
+}
+
+/* Greek Key Meander Pattern Divider Driven by Tokens */
+.greek-key-border {
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--accent) 0,
+    var(--accent) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  height: 3px;
+}
+
+.greek-frieze {
+  background-color: var(--surface);
+  background-image: radial-gradient(var(--accent) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Dark Mode Image Filter */
+[data-theme="dark"] img,
+[data-theme="dark"] svg.themed-illustration {
+  filter: var(--card-filter);
+}
+
+/* Aesthetic Mode Gentle Floating Motion on Cards (respects reduced motion) */
+@media (prefers-reduced-motion: no-preference) {
+  [data-theme="aesthetic"] .floating-card {
+    animation: aestheticFloat 6s ease-in-out infinite;
+  }
+  @keyframes aestheticFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
+  }
+}
+
+/* Print Styles: Always force clean, high-contrast light presentation */
+@media print {
+  :root,
+  [data-theme] {
+    color-scheme: light !important;
+    --bg: #FFFFFF !important;
+    --bg-gradient: none !important;
+    --surface: #FFFFFF !important;
+    --surface-2: #F5F5F5 !important;
+    --border: #333333 !important;
+    --text: #000000 !important;
+    --text-muted: #555555 !important;
+    --primary: #000000 !important;
+    --text-on-primary: #FFFFFF !important;
+    --accent: #555555 !important;
+    --shadow: none !important;
+    --glow: none !important;
+  }
+}

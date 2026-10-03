@@ -19,13 +19,17 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "lint": "npm run lint -w client && npm run lint -w server",
+    "lint:colors": "npx tsx scripts/lint-colors.ts",
+    "test:contrast": "npx tsx scripts/check-contrast.ts",
     "seed": "npm run seed -w server",
-    "audit:lighthouse": "node scripts/run-lighthouse.js"
+    "audit:lighthouse": "node scripts/run-lighthouse.js",
+    "test:lighthouse": "node scripts/run-lighthouse.js"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.50.0",
     "concurrently": "^9.1.2",
-    "vitest": "^3.0.4",
-    "@playwright/test": "^1.50.0"
+    "vitest": "^3.0.4"
   },
   "engines": {
     "node": ">=20.0.0"

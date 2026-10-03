@@ -1,39 +1,29 @@
 import { create } from 'zustand';
+import { useTheme, ThemeMode } from './themeStore';
 
 interface UIState {
-  theme: 'dark' | 'light';
+  theme: ThemeMode;
   toggleTheme: () => void;
-  setTheme: (theme: 'dark' | 'light') => void;
+  setTheme: (theme: ThemeMode) => void;
   isCartDrawerOpen: boolean;
   setCartDrawerOpen: (open: boolean) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
-  theme:
-    typeof window !== 'undefined' &&
-    (localStorage.getItem('medistore_theme') as 'dark' | 'light')
-      ? (localStorage.getItem('medistore_theme') as 'dark' | 'light')
-      : 'dark', // Default to night temple mode for aesthetic impact
-  toggleTheme: () =>
-    set((state) => {
-      const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('medistore_theme', nextTheme);
-      if (nextTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      return { theme: nextTheme };
-    }),
-  setTheme: (theme) => {
-    localStorage.setItem('medistore_theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+  get theme() {
+    return useTheme.getState().theme;
+  },
+  toggleTheme: () => {
+    useTheme.getState().cycleTheme();
+    set({ theme: useTheme.getState().theme });
+  },
+  setTheme: (theme: ThemeMode) => {
+    useTheme.getState().setTheme(theme);
     set({ theme });
   },
   isCartDrawerOpen: false,
   setCartDrawerOpen: (open) => set({ isCartDrawerOpen: open }),
 }));
+
+export { useTheme };
+export type { ThemeMode };

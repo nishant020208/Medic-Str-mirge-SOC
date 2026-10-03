@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: medistore-temple
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CSP_CONNECT_EXTRA
+        value: ""
+      - key: VITE_WEB3_MODE
+        value: mock
+      - key: VITE_BATCH_REGISTRY_ADDRESS
+        value: ""
+      - key: VITE_SEPOLIA_RPC_URL
+        value: ""
+      - key: VITE_TERMINAL_WS_URL
+        value: ""

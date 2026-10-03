@@ -1,0 +1,93 @@
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import morgan from 'morgan';
+import { Request, Response, NextFunction } from 'express';
+
+export function configureHelmet() {
+  const extraConnectSrc = process.env.CSP_CONNECT_EXTRA
+    ? process.env.CSP_CONNECT_EXTRA.split(' ')
+    : [];
+
+  return helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: [
+          "'self'",
+          'ws:',
+          'wss:',
+          'https://*.infura.io',
+          'https://*.alchemy.com',
+          'https://rpc.sepolia.org',
+          ...extraConnectSrc,
+        ],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        fontSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  });
+}
+
+export const apiRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 120, // 120 requests per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { trustProxy: false },
+  message: { error: 'Too many sanctum inquiries. Please await the next celestial minute.' },
+});
+
+export const loginRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10, // 10 attempts per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { trustProxy: false },
+  message: { error: 'Too many unauthorized entry attempts. Sanctum veil locked for 60 seconds.' },
+});
+
+// Custom morgan logger including real client IP (req.ip)
+export const morganLogger = morgan(
+  ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms (Client IP: :req[x-forwarded-for] / :req[x-real-ip])'
+);
+
+// CSRF Protection middleware for state-changing HTTP methods
+export function csrfProtection(req: Request, res: Response, next: NextFunction) {
+  const safeMethods = ['GET', 'HEAD', 'OPTIONS'];
+  if (safeMethods.includes(req.method)) {
+    return next();
+  }
+
+  // Verify custom header commonly used by AJAX/SPA clients
+  const customHeader = req.headers['x-requested-with'];
+  if (!customHeader) {
+    return res.status(403).json({
+      error: 'Missing required sanctum authorization header (X-Requested-With). CSRF precaution triggered.',
+    });
+  }
+
+  // Verify origin if present
+  const origin = req.headers.origin;
+  const host = req.headers.host;
+  if (origin && host) {
+    try {
+      const originHost = new URL(origin).host;
+      if (originHost !== host) {
+        return res.status(403).json({
+          error: 'Cross-origin sanctuary intrusion prevented. CSRF precaution triggered.',
+        });
+      }
+    } catch {
+      return res.status(403).json({ error: 'Malformed Origin header' });
+    }
+  }
+
+  next();
+}

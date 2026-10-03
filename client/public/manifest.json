@@ -1,0 +1,15 @@
+{
+  "short_name": "MediStore",
+  "name": "MediStore: Temple of Asclepius",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0B1F4B",
+  "theme_color": "#C9A227",
+  "display": "standalone"
+}

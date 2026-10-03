@@ -1,0 +1,28 @@
+{
+  "name": "medistore-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MediStore: Temple of Asclepius - Hackathon Victim Application",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"server,client\" -c \"cyan,magenta\" \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w client && npm run build -w server",
+    "start": "npm run start -w server",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "lint": "npm run lint -w client && npm run lint -w server",
+    "seed": "npm run seed -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "vitest": "^3.0.4",
+    "@playwright/test": "^1.50.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

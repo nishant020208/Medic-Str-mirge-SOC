@@ -1,165 +1,137 @@
 import {
-  SEED_PRODUCTS,
-  SEED_USERS,
-  SEED_ORDERS,
-  ProductData,
-  UserData,
-  OrderData,
-} from './seedData.js';
+  StorageAdapter,
+  PostgresAdapter,
+  MongoAdapter,
+  MemoryAdapter,
+} from './db.js';
+import { ProductData, UserData, OrderData } from './seedData.js';
 
-class InMemoryStore {
-  public products: ProductData[] = [];
-  public users: UserData[] = [];
-  public orders: OrderData[] = [];
-  public nonces: Map<string, { nonce: string; domain: string; expiresAt: number }> =
+class UnifiedStore {
+  private adapter: StorageAdapter;
+  private memoryFallback: MemoryAdapter;
+  private nonces: Map<string, { nonce: string; domain: string; expiresAt: number }> =
     new Map();
 
   constructor() {
-    this.reset();
+    this.memoryFallback = new MemoryAdapter();
+    this.adapter = this.memoryFallback;
+  }
+
+  // Getters for seed scripts and backwards compatibility
+  public get products(): ProductData[] {
+    return this.memoryFallback.products;
+  }
+
+  public get users(): UserData[] {
+    return this.memoryFallback.users;
+  }
+
+  public get orders(): OrderData[] {
+    return this.memoryFallback.orders;
+  }
+
+  public get storageType(): 'postgres' | 'mongodb' | 'memory' {
+    return this.adapter.type;
+  }
+
+  public async setAdapter(newAdapter: StorageAdapter) {
+    this.adapter = newAdapter;
   }
 
   public reset() {
-    this.products = JSON.parse(JSON.stringify(SEED_PRODUCTS));
-    this.users = JSON.parse(JSON.stringify(SEED_USERS));
-    this.orders = JSON.parse(JSON.stringify(SEED_ORDERS));
+    this.memoryFallback.resetSync();
     this.nonces.clear();
+    if (this.adapter !== this.memoryFallback) {
+      this.adapter.reset().catch((err) => {
+        console.warn('[Database] Reset error:', err.message);
+      });
+    }
   }
 
   // Product methods
-  public getProducts(filters?: {
+  public async getProducts(filters?: {
     q?: string;
     category?: string;
     rx?: boolean;
     inStock?: boolean;
     sort?: string;
-  }): ProductData[] {
-    let result = [...this.products];
-
-    if (filters?.q) {
-      const q = filters.q.toLowerCase();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
-          p.batchId.toLowerCase().includes(q)
-      );
-    }
-
-    if (filters?.category && filters.category !== 'All') {
-      result = result.filter((p) => p.category === filters.category);
-    }
-
-    if (filters?.rx !== undefined) {
-      result = result.filter((p) => p.rx === filters.rx);
-    }
-
-    if (filters?.inStock) {
-      result = result.filter((p) => p.stock > 0);
-    }
-
-    if (filters?.sort) {
-      if (filters.sort === 'price-asc') {
-        result.sort((a, b) => a.price - b.price);
-      } else if (filters.sort === 'price-desc') {
-        result.sort((a, b) => b.price - a.price);
-      } else if (filters.sort === 'name') {
-        result.sort((a, b) => a.name.localeCompare(b.name));
-      } else if (filters.sort === 'featured') {
-        result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
-      }
-    }
-
-    return result;
+  }): Promise<ProductData[]> {
+    return await this.adapter.getProducts(filters);
   }
 
-  public getProductById(id: string): ProductData | undefined {
-    return this.products.find((p) => p.id === id);
+  public async getProductById(id: string): Promise<ProductData | undefined> {
+    return await this.adapter.getProductById(id);
   }
 
-  public updateProductStock(id: string, stock: number): ProductData | null {
-    const p = this.getProductById(id);
-    if (!p) return null;
-    p.stock = stock;
-    return p;
+  public async updateProductStock(id: string, stock: number): Promise<ProductData | null> {
+    const updated = await this.adapter.updateProductStock(id, stock);
+    if (this.adapter !== this.memoryFallback) {
+      this.memoryFallback.updateProductStock(id, stock);
+    }
+    return updated;
   }
 
   // User methods
-  public findUserByEmail(email: string): UserData | undefined {
-    return this.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+  public async findUserByEmail(email: string): Promise<UserData | undefined> {
+    return await this.adapter.findUserByEmail(email);
   }
 
-  public findUserById(id: string): UserData | undefined {
-    return this.users.find((u) => u.id === id);
+  public async findUserById(id: string): Promise<UserData | undefined> {
+    return await this.adapter.findUserById(id);
   }
 
-  public createUser(email: string, passwordHash: string, role: 'customer' | 'pharmacist' = 'customer'): UserData {
-    const user: UserData = {
-      id: `usr_${Math.random().toString(36).substring(2, 10)}`,
-      email,
-      passwordHash,
-      role,
-      createdAt: new Date().toISOString(),
-    };
-    this.users.push(user);
-    return user;
+  public async createUser(
+    email: string,
+    passwordHash: string,
+    role: 'customer' | 'pharmacist' = 'customer'
+  ): Promise<UserData> {
+    const created = await this.adapter.createUser(email, passwordHash, role);
+    if (this.adapter !== this.memoryFallback) {
+      this.memoryFallback.users.push(created);
+    }
+    return created;
   }
 
-  public findOrCreateWalletUser(address: string): UserData {
-    const lower = address.toLowerCase();
-    const existing = this.users.find((u) => u.address?.toLowerCase() === lower);
-    if (existing) return existing;
-
-    const user: UserData = {
-      id: `usr_w3_${lower.slice(2, 10)}`,
-      email: `${lower.slice(0, 6)}...${lower.slice(-4)}@ethereum.sepolia`,
-      passwordHash: '',
-      role: 'customer',
-      address: lower,
-      createdAt: new Date().toISOString(),
-    };
-    this.users.push(user);
+  public async findOrCreateWalletUser(address: string): Promise<UserData> {
+    const user = await this.adapter.findOrCreateWalletUser(address);
+    if (this.adapter !== this.memoryFallback) {
+      const existing = this.memoryFallback.users.find(
+        (u) => u.address?.toLowerCase() === address.toLowerCase()
+      );
+      if (!existing) this.memoryFallback.users.push(user);
+    }
     return user;
   }
 
   // Order methods
-  public getOrders(): OrderData[] {
-    return [...this.orders].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+  public async getOrders(): Promise<OrderData[]> {
+    return await this.adapter.getOrders();
   }
 
-  public getOrderById(id: string): OrderData | undefined {
-    return this.orders.find((o) => o.id === id);
+  public async getOrderById(id: string): Promise<OrderData | undefined> {
+    return await this.adapter.getOrderById(id);
   }
 
-  public createOrder(order: Omit<OrderData, 'id' | 'createdAt'>): OrderData {
-    const newOrder: OrderData = {
-      ...order,
-      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-      createdAt: new Date().toISOString(),
-    };
-    this.orders.unshift(newOrder);
-
-    // Decrement product stock
-    for (const item of newOrder.items) {
-      const prod = this.getProductById(item.productId);
-      if (prod) {
-        prod.stock = Math.max(0, prod.stock - item.quantity);
-      }
+  public async createOrder(order: Omit<OrderData, 'id' | 'createdAt'>): Promise<OrderData> {
+    const created = await this.adapter.createOrder(order);
+    if (this.adapter !== this.memoryFallback) {
+      this.memoryFallback.orders.unshift(created);
     }
-
-    return newOrder;
+    return created;
   }
 
-  public updateOrderStatus(id: string, status: OrderData['status']): OrderData | null {
-    const order = this.getOrderById(id);
-    if (!order) return null;
-    order.status = status;
-    return order;
+  public async updateOrderStatus(
+    id: string,
+    status: OrderData['status']
+  ): Promise<OrderData | null> {
+    const updated = await this.adapter.updateOrderStatus(id, status);
+    if (this.adapter !== this.memoryFallback) {
+      this.memoryFallback.updateOrderStatus(id, status);
+    }
+    return updated;
   }
 
-  // Nonce storage
+  // Fast Ephemeral Nonces (stored with TTL for SIWE auth)
   public createNonce(domain: string): string {
     const nonce = Math.random().toString(36).substring(2) + Date.now().toString(36);
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 min expiry
@@ -176,4 +148,44 @@ class InMemoryStore {
   }
 }
 
-export const store = new InMemoryStore();
+export const store = new UnifiedStore();
+
+/**
+ * Initializes database connection if environment variables are provided.
+ * Fallbacks gracefully to high-performance in-memory store if unset or on error.
+ */
+export async function initDatabase(): Promise<void> {
+  const dbUrl = process.env.DATABASE_URL;
+  const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL;
+
+  if (dbUrl) {
+    try {
+      const masked = dbUrl.replace(/:([^:@]+)@/, ':****@');
+      console.log(`[Database] DATABASE_URL detected. Connecting to PostgreSQL (${masked})...`);
+      const pgAdapter = new PostgresAdapter(dbUrl);
+      await pgAdapter.initialize();
+      await store.setAdapter(pgAdapter);
+      console.log('✅ [Database] PostgreSQL connected successfully. Dispensary schema & data synchronized.');
+      return;
+    } catch (err: any) {
+      console.warn(`⚠️ [Database] PostgreSQL connection failed: ${err.message}`);
+      console.warn('⚠️ [Database] Falling back to In-Memory Dispensary Store to prevent downtime.');
+    }
+  } else if (mongoUri) {
+    try {
+      const masked = mongoUri.replace(/:([^:@]+)@/, ':****@');
+      console.log(`[Database] MONGODB_URI detected. Connecting to MongoDB (${masked})...`);
+      const mongoAdapter = new MongoAdapter(mongoUri);
+      await mongoAdapter.initialize();
+      await store.setAdapter(mongoAdapter);
+      console.log('✅ [Database] MongoDB connected successfully. Collections & indices synchronized.');
+      return;
+    } catch (err: any) {
+      console.warn(`⚠️ [Database] MongoDB connection failed: ${err.message}`);
+      console.warn('⚠️ [Database] Falling back to In-Memory Dispensary Store to prevent downtime.');
+    }
+  } else {
+    console.log('ℹ️ [Database] No DATABASE_URL or MONGODB_URI configured.');
+    console.log('ℹ️ [Database] Running with zero-config In-Memory Dispensary Store. (Enter keys anytime to connect seamlessly)');
+  }
+}

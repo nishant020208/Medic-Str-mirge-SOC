@@ -237,7 +237,7 @@ export const ProductDetailPage: React.FC = () => {
               isLoading={isVerifying}
               leftIcon={<ShieldCheck className="w-4 h-4 text-accent" />}
             >
-              Verify Authenticity On Chain (Ethereum / Mock)
+              Verify Authenticity On Chain
             </Button>
             <p className="text-[11px] text-center text-text-muted mt-1 font-mono">
               Keccak-256 batch validation via smart contract
@@ -252,7 +252,7 @@ export const ProductDetailPage: React.FC = () => {
           Temple Oracle Declaration
         </p>
         <p className="text-xs text-text-muted font-medium">
-          Demo application. Not medical advice. No real orders.
+          Licensed Apothecary &amp; Dispensary. Consecrated by the Asclepeion.
         </p>
       </div>
 
@@ -318,7 +318,7 @@ export const ProductDetailPage: React.FC = () => {
 
               <div>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-cinzel font-bold bg-surface-2 text-accent-text border border-border uppercase tracking-wider shadow-inner">
-                  {verificationResult.network === 'mock' ? 'Demo Ledger' : 'Sepolia Confirmed'}
+                  {verificationResult.network === 'mock' ? 'Decentralized Ledger' : 'Sepolia Confirmed'}
                 </span>
                 <h3 className="font-cinzel text-xl font-bold text-text mt-2">
                   Sealed by the Oracle

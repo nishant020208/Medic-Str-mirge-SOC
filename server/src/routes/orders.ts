@@ -23,7 +23,12 @@ const createOrderSchema = z.object({
   tax: z.number().nonnegative(),
   shipping: z.number().nonnegative(),
   total: z.number().positive(),
-  paymentMethod: z.enum(['Credit Card (Demo)', 'Wallet (Sepolia Mock)']),
+  paymentMethod: z.enum([
+    'Credit Card',
+    'Credit Card (Demo)',
+    'Wallet (Sepolia Mock)',
+    'Web3 Wallet',
+  ]),
   shippingAddress: z.object({
     fullName: z.string().min(2),
     street: z.string().min(3),
@@ -35,18 +40,19 @@ const createOrderSchema = z.object({
 });
 
 // GET /api/orders
-ordersRouter.get('/', (req: Request, res: Response) => {
+ordersRouter.get('/', async (req: Request, res: Response) => {
   const userRole = req.session?.role;
   const userId = req.session?.userId;
+  const allOrders = await store.getOrders();
 
   // Pharmacist can view all orders
   if (userRole === 'pharmacist') {
-    return res.json({ orders: store.getOrders() });
+    return res.json({ orders: allOrders });
   }
 
   // Customer views their own orders, or empty list
   if (userId) {
-    const userOrders = store.getOrders().filter((o) => o.userId === userId);
+    const userOrders = allOrders.filter((o) => o.userId === userId);
     return res.json({ orders: userOrders });
   }
 
@@ -54,8 +60,8 @@ ordersRouter.get('/', (req: Request, res: Response) => {
 });
 
 // GET /api/orders/:id
-ordersRouter.get('/:id', (req: Request, res: Response) => {
-  const order = store.getOrderById(req.params.id);
+ordersRouter.get('/:id', async (req: Request, res: Response) => {
+  const order = await store.getOrderById(req.params.id);
   if (!order) {
     return res.status(404).json({ error: 'Order not found in sacred annals' });
   }
@@ -63,7 +69,7 @@ ordersRouter.get('/:id', (req: Request, res: Response) => {
 });
 
 // POST /api/orders
-ordersRouter.post('/', (req: Request, res: Response) => {
+ordersRouter.post('/', async (req: Request, res: Response) => {
   const parseResult = createOrderSchema.safeParse(req.body);
   if (!parseResult.success) {
     return res.status(400).json({ error: 'Invalid order structure', details: parseResult.error });
@@ -71,7 +77,7 @@ ordersRouter.post('/', (req: Request, res: Response) => {
 
   const userId = req.session?.userId || 'usr_guest_' + Math.random().toString(36).substring(2, 8);
 
-  const newOrder = store.createOrder({
+  const newOrder = await store.createOrder({
     ...parseResult.data,
     userId,
     status: 'Pending',
@@ -88,13 +94,13 @@ const statusSchema = z.object({
   status: z.enum(['Pending', 'Dispensed', 'Shipped', 'Delivered', 'Cancelled']),
 });
 
-ordersRouter.patch('/:id/status', requirePharmacist, (req: Request, res: Response) => {
+ordersRouter.patch('/:id/status', requirePharmacist, async (req: Request, res: Response) => {
   const parseResult = statusSchema.safeParse(req.body);
   if (!parseResult.success) {
     return res.status(400).json({ error: 'Invalid consignment status' });
   }
 
-  const updated = store.updateOrderStatus(req.params.id, parseResult.data.status);
+  const updated = await store.updateOrderStatus(req.params.id, parseResult.data.status);
   if (!updated) {
     return res.status(404).json({ error: 'Order not found in sacred annals' });
   }

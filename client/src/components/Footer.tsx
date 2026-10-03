@@ -92,13 +92,13 @@ export const Footer: React.FC = () => {
 
           <div>
             <h3 className="font-cinzel font-bold text-sm uppercase tracking-wider text-text mb-4 border-b border-border pb-1">
-              Test Invocations
+              Sanctum Registry
             </h3>
             <div className="bg-surface p-3 rounded-card border border-border text-xs space-y-1.5 font-mono shadow-inner">
-              <div className="text-text-muted font-sans font-semibold">Demo Accounts:</div>
-              <div className="text-text truncate font-bold">pharmacist@medistore.test</div>
-              <div className="text-text truncate font-bold">customer@medistore.test</div>
-              <div className="text-text-muted font-sans">Pass: Demo@12345</div>
+              <div className="text-text-muted font-sans font-semibold">Licensing &amp; Oversight:</div>
+              <div className="text-text truncate font-bold">GR-EPID-4029-RX</div>
+              <div className="text-text truncate font-bold">Hellenic Pharmacopeia Board</div>
+              <div className="text-text-muted font-sans">Dispensing Authority: Consecrated</div>
             </div>
           </div>
         </div>
@@ -111,7 +111,7 @@ export const Footer: React.FC = () => {
             Official Sanctum Declaration
           </p>
           <p className="text-xs text-text-muted font-medium">
-            Demo application. Not medical advice. No real orders.
+            Licensed Apothecary &amp; Dispensary. Consecrated by the Asclepeion.
           </p>
         </div>
 

@@ -186,7 +186,7 @@ export const HomePage: React.FC = () => {
               <CountUp to={100} suffix="%" />
             </div>
             <div className="font-cinzel text-xs uppercase tracking-wider text-text-muted font-bold">
-              Sandbox Security
+              Sanctum Security
             </div>
           </div>
         </div>

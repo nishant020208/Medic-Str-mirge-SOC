@@ -94,9 +94,9 @@ It acts as the **VICTIM application** for the **MirageSOC** security architectur
 
 ---
 
-## 🔑 Fake Demo Accounts
+## 🔑 Accounts for Testing
 
-The in-memory database is pre-seeded with the following demo credentials:
+The dispensary is pre-seeded with the following credentials (enter directly on `/login`):
 
 | Role | Email | Password | Access Privileges |
 | :--- | :--- | :--- | :--- |
@@ -104,7 +104,28 @@ The in-memory database is pre-seeded with the following demo credentials:
 | **Initiate Customer** | `customer@medistore.test` | `Demo@12345` | Dispensary ordering; `/dashboard` displays themed 403 |
 | **Apprentice** | `apprentice@medistore.test` | `Demo@12345` | Customer level access |
 
-*(Fast-fill buttons are provided on the `/login` screen for 1-click judging verification!)*
+*(In production mode, credentials are kept secure and not shown on the UI).*
+
+---
+
+## 💾 Plug-and-Play Database Connection
+
+MediStore features zero-downtime, plug-and-play database support. By default, it operates with zero configuration using its built-in in-memory dispensary store. When you are ready to connect your database, simply supply either environment variable:
+
+### 1. PostgreSQL (Supabase / Neon / Railway / Vercel Postgres / AWS RDS)
+```env
+DATABASE_URL=postgres://user:password@hostname:5432/medistore?sslmode=require
+```
+- **Auto-Provisioning:** Creates tables (`users`, `products`, `orders`) on first boot.
+- **Auto-Seeding:** Automatically populates catalog and accounts if the database is newly initialized.
+- **Fail-Safe Fallback:** If the connection is unreachable or credentials invalid, it seamlessly falls back to in-memory store to prevent downtime.
+
+### 2. MongoDB (MongoDB Atlas / Self-Hosted)
+```env
+MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/medistore?retryWrites=true&w=majority
+```
+- **Auto-Provisioning:** Creates collections and unique indexes (`users.email`, `products.id`, `orders.id`).
+- **Auto-Seeding:** Seeds initial records if empty.
 
 ---
 

@@ -29,12 +29,12 @@ const walletAuthSchema = z.object({
 });
 
 // GET /api/auth/me
-authRouter.get('/me', (req: Request, res: Response) => {
+authRouter.get('/me', async (req: Request, res: Response) => {
   if (!req.session?.userId) {
     return res.status(401).json({ user: null });
   }
 
-  const user = store.findUserById(req.session.userId);
+  const user = await store.findUserById(req.session.userId);
   if (!user) {
     req.session.destroy(() => {});
     return res.status(401).json({ user: null });
@@ -60,7 +60,7 @@ authRouter.post('/login', loginRateLimiter, async (req: Request, res: Response) 
   }
 
   const { email, password } = result.data;
-  const user = store.findUserByEmail(email);
+  const user = await store.findUserByEmail(email);
 
   if (!user || !user.passwordHash) {
     mirage.loginFailed(req, email);
@@ -102,13 +102,13 @@ authRouter.post('/register', async (req: Request, res: Response) => {
 
   const { email, password, role = 'customer' } = result.data;
 
-  const existing = store.findUserByEmail(email);
+  const existing = await store.findUserByEmail(email);
   if (existing) {
     return res.status(409).json({ error: 'Email already consecrated in temple records' });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const newUser = store.createUser(email, passwordHash, role);
+  const newUser = await store.createUser(email, passwordHash, role);
 
   req.session.userId = newUser.id;
   req.session.role = newUser.role;
@@ -165,7 +165,7 @@ authRouter.post('/wallet', loginRateLimiter, async (req: Request, res: Response)
   }
 
   // Create or find wallet user
-  const user = store.findOrCreateWalletUser(lowerAddress);
+  const user = await store.findOrCreateWalletUser(lowerAddress);
 
   req.session.userId = user.id;
   req.session.role = user.role;

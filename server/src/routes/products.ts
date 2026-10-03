@@ -6,10 +6,10 @@ import { requirePharmacist } from '../middleware/auth.js';
 export const productsRouter = Router();
 
 // GET /api/products
-productsRouter.get('/', (req: Request, res: Response) => {
+productsRouter.get('/', async (req: Request, res: Response) => {
   const { q, category, rx, inStock, sort } = req.query;
 
-  const products = store.getProducts({
+  const products = await store.getProducts({
     q: typeof q === 'string' ? q : undefined,
     category: typeof category === 'string' ? category : undefined,
     rx: rx === 'true' ? true : rx === 'false' ? false : undefined,
@@ -24,15 +24,15 @@ productsRouter.get('/', (req: Request, res: Response) => {
 });
 
 // GET /api/products/:id
-productsRouter.get('/:id', (req: Request, res: Response) => {
-  const product = store.getProductById(req.params.id);
+productsRouter.get('/:id', async (req: Request, res: Response) => {
+  const product = await store.getProductById(req.params.id);
   if (!product) {
     return res.status(404).json({ error: 'Remedy not found in temple archives' });
   }
 
   // Find 3 related items in the same category
-  const related = store
-    .getProducts({ category: product.category })
+  const allInCategory = await store.getProducts({ category: product.category });
+  const related = allInCategory
     .filter((p) => p.id !== product.id)
     .slice(0, 3);
 
@@ -44,13 +44,13 @@ const stockUpdateSchema = z.object({
   stock: z.number().int().min(0),
 });
 
-productsRouter.patch('/:id/stock', requirePharmacist, (req: Request, res: Response) => {
+productsRouter.patch('/:id/stock', requirePharmacist, async (req: Request, res: Response) => {
   const parseResult = stockUpdateSchema.safeParse(req.body);
   if (!parseResult.success) {
     return res.status(400).json({ error: 'Invalid stock measurement' });
   }
 
-  const updated = store.updateProductStock(req.params.id, parseResult.data.stock);
+  const updated = await store.updateProductStock(req.params.id, parseResult.data.stock);
   if (!updated) {
     return res.status(404).json({ error: 'Remedy not found in temple archives' });
   }

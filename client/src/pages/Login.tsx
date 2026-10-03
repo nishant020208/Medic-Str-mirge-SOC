@@ -28,7 +28,6 @@ export const LoginPage: React.FC = () => {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -84,16 +83,6 @@ export const LoginPage: React.FC = () => {
       toast.error(err.message || 'Wallet signing ceremony failed', 'Wallet Auth Error');
     } finally {
       setIsWalletConnecting(false);
-    }
-  };
-
-  const fillCredentials = (role: 'pharmacist' | 'customer') => {
-    if (role === 'pharmacist') {
-      setValue('email', 'pharmacist@medistore.test');
-      setValue('password', 'Demo@12345');
-    } else {
-      setValue('email', 'customer@medistore.test');
-      setValue('password', 'Demo@12345');
     }
   };
 
@@ -163,31 +152,8 @@ export const LoginPage: React.FC = () => {
             Enter with Web3 Wallet
           </Button>
           <span className="text-[10px] text-center text-text-muted block mt-1.5 font-mono">
-            EIP-4361 / Nonce Sign-In (Mock / Sepolia)
+            EIP-4361 / Cryptographic Nonce Authentication
           </span>
-        </div>
-
-        {/* Demo Fast-Fill helper */}
-        <div className="mt-6 pt-4 border-t border-border text-center">
-          <span className="text-[11px] font-cinzel text-text-muted uppercase tracking-wider block mb-2 font-bold">
-            Hackathon Fast Demo Fill
-          </span>
-          <div className="flex gap-2 justify-center">
-            <button
-              type="button"
-              onClick={() => fillCredentials('pharmacist')}
-              className="px-2.5 py-1 text-xs font-mono bg-surface-2 rounded-card border border-border hover:border-accent text-text"
-            >
-              Pharmacist
-            </button>
-            <button
-              type="button"
-              onClick={() => fillCredentials('customer')}
-              className="px-2.5 py-1 text-xs font-mono bg-surface-2 rounded-card border border-border hover:border-accent text-text"
-            >
-              Customer
-            </button>
-          </div>
         </div>
 
         <div className="mt-6 text-center text-xs text-text-muted">

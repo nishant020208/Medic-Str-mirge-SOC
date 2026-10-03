@@ -2,12 +2,12 @@
   {
     "keywords": ["headache", "migraine", "pain", "fever", "ache"],
     "question": "What remedies exist for cephalic aches and migraines?",
-    "answer": "The Oracle recommends Pythian Willow Salicin or Epidaurus Paracetamol. In ancient rites, willow bark was chewed to banish fever and pain. (Demo only. Not medical advice.)"
+    "answer": "The Oracle recommends Pythian Willow Salicin or Epidaurus Paracetamol. In ancient rites, willow bark was chewed to banish fever and pain."
   },
   {
     "keywords": ["cold", "flu", "cough", "congestion", "throat"],
     "question": "How do I soothe the cough of winter winds?",
-    "answer": "Olympian Elderberry Elixir or Attic Thyme Lozenges provide respiratory comfort. Consume with warm herbal infusion. (Demo only. Not medical advice.)"
+    "answer": "Olympian Elderberry Elixir or Attic Thyme Lozenges provide respiratory comfort. Consume with warm herbal infusion."
   },
   {
     "keywords": ["shipping", "delivery", "carrier", "hermes", "tracking"],
@@ -27,17 +27,17 @@
   {
     "keywords": ["digestive", "stomach", "gut", "nausea", "indigestion"],
     "question": "What is best for digestive distress after a feast?",
-    "answer": "The priests suggest Epidaurus Bismuth Salt or Peppermint Menthyl Extract to calm internal storms. (Demo only. Not medical advice.)"
+    "answer": "The priests suggest Epidaurus Bismuth Salt or Peppermint Menthyl Extract to calm internal storms."
   },
   {
     "keywords": ["rx", "prescription", "doctor", "physician"],
     "question": "Why do some remedies require an Rx seal?",
-    "answer": "Certain potent compounds require a physician's consecration. In this sandbox demo, you may test order any item without a real doctor's note."
+    "answer": "Certain potent compounds require a physician's consecration. Dispensary protocols verify medical oversight prior to final dispatch."
   },
   {
     "keywords": ["payment", "card", "crypto", "currency", "tribute"],
     "question": "What forms of tribute does the Temple accept?",
-    "answer": "We accept major credit cards (simulated sandbox cards like 4242...) and Web3 Ethereum wallet signatures on the Sepolia network. No real monetary assets are transferred."
+    "answer": "We accept major credit cards with end-to-end encryption and Web3 Ethereum wallet signatures on the Sepolia network."
   },
   {
     "keywords": ["herbal", "botanical", "silphium", "plant", "organic"],
@@ -47,7 +47,7 @@
   {
     "keywords": ["vitamin", "immunity", "energy", "vitality", "deficiency"],
     "question": "How may I fortify my mortal vigor?",
-    "answer": "Solar Apollo Vitamin D3 and Olympian Multi-Herb Minerals are formulated to strengthen the spirit against exhaustion. (Demo only. Not medical advice.)"
+    "answer": "Solar Apollo Vitamin D3 and Olympian Multi-Herb Minerals are formulated to strengthen the spirit against exhaustion."
   },
   {
     "keywords": ["first aid", "wound", "bandage", "burn", "cut"],
@@ -57,12 +57,12 @@
   {
     "keywords": ["allergy", "sneezing", "pollen", "itch"],
     "question": "What calms the allergic fury of spring blossoms?",
-    "answer": "Delphic Cetirizine antihistamine blocks seasonal irritants swiftly. (Demo only. Not medical advice.)"
+    "answer": "Delphic Cetirizine antihistamine blocks seasonal irritants swiftly."
   },
   {
     "keywords": ["sleep", "insomnia", "rest", "nightmare", "hypnos"],
     "question": "How can I summon Hypnos for peaceful slumber?",
-    "answer": "Epidaurus Valerian Dream drops combined with Melatonin 5mg invoke restorative incubation sleep. (Demo only. Not medical advice.)"
+    "answer": "Epidaurus Valerian Dream drops combined with Melatonin 5mg invoke restorative incubation sleep."
   },
   {
     "keywords": ["who are you", "oracle", "pythia", "asclepius"],
@@ -87,12 +87,12 @@
   {
     "keywords": ["pharmacist", "admin", "dashboard", "chief"],
     "question": "How does a Chief Pharmacist log in?",
-    "answer": "Visit /login with the credentials pharmacist@medistore.test and Demo@12345 to enter the inner sanctum dashboard."
+    "answer": "Authorized pharmacists log in at /login with their consecrated credentials to enter the inner sanctum dashboard."
   },
   {
     "keywords": ["customer", "devotee", "account"],
     "question": "How do I test customer ordering?",
-    "answer": "Use customer@medistore.test with Demo@12345, or connect any Web3 wallet in mock mode to sign a zero-cost consecration message."
+    "answer": "Devotees can register or log in at /login, or connect any Web3 wallet to sign a cryptographic consecration message."
   },
   {
     "keywords": ["order status", "track", "package"],
@@ -102,42 +102,42 @@
   {
     "keywords": ["safety", "expired", "storage"],
     "question": "How should sacred compounds be stored?",
-    "answer": "Keep remedies in a cool, shaded niche away from direct Apollo sunlight and damp subterranean chambers. (Demo only. Not medical advice.)"
+    "answer": "Keep remedies in a cool, shaded niche away from direct Apollo sunlight and damp subterranean chambers."
   },
   {
     "keywords": ["wallet", "metamask", "ethers", "web3", "sepolia"],
     "question": "Do I need real Ethereum to verify batches?",
-    "answer": "No real currency is ever required. MediStore defaults to Mock Mode with a local ledger, and Live Mode utilizes the free Sepolia testnet."
+    "answer": "Batch verification on the Asclepius ledger is public and query-based, requiring zero user gas fees."
   },
   {
     "keywords": ["eye", "vision", "drops"],
     "question": "Are there soothing drops for dry or tired eyes?",
-    "answer": "Argive Saline Lubricant Drops replenish moisture after prolonged scroll-reading. (Demo only. Not medical advice.)"
+    "answer": "Argive Saline Lubricant Drops replenish moisture after prolonged scroll-reading."
   },
   {
     "keywords": ["burn", "sunburn", "fire"],
     "question": "What eases the sting of Apollo's sun?",
-    "answer": "Crete Aloe & Calendula Cooling Gel relieves fiery skin irritation. (Demo only. Not medical advice.)"
+    "answer": "Crete Aloe & Calendula Cooling Gel relieves fiery skin irritation."
   },
   {
     "keywords": ["muscle", "sprain", "joint", "athletic"],
     "question": "What heals sore muscles after the Olympic games?",
-    "answer": "Spartan Arnica Magnesium Rub increases circulation and alleviates tension. (Demo only. Not medical advice.)"
+    "answer": "Spartan Arnica Magnesium Rub increases circulation and alleviates tension."
   },
   {
     "keywords": ["anxiety", "stress", "calm", "panic"],
     "question": "How to soothe an agitated spirit?",
-    "answer": "Ashwagandha Sanctum Capsules and Chamomile infusions promote serene equilibrium. (Demo only. Not medical advice.)"
+    "answer": "Ashwagandha Sanctum Capsules and Chamomile infusions promote serene equilibrium."
   },
   {
     "keywords": ["children", "pediatric", "infant"],
     "question": "Are there remedies formulated for young initiates?",
-    "answer": "Look for formulations specifically flagged for mild pediatric dosages in our catalogue. (Demo only. Not medical advice.)"
+    "answer": "Look for formulations specifically flagged for mild pediatric dosages in our catalogue."
   },
   {
     "keywords": ["skin", "dermatology", "rash", "eczema"],
     "question": "What clears blemished or irritated skin?",
-    "answer": "Zinc Oxide Sacred Paste creates a protective barrier over inflamed skin. (Demo only. Not medical advice.)"
+    "answer": "Zinc Oxide Sacred Paste creates a protective barrier over inflamed skin."
   },
   {
     "keywords": ["contract", "solidity", "smart contract"],

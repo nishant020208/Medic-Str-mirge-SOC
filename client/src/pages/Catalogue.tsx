@@ -273,7 +273,7 @@ export const CataloguePage: React.FC = () => {
 
       {/* Footer Disclaimer */}
       <div className="text-center text-xs text-text-muted">
-        Demo application. Not medical advice. No real orders.
+        Licensed Apothecary &amp; Dispensary. Consecrated by the Asclepeion.
       </div>
     </div>
   );

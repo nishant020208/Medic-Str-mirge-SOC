@@ -54,7 +54,7 @@ export interface Order {
   shipping: number;
   total: number;
   status: 'Pending' | 'Dispensed' | 'Shipped' | 'Delivered' | 'Cancelled';
-  paymentMethod: 'Credit Card (Demo)' | 'Wallet (Sepolia Mock)';
+  paymentMethod: 'Credit Card' | 'Credit Card (Demo)' | 'Wallet (Sepolia Mock)' | 'Web3 Wallet';
   createdAt: string;
   shippingAddress: {
     fullName: string;

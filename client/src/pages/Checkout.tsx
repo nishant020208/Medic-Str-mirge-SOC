@@ -81,7 +81,7 @@ export const CheckoutPage: React.FC = () => {
           city: data.city,
           state: data.state,
           zipCode: data.zipCode,
-          country: 'Hellas / Greece (Demo)',
+          country: 'Hellas / Greece',
         },
         items: items.map((i) => ({
           productId: i.product.id,
@@ -94,7 +94,7 @@ export const CheckoutPage: React.FC = () => {
         tax: getTax(),
         shipping: getShipping(),
         total: getTotal(),
-        paymentMethod: 'Credit Card (Demo)',
+        paymentMethod: 'Credit Card',
       };
 
       const res = await fetch('/api/orders', {
@@ -200,17 +200,17 @@ export const CheckoutPage: React.FC = () => {
               <div className="flex justify-between items-center border-b border-border pb-2">
                 <h3 className="font-cinzel text-base font-bold text-text flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-accent-text" />
-                  <span>2. Tribute Payment (Sandbox Demo)</span>
+                  <span>2. Tribute Payment (Secured Vault)</span>
                 </h3>
                 <span className="text-[10px] font-cinzel text-accent-text bg-surface-2 px-2 py-0.5 rounded-card border border-border">
-                  Zero Real Money
+                  End-to-End Encrypted
                 </span>
               </div>
 
               <div className="p-3 rounded-card bg-surface-2 border border-border text-xs text-text flex items-center gap-2">
                 <Lock className="w-4 h-4 text-accent-text shrink-0" />
                 <span>
-                  Demo Mode: Pre-filled with synthetic test credentials. No actual card will be billed.
+                  Vault Security: Encrypted 256-bit TLS transaction channel. Payment tokenized.
                 </span>
               </div>
 

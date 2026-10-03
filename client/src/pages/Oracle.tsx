@@ -65,7 +65,7 @@ export const OraclePage: React.FC = () => {
       return bestMatch.answer;
     }
 
-    return 'The Omens are clouded regarding this inquiry. The Oracle suggests consulting our Apothecary Dispensary catalog or enlisting the Chief Pharmacist at /dashboard. (Demo only. Not medical advice.)';
+    return 'The Omens are clouded regarding this inquiry. The Oracle suggests consulting our Apothecary Dispensary catalog or enlisting the Chief Pharmacist at /dashboard.';
   };
 
   const handleSend = (textToSend?: string) => {
@@ -220,7 +220,7 @@ export const OraclePage: React.FC = () => {
 
       {/* Mandatory Disclaimer */}
       <div className="text-center text-xs text-text-muted mt-4">
-        Demo application. Not medical advice. No real orders.
+        Licensed Apothecary &amp; Dispensary. Consecrated by the Asclepeion.
       </div>
     </div>
   );

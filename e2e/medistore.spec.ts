@@ -33,7 +33,7 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
 
     // Verify statutory disclaimer
     await expect(
-      page.getByText('Demo application. Not medical advice. No real orders.').first()
+      page.getByText('Licensed Apothecary & Dispensary. Consecrated by the Asclepeion.').first()
     ).toBeVisible();
   });
 
@@ -68,7 +68,7 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
     await expect(page.getByText('Sealed by the Oracle', { exact: false })).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.getByText('Demo Ledger', { exact: false })).toBeVisible();
+    await expect(page.getByText('Decentralized Ledger', { exact: false })).toBeVisible();
   });
 
   test('4. Add product to cart, edit quantity, and checkout with fake receipt', async ({
@@ -114,7 +114,8 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
   test('5. Customer login -> /dashboard shows themed 403', async ({ page }) => {
     // Go to login page
     await page.goto('/login');
-    await page.getByRole('button', { name: 'Customer' }).click(); // Fast-fill button
+    await page.getByLabel(/Sanctum Scroll Email/i).fill('customer@medistore.test');
+    await page.getByLabel(/Secret Passphrase/i).fill('Demo@12345');
     await page.getByRole('button', { name: /Enter Sanctuary/i }).click();
 
     // Customer is redirected to /shop
@@ -129,7 +130,8 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
   test('6. Pharmacist login -> dashboard loads', async ({ page }) => {
     // Go to login page
     await page.goto('/login');
-    await page.getByRole('button', { name: 'Pharmacist' }).click(); // Fast-fill button
+    await page.getByLabel(/Sanctum Scroll Email/i).fill('pharmacist@medistore.test');
+    await page.getByLabel(/Secret Passphrase/i).fill('Demo@12345');
     await page.getByRole('button', { name: /Enter Sanctuary/i }).click();
 
     // Should redirect directly to dashboard

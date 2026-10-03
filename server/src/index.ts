@@ -22,6 +22,7 @@ import {
 import { authRouter } from './routes/auth.js';
 import { productsRouter } from './routes/products.js';
 import { ordersRouter } from './routes/orders.js';
+import { initDatabase } from './data/store.js';
 
 dotenv.config();
 
@@ -234,6 +235,10 @@ const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';
 
 if (process.env.NODE_ENV !== 'test') {
+  initDatabase().catch((err) => {
+    console.warn('[Database] Initialization notice:', err.message);
+  });
+
   server.listen(Number(PORT), HOST, () => {
     console.log(`[MediStore] Temple of Asclepius server listening on http://${HOST}:${PORT}`);
     console.log(`[MediStore] Environment: ${process.env.NODE_ENV || 'development'}`);

@@ -109,9 +109,22 @@ export function isReservedTrapPath(urlPath: string): boolean {
   return RESERVED_TRAP_PATHS.some((trap) => trap.toLowerCase() === normalized);
 }
 
-// Static client assets
+// Static client assets with long-term caching for hashed assets
 const clientDistPath = path.resolve(__dirname, '../../client/dist');
-app.use(express.static(clientDistPath));
+app.use(
+  express.static(clientDistPath, {
+    maxAge: '1y',
+    immutable: true,
+    setHeaders: (res, filePath) => {
+      // Never long-cache HTML or manifest
+      if (filePath.endsWith('.html') || filePath.endsWith('manifest.json')) {
+        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+      } else {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    },
+  })
+);
 
 // Rule 4: SPA fallback MUST ONLY serve index.html for GET requests that:
 // 1. Have no file extension
@@ -139,6 +152,7 @@ app.get('*', (req, res, next) => {
   }
 
   const indexPath = path.join(clientDistPath, 'index.html');
+  res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
   res.sendFile(indexPath, (err) => {
     if (err) {
       next();

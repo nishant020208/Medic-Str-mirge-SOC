@@ -15,9 +15,9 @@ export const Badge: React.FC<BadgeProps> = ({
 }) => {
   const variants = {
     gold: 'bg-gold-500/15 text-gold-700 dark:text-gold-300 border border-gold-500/30',
-    olive: 'bg-olive-500/15 text-olive-600 dark:text-olive-400 border border-olive-500/30',
-    terracotta: 'bg-terracotta-500/15 text-terracotta-600 dark:text-terracotta-400 border border-terracotta-500/30',
-    lapis: 'bg-lapis-500/15 text-lapis-700 dark:text-lapis-200 border border-lapis-500/30',
+    olive: 'bg-olive-500/15 text-olive-700 dark:text-olive-300 border border-olive-500/30',
+    terracotta: 'bg-terracotta-500/15 text-terracotta-700 dark:text-terracotta-300 border border-terracotta-500/30',
+    lapis: 'bg-lapis-500/15 text-lapis-800 dark:text-lapis-200 border border-lapis-500/30',
     outline: 'border border-marble-300 dark:border-lapis-700 text-ink-800 dark:text-marble-200',
   };
 

@@ -113,6 +113,7 @@ export const CataloguePage: React.FC = () => {
               <SlidersHorizontal className="w-3.5 h-3.5" /> Sort:
             </span>
             <select
+              aria-label="Sort remedies by"
               value={sort}
               onChange={(e) => updateFilter('sort', e.target.value)}
               className="text-xs px-2.5 py-2 rounded-sm bg-marble-50 dark:bg-lapis-950 border border-marble-300 dark:border-lapis-700 text-ink-900 dark:text-marble-100 font-cinzel"
@@ -178,6 +179,7 @@ export const CataloguePage: React.FC = () => {
       </div>
 
       {/* Product Grid */}
+      <h2 className="sr-only">Apothecary Collection</h2>
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (

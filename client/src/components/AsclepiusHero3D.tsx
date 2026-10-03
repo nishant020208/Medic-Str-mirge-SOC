@@ -179,7 +179,10 @@ function SceneContainer({ mousePos }: { mousePos: { x: number; y: number } }) {
 
 // Static SVG Fallback for low-end devices, reduced motion, or WebGL absence
 export const StaticAsclepiusHeroFallback: React.FC = () => (
-  <div className="w-full h-full flex items-center justify-center relative">
+  <div
+    data-testid="static-hero-fallback"
+    className="w-full h-full flex items-center justify-center relative"
+  >
     <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-gold-500/20 via-lapis-900/30 to-gold-500/10 border-2 border-gold-500/40 p-8 flex items-center justify-center shadow-gold-glow animate-pulse-subtle">
       <svg
         viewBox="0 0 100 100"
@@ -212,7 +215,11 @@ export const AsclepiusHero3D: React.FC = () => {
       return;
     }
 
-    // 2. Check low-end device hardware hints
+    // 2. Mobile screen optimization (lightweight static hero for touch/mobile devices)
+    if (window.innerWidth < 768) {
+      setShouldFallback(true);
+      return;
+    }
     const hardwareConcurrency = navigator.hardwareConcurrency || 4;
     const deviceMemory = (navigator as any).deviceMemory || 4;
     if (hardwareConcurrency <= 2 || deviceMemory <= 2) {
@@ -246,6 +253,8 @@ export const AsclepiusHero3D: React.FC = () => {
 
   return (
     <div
+      data-testid="asclepius-3d-canvas"
+      role="img"
       onMouseMove={handleMouseMove}
       className="w-full h-full relative cursor-grab active:cursor-grabbing"
       aria-label="Interactive 3D Rod of Asclepius Emblem"

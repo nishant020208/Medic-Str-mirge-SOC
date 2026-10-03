@@ -14,9 +14,9 @@ export const Footer: React.FC = () => {
               <div className="w-8 h-8 rounded-sm bg-lapis-900 border border-gold-500/50 flex items-center justify-center text-gold-400">
                 <HeartPulse className="w-5 h-5" />
               </div>
-              <h4 className="font-cinzel font-bold text-base tracking-wider text-ink-950 dark:text-marble-100">
+              <h3 className="font-cinzel font-bold text-base tracking-wider text-ink-950 dark:text-marble-100">
                 MEDISTORE
-              </h4>
+              </h3>
             </div>
             <p className="font-cormorant text-base text-ink-700 dark:text-marble-300 leading-relaxed mb-4">
               Consecrated to Asclepius, divinity of healing. Blending ancient botanical traditions with cryptographic batch seals.
@@ -28,9 +28,9 @@ export const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h5 className="font-cinzel font-bold text-sm uppercase tracking-wider text-ink-950 dark:text-gold-300 mb-4 border-b border-gold-500/30 pb-1">
+            <h3 className="font-cinzel font-bold text-sm uppercase tracking-wider text-ink-950 dark:text-gold-300 mb-4 border-b border-gold-500/30 pb-1">
               Sanctuary Gates
-            </h5>
+            </h3>
             <ul className="space-y-2 text-sm font-medium">
               <li>
                 <Link to="/" className="hover:text-gold-500 transition-colors">
@@ -61,9 +61,9 @@ export const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h5 className="font-cinzel font-bold text-sm uppercase tracking-wider text-ink-950 dark:text-gold-300 mb-4 border-b border-gold-500/30 pb-1">
+            <h3 className="font-cinzel font-bold text-sm uppercase tracking-wider text-ink-950 dark:text-gold-300 mb-4 border-b border-gold-500/30 pb-1">
               Hallowed Cryptography
-            </h5>
+            </h3>
             <ul className="space-y-2 text-sm font-medium">
               <li>
                 <Link to="/quest" className="hover:text-gold-500 transition-colors flex items-center gap-1.5">
@@ -91,9 +91,9 @@ export const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h5 className="font-cinzel font-bold text-sm uppercase tracking-wider text-ink-950 dark:text-gold-300 mb-4 border-b border-gold-500/30 pb-1">
+            <h3 className="font-cinzel font-bold text-sm uppercase tracking-wider text-ink-950 dark:text-gold-300 mb-4 border-b border-gold-500/30 pb-1">
               Test Invocations
-            </h5>
+            </h3>
             <div className="bg-marble-100 dark:bg-lapis-900/60 p-3 rounded-sm border border-marble-300 dark:border-lapis-700 text-xs space-y-1.5 font-mono">
               <div className="text-ink-600 dark:text-marble-300 font-sans font-semibold">Demo Accounts:</div>
               <div className="text-gold-700 dark:text-gold-300 truncate">pharmacist@medistore.test</div>

@@ -47,7 +47,6 @@ export const Navbar: React.FC = () => {
           <Link
             to="/"
             className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-gold-500 rounded"
-            aria-label="MediStore Home"
           >
             <div className="w-10 h-10 rounded-sm bg-lapis-900 dark:bg-lapis-900 border border-gold-500/50 flex items-center justify-center text-gold-400 group-hover:scale-105 transition-transform shadow-sm">
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">

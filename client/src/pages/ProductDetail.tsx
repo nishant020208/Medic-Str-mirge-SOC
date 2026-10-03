@@ -162,9 +162,9 @@ export const ProductDetailPage: React.FC = () => {
           </div>
 
           <Card variant="papyrus" className="p-4">
-            <h4 className="font-cinzel text-xs uppercase tracking-wider font-bold text-ink-900 dark:text-gold-300 mb-2">
+            <h2 className="font-cinzel text-xs uppercase tracking-wider font-bold text-ink-900 dark:text-gold-300 mb-2">
               Asclepeion Description
-            </h4>
+            </h2>
             <p className="font-cormorant text-lg text-ink-800 dark:text-marble-200 leading-relaxed">
               {product.description}
             </p>
@@ -172,9 +172,9 @@ export const ProductDetailPage: React.FC = () => {
 
           {/* Dosage & Administration */}
           <div className="p-4 rounded-sm border border-marble-300 dark:border-lapis-800 bg-white/60 dark:bg-lapis-950/60">
-            <h4 className="font-cinzel text-xs uppercase tracking-wider font-bold text-gold-600 dark:text-gold-400 mb-1">
+            <h2 className="font-cinzel text-xs uppercase tracking-wider font-bold text-gold-700 dark:text-gold-300 mb-1">
               Ritual Dosage &amp; Protocol
-            </h4>
+            </h2>
             <p className="text-xs text-ink-700 dark:text-marble-300 font-medium">
               {product.dosage}
             </p>
@@ -249,9 +249,9 @@ export const ProductDetailPage: React.FC = () => {
       {/* Related Products */}
       {related.length > 0 && (
         <div className="mt-16">
-          <h3 className="font-cinzel text-xl font-bold text-ink-950 dark:text-marble-100 mb-6">
+          <h2 className="font-cinzel text-xl font-bold text-ink-950 dark:text-marble-100 mb-6">
             Harmonious Sanctum Remedies
-          </h3>
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {related.map((item) => (
               <Link key={item.id} to={`/shop/${item.id}`} className="group block focus:outline-none">
@@ -260,18 +260,18 @@ export const ProductDetailPage: React.FC = () => {
                     <Badge variant="lapis" size="sm" className="mb-2">
                       {item.category}
                     </Badge>
-                    <h4 className="font-cinzel font-bold text-sm text-ink-950 dark:text-marble-100 group-hover:text-gold-500 mb-1">
+                    <h3 className="font-cinzel font-bold text-sm text-ink-950 dark:text-marble-100 group-hover:text-gold-500 mb-1">
                       {item.name}
-                    </h4>
+                    </h3>
                     <p className="font-cormorant text-sm text-ink-700 dark:text-marble-300 line-clamp-2">
                       {item.description}
                     </p>
                   </div>
                   <div className="mt-4 pt-3 border-t border-marble-200 dark:border-lapis-800 flex justify-between items-center">
-                    <span className="font-cinzel font-bold text-gold-600 dark:text-gold-400">
+                    <span className="font-cinzel font-bold text-gold-700 dark:text-gold-300">
                       {formatPrice(item.price)}
                     </span>
-                    <span className="text-xs font-cinzel text-gold-600 group-hover:underline">
+                    <span className="text-xs font-cinzel text-gold-700 dark:text-gold-300 group-hover:underline">
                       Inspect →
                     </span>
                   </div>
@@ -310,9 +310,9 @@ export const ProductDetailPage: React.FC = () => {
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-cinzel font-bold bg-gold-500/20 text-gold-600 dark:text-gold-300 uppercase tracking-wider">
                   {verificationResult.network === 'mock' ? 'Demo Ledger' : 'Sepolia Confirmed'}
                 </span>
-                <h4 className="font-cinzel text-xl font-bold text-ink-950 dark:text-marble-100 mt-2">
+                <h3 className="font-cinzel text-xl font-bold text-ink-950 dark:text-marble-100 mt-2">
                   Sealed by the Oracle
-                </h4>
+                </h3>
                 <p className="font-cormorant text-base text-ink-700 dark:text-marble-300 mt-1">
                   This pharmaceutical batch hash is genuinely stamped into the Asclepius ledger. Zero adulteration detected.
                 </p>

@@ -54,8 +54,9 @@ export const loginRateLimiter = rateLimit({
 });
 
 // Custom morgan logger including real client IP (req.ip)
+morgan.token('client-ip', (req: Request) => req.ip || req.socket.remoteAddress || '-');
 export const morganLogger = morgan(
-  ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms (Client IP: :req[x-forwarded-for] / :req[x-real-ip])'
+  ':client-ip - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] - :response-time ms'
 );
 
 // CSRF Protection middleware for state-changing HTTP methods

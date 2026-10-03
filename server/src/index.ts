@@ -38,16 +38,16 @@ app.set('trust proxy', true);
 // BEFORE static files, API routes, body parsers and the SPA fallback
 app.use(mirage);
 
-// Rule 6: Expose GET /healthz returning { status: "ok" }
-app.get('/healthz', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
-
 // Logging with morgan, capturing req.ip
 app.use(morganLogger);
 
 // Helmet with strict CSP
 app.use(configureHelmet());
+
+// Rule 6: Expose GET /healthz returning { status: "ok" }
+app.get('/healthz', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
 
 // Compression
 app.use(compression());
@@ -94,88 +94,137 @@ app.use('/api/auth', authRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
 
+// Explicit reserved trap paths for MirageSOC security triggers
+export const RESERVED_TRAP_PATHS = [
+  '/admin-old',
+  '/.env',
+  '/backup.zip',
+  '/wp-login.php',
+  '/phpmyadmin',
+  '/api/v1/internal/keys',
+];
+
+export function isReservedTrapPath(urlPath: string): boolean {
+  const normalized = urlPath.toLowerCase().replace(/\/+$/, '') || '/';
+  return RESERVED_TRAP_PATHS.some((trap) => trap.toLowerCase() === normalized);
+}
+
 // Static client assets
 const clientDistPath = path.resolve(__dirname, '../../client/dist');
 app.use(express.static(clientDistPath));
 
-// Rule 4: SPA fallback MUST ONLY serve index.html for paths WITHOUT a file extension
-// and NOT starting with /api, so trap paths (/admin-old, /.env, /backup.zip, etc.) are NOT swallowed!
+// Rule 4: SPA fallback MUST ONLY serve index.html for GET requests that:
+// 1. Have no file extension
+// 2. Do not start with /api
+// 3. Are not in the explicit reserved-paths list (the six trap paths above, case-insensitive, with or without trailing slash)
 app.get('*', (req, res, next) => {
-  // If the path starts with /api or has a file extension (.env, .zip, .php, etc.), pass to next()
-  if (req.path.startsWith('/api') || req.path.includes('.')) {
+  // Only handle GET and HEAD requests
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
     return next();
   }
 
-  res.sendFile(path.join(clientDistPath, 'index.html'), (err) => {
+  // Must not start with /api
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+
+  // Must not have a file extension
+  if (path.extname(req.path) !== '' || (req.path.slice(1).includes('.') && !req.path.endsWith('/'))) {
+    return next();
+  }
+
+  // Must not be a reserved trap path (case-insensitive, with or without trailing slash)
+  if (isReservedTrapPath(req.path)) {
+    return next();
+  }
+
+  const indexPath = path.join(clientDistPath, 'index.html');
+  res.sendFile(indexPath, (err) => {
     if (err) {
       next();
     }
   });
 });
 
-// 404 handler for unmatched backend paths
+// 404 handler for unmatched backend paths, trap paths, and unknown assets
+// Every one must return 404 (plain "Not found", NOT index.html, NOT the React app)
 app.use((req, res) => {
-  res.status(404).json({ error: 'Sanctum endpoint not found' });
+  res.status(404).type('text/plain').send('Not found');
 });
 
 // WebSocket Server for Oracle Console (/terminal-ws)
-const wss = new WebSocketServer({ server, path: '/terminal-ws' });
+// OFF by default. Enabled ONLY when ENABLE_LOCAL_TERMINAL_ECHO=true.
+// When on, it may only return harmless canned text (e.g. "command not found: <first word>"), max 200 chars input, never executes anything.
+// MirageSOC will replace this endpoint via VITE_TERMINAL_WS_URL.
+let wss: WebSocketServer | null = null;
+if (process.env.ENABLE_LOCAL_TERMINAL_ECHO === 'true') {
+  wss = new WebSocketServer({ noServer: true });
 
-wss.on('connection', (ws: WebSocket) => {
-  ws.send(
-    JSON.stringify({
-      reply: 'Asclepeion Terminal Daemon connected. Enter "help" for options.',
-    })
-  );
+  wss.on('connection', (ws: WebSocket) => {
+    ws.send(
+      JSON.stringify({
+        reply: 'Asclepeion Terminal Local Echo connected (canned echo mode).',
+      })
+    );
 
-  ws.on('message', (message: string) => {
-    try {
-      const data = JSON.parse(message.toString());
-      const cmd = (data.cmd || '').trim().toLowerCase();
-
-      let reply = '';
-      switch (cmd) {
-        case 'help':
-          reply = `Available sanctum operations:
-  status   - Health inspection
-  whoami   - Current user credentials
-  version  - System compilation manifest
-  time     - Epidaurus celestial clock
-  exit     - Sever terminal link`;
-          break;
-        case 'status':
-          reply = 'SYSTEM HEALTH: All dispensary sub-systems normal. MirageSOC hooks primed.';
-          break;
-        case 'whoami':
-          reply = 'deploy (UID=1001, GID=1001, Shell=/bin/temple-sh)';
-          break;
-        case 'version':
-          reply = 'MediStore v1.0.0-asclepeion [Production Node 20 / Express 4]';
-          break;
-        case 'time':
-          reply = `Current celestial timestamp: ${new Date().toISOString()}`;
-          break;
-        case 'exit':
-          reply = 'Closing oracle stream...';
-          ws.close();
+    ws.on('message', (message: string) => {
+      try {
+        const rawStr = message.toString();
+        // Max 200 chars input
+        if (rawStr.length > 200) {
+          ws.send(JSON.stringify({ reply: 'Error: input exceeds maximum limit of 200 characters.' }));
           return;
-        default:
-          reply = `bash: command not recognized: "${cmd}". Type "help" for commands.`;
-          break;
-      }
+        }
 
-      ws.send(JSON.stringify({ reply }));
-    } catch {
-      ws.send(JSON.stringify({ reply: 'Error: invalid payload format' }));
-    }
+        let cmd = '';
+        try {
+          const parsed = JSON.parse(rawStr);
+          cmd = String(parsed.cmd || parsed.command || '').trim();
+        } catch {
+          cmd = rawStr.trim();
+        }
+
+        if (cmd.length > 200) {
+          ws.send(JSON.stringify({ reply: 'Error: command exceeds 200 characters.' }));
+          return;
+        }
+
+        const firstWord = cmd.split(/\s+/)[0] || '';
+        // Harmless canned response only - never executes anything
+        const reply = `command not found: ${firstWord}`;
+        ws.send(JSON.stringify({ reply }));
+      } catch {
+        ws.send(JSON.stringify({ reply: 'Error: invalid payload format' }));
+      }
+    });
   });
+}
+
+// Safely handle HTTP upgrade requests
+server.on('upgrade', (request, socket, head) => {
+  const host = request.headers.host || 'localhost';
+  const pathname = request.url ? new URL(request.url, `http://${host}`).pathname : '';
+  if (pathname === '/terminal-ws') {
+    if (process.env.ENABLE_LOCAL_TERMINAL_ECHO === 'true' && wss) {
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        wss!.emit('connection', ws, request);
+      });
+    } else {
+      socket.write('HTTP/1.1 404 Not Found\r\n\r\n');
+      socket.destroy();
+    }
+  }
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`[MediStore] Temple of Asclepius server listening on port ${PORT}`);
-  console.log(`[MediStore] Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`[MediStore] MirageSOC security pass-through initialized as first middleware`);
-});
+const HOST = '0.0.0.0';
+
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(Number(PORT), HOST, () => {
+    console.log(`[MediStore] Temple of Asclepius server listening on http://${HOST}:${PORT}`);
+    console.log(`[MediStore] Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`[MediStore] MirageSOC security pass-through initialized as first middleware`);
+  });
+}
 
 export { app, server };

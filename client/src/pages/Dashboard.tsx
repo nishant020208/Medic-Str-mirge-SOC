@@ -10,6 +10,9 @@ import {
   X,
   Lock,
   Boxes,
+  UserCheck,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -40,10 +43,31 @@ export const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('inventory');
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [whitelist, setWhitelist] = useState<any[]>([]);
   const [, setLoadingData] = useState(true);
   const [searchProduct, setSearchProduct] = useState('');
   const [editingStockId, setEditingStockId] = useState<string | null>(null);
   const [stockInputVal, setStockInputVal] = useState<number>(0);
+
+  // Whitelist form state
+  const [newEmail, setNewEmail] = useState('');
+  const [newRole, setNewRole] = useState<'customer' | 'pharmacist'>('customer');
+  const [newNotes, setNewNotes] = useState('');
+  const [isAddingWhitelist, setIsAddingWhitelist] = useState(false);
+
+  const fetchWhitelist = async () => {
+    try {
+      const res = await fetch('/api/auth/whitelist', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setWhitelist(data.whitelist || []);
+      }
+    } catch (e) {
+      console.error('Error fetching whitelist:', e);
+    }
+  };
 
   useEffect(() => {
     if (user?.role !== 'pharmacist') return;
@@ -51,9 +75,12 @@ export const DashboardPage: React.FC = () => {
     const loadDashboardData = async () => {
       try {
         setLoadingData(true);
-        const [prodRes, ordRes] = await Promise.all([
+        const [prodRes, ordRes, wlRes] = await Promise.all([
           fetch('/api/products?limit=100'),
           fetch('/api/orders', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          }),
+          fetch('/api/auth/whitelist', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
           }),
         ]);
@@ -67,6 +94,11 @@ export const DashboardPage: React.FC = () => {
           const data = await ordRes.json();
           setOrders(data.orders || []);
         }
+
+        if (wlRes.ok) {
+          const data = await wlRes.json();
+          setWhitelist(data.whitelist || []);
+        }
       } catch (err) {
         console.error('Error fetching dashboard records:', err);
       } finally {
@@ -76,6 +108,60 @@ export const DashboardPage: React.FC = () => {
 
     loadDashboardData();
   }, [user]);
+
+  const handleAddToWhitelist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmail.trim()) return;
+
+    try {
+      setIsAddingWhitelist(true);
+      const res = await fetch('/api/auth/whitelist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify({
+          email: newEmail.trim(),
+          role: newRole,
+          notes: newNotes.trim() || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to add to whitelist');
+      }
+
+      toast.success(data.message || 'Devotee whitelisted successfully', 'Whitelist Updated');
+      setNewEmail('');
+      setNewNotes('');
+      await fetchWhitelist();
+    } catch (err: any) {
+      toast.error(err.message || 'Error updating whitelist', 'Whitelist Error');
+    } finally {
+      setIsAddingWhitelist(false);
+    }
+  };
+
+  const handleRemoveFromWhitelist = async (email: string) => {
+    try {
+      const res = await fetch(`/api/auth/whitelist/${encodeURIComponent(email)}`, {
+        method: 'DELETE',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to remove email');
+      }
+
+      toast.success(`${email} removed from whitelist`, 'Whitelist Updated');
+      await fetchWhitelist();
+    } catch (err: any) {
+      toast.error(err.message || 'Error removing from whitelist', 'Whitelist Error');
+    }
+  };
 
   // Handle 403 Forbidden for non-pharmacists
   if (authLoading) {
@@ -200,9 +286,9 @@ export const DashboardPage: React.FC = () => {
 
   const filteredProducts = products.filter(
     (p) =>
-      p.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchProduct.toLowerCase()) ||
-      p.batchId.toLowerCase().includes(searchProduct.toLowerCase())
+      (p.name || '').toLowerCase().includes(searchProduct.toLowerCase()) ||
+      (p.category || '').toLowerCase().includes(searchProduct.toLowerCase()) ||
+      (p.batchId || '').toLowerCase().includes(searchProduct.toLowerCase())
   );
 
   return (
@@ -357,13 +443,14 @@ export const DashboardPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Tabs: Inventory / Orders / Alerts */}
+      {/* Tabs: Inventory / Orders / Alerts / Whitelist */}
       <div className="mb-6">
         <Tabs
           tabs={[
             { id: 'inventory', label: 'Inventory Register', count: products.length },
             { id: 'orders', label: 'Order Consignments', count: orders.length },
             { id: 'alerts', label: 'Depletion Warnings', count: lowStockItems.length },
+            { id: 'whitelist', label: 'Devotee Whitelist', count: whitelist.length },
           ]}
           activeTab={activeTab}
           onChange={setActiveTab}
@@ -578,6 +665,143 @@ export const DashboardPage: React.FC = () => {
               ))
             )}
           </div>
+        </Card>
+      )}
+
+      {/* Tab Content: Devotee Whitelist */}
+      {activeTab === 'whitelist' && (
+        <Card variant="marble" className="p-6">
+          <div className="mb-6">
+            <h3 className="font-cinzel text-lg font-bold text-text mb-1">
+              Sanctum Access Whitelist
+            </h3>
+            <p className="font-cormorant text-sm text-text-muted">
+              Grant entry credentials to worshippers and herbalists. Whitelisted emails can access the Temple Sanctum freely.
+            </p>
+          </div>
+
+          {/* Add Whitelist Form */}
+          <form
+            onSubmit={handleAddToWhitelist}
+            className="mb-8 p-4 rounded-card bg-surface-2 border border-border flex flex-col md:flex-row gap-3 items-end"
+          >
+            <div className="flex-grow w-full md:w-auto">
+              <label className="block text-xs font-cinzel uppercase text-text-muted mb-1 font-bold">
+                Devotee Email
+              </label>
+              <Input
+                type="email"
+                required
+                placeholder="devotee@temple.sanctum"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+            <div className="w-full md:w-44">
+              <label className="block text-xs font-cinzel uppercase text-text-muted mb-1 font-bold">
+                Assigned Role
+              </label>
+              <select
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value as 'customer' | 'pharmacist')}
+                className="w-full h-[42px] px-3 text-xs rounded-card bg-surface border border-border text-text font-cinzel focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="customer">Devotee (Customer)</option>
+                <option value="pharmacist">Chief Pharmacist</option>
+              </select>
+            </div>
+            <div className="w-full md:w-56">
+              <label className="block text-xs font-cinzel uppercase text-text-muted mb-1 font-bold">
+                Consecration Notes
+              </label>
+              <Input
+                type="text"
+                placeholder="e.g. VIP Guild Seeker"
+                value={newNotes}
+                onChange={(e) => setNewNotes(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              disabled={isAddingWhitelist || !newEmail.trim()}
+              leftIcon={<Plus className="w-4 h-4" />}
+              className="w-full md:w-auto shrink-0"
+            >
+              {isAddingWhitelist ? 'Consecrating...' : 'Whitelist Devotee'}
+            </Button>
+          </form>
+
+          {/* Whitelist Table */}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Email Scroll</TableHead>
+                <TableHead>Sanctum Role</TableHead>
+                <TableHead>Granted By</TableHead>
+                <TableHead>Notes</TableHead>
+                <TableHead>Consecrated At</TableHead>
+                <TableHead className="text-right">Revoke</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {whitelist.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-6 text-text-muted font-cinzel">
+                    No devotees currently registered in the sanctum whitelist.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                whitelist.map((w) => (
+                  <TableRow key={w.email}>
+                    <TableCell className="font-bold font-cinzel text-text">
+                      <div className="flex items-center gap-2">
+                        <UserCheck className="w-4 h-4 text-accent-text shrink-0" />
+                        <span>{w.email}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={w.role === 'pharmacist' ? 'primary' : 'success'}
+                        size="sm"
+                      >
+                        {w.role === 'pharmacist' ? 'Chief Pharmacist' : 'Devotee'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-text-muted font-sans">
+                      {w.addedBy || 'Sanctum Oracle'}
+                    </TableCell>
+                    <TableCell className="text-xs text-text-muted font-sans italic">
+                      {w.notes || '—'}
+                    </TableCell>
+                    <TableCell className="text-xs text-text-muted font-cinzel">
+                      {w.createdAt ? new Date(w.createdAt).toLocaleDateString() : 'Sacred Age'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {w.email === 'pharmacist@medistore.test' ? (
+                        <span className="text-[10px] text-text-muted uppercase font-cinzel font-bold">
+                          Immortal
+                        </span>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveFromWhitelist(w.email)}
+                          className="hover:text-danger hover:bg-surface-2 p-1.5"
+                          title="Revoke sanctum entry"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </Card>
       )}
     </div>

@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { store } from '../data/store.js';
 import { requirePharmacist } from '../middleware/auth.js';
+import type { OrderData } from '../data/seedData.js';
 
 export const ordersRouter = Router();
 
@@ -77,8 +78,14 @@ ordersRouter.post('/', async (req: Request, res: Response) => {
 
   const userId = req.session?.userId || 'usr_guest_' + Math.random().toString(36).substring(2, 8);
 
+  // createOrderSchema validated every field above, so the parsed data already carries
+  // all OrderData fields except the store-assigned ones (id, userId, status, createdAt).
+  // The assertion bridges Vercel's @vercel/node compiler, which widens the zod-inferred
+  // fields to optional under its own cross-workspace compiler settings.
+  const orderFields = parseResult.data as Omit<OrderData, 'id' | 'userId' | 'status' | 'createdAt'>;
+
   const newOrder = await store.createOrder({
-    ...parseResult.data,
+    ...orderFields,
     userId,
     status: 'Pending',
   });

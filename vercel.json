@@ -11,6 +11,12 @@
           "format": "url",
           "env": "SERVER_URL"
         }
+      ],
+      "rewrites": [
+        {
+          "source": "/(.*)",
+          "destination": "/index.html"
+        }
       ]
     },
     "server": {
@@ -33,6 +39,12 @@
     },
     {
       "source": "/admin-old(.*)",
+      "destination": {
+        "service": "server"
+      }
+    },
+    {
+      "source": "/ADMIN-OLD(.*)",
       "destination": {
         "service": "server"
       }

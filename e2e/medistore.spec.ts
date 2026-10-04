@@ -44,7 +44,7 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
     await expect(page.getByText('The Apothecary Archives')).toBeVisible();
 
     // Verify product cards appear
-    const productCard = page.locator('h3').first();
+    const productCard = page.locator('a[href^="/shop/med-"]').first();
     await expect(productCard).toBeVisible();
 
     // Navigate to product detail

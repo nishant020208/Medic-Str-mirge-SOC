@@ -22,8 +22,10 @@ import { authRouter } from './routes/auth.js';
 import { productsRouter } from './routes/products.js';
 import { ordersRouter } from './routes/orders.js';
 import { oracleRouter } from './routes/oracle.js';
+import { terminalRouter } from './routes/terminal.js';
 import { whenStoreReady } from './data/store.js';
 import { getPostgresPool, checkDatabaseHealth } from './data/db.js';
+import { checkSupabaseHealth } from './lib/supabaseAdmin.js';
 
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
@@ -45,10 +47,13 @@ app.use(morganLogger);
 // Helmet with strict CSP
 app.use(configureHelmet());
 
-// Expose GET /healthz returning { status: "ok", db: "ok" | "down" }
+// Expose GET /healthz returning { status: "ok", db: "ok" | "down", supabase: "ok" | "down" }
 app.get('/healthz', async (req, res) => {
-  const dbStatus = await checkDatabaseHealth();
-  res.status(200).json({ status: 'ok', db: dbStatus });
+  const [dbStatus, supabaseStatus] = await Promise.all([
+    checkDatabaseHealth(),
+    checkSupabaseHealth(),
+  ]);
+  res.status(200).json({ status: 'ok', db: dbStatus, supabase: supabaseStatus });
 });
 
 // Compression
@@ -145,6 +150,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/oracle', oracleRouter);
+app.use('/api/terminal', terminalRouter);
 
 // Express must not serve static files on Vercel (Vercel CDN serves client/dist).
 // Keep static serving only for local production preview.

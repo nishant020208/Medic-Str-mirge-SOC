@@ -44,6 +44,16 @@ export const AuthCallbackPage: React.FC = () => {
 
         // Set the user in our auth store (which will be backed by Express session)
         setUser(resData.user);
+
+        // Discard the client-side Supabase session: the Express cookie is the
+        // ONLY session that matters from here on. The browser must not rely on
+        // Supabase tokens anywhere else in the app.
+        try {
+          await supabase.auth.signOut({ scope: 'local' });
+        } catch {
+          // Ignore — local sign-out is best-effort housekeeping.
+        }
+
         toast.success(`Welcome back, ${resData.user.email}`, 'Sanctum Veil Opened');
 
         // Redirect to home or shop based on role

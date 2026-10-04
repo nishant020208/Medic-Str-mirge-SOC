@@ -5,6 +5,7 @@ import { ethers } from 'ethers';
 import { store } from '../data/store.js';
 import { loginRateLimiter } from '../middleware/security.js';
 import { requirePharmacist } from '../middleware/auth.js';
+import { getSupabaseAdmin } from '../lib/supabaseAdmin.js';
 // Import mirage hook
 // @ts-ignore - mirage.js is a plain JS stub to be swapped in security testing
 import mirage from '../../mirage.js';
@@ -19,7 +20,16 @@ const loginSchema = z.object({
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  role: z.enum(['customer', 'pharmacist']).optional(),
+  // NOTE: `role` is deliberately NOT accepted. Zod strips unknown keys, so a
+  // request body containing role:'pharmacist' can never reach createUser — the
+  // only pharmacist account comes from db:seed.
+});
+
+const googleSessionSchema = z.object({
+  id: z.string().min(1).max(128),
+  email: z.string().email(),
+  access_token: z.string().min(20).max(8192),
+  // `role` is never accepted here either: role=customer ALWAYS for Google sign-in.
 });
 
 const walletAuthSchema = z.object({
@@ -118,7 +128,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Invalid registration parameters' });
   }
 
-  const { email, password, role = 'customer' } = result.data;
+  const { email, password } = result.data;
 
   const existing = await store.findUserByEmail(email);
   if (existing) {
@@ -126,7 +136,7 @@ authRouter.post('/register', async (req: Request, res: Response) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const newUser = await store.createUser(email, passwordHash, role);
+  const newUser = await store.createUser(email, passwordHash, 'customer');
 
   req.session.userId = newUser.id;
   req.session.role = newUser.role;
@@ -145,6 +155,90 @@ authRouter.post('/register', async (req: Request, res: Response) => {
         email: newUser.email,
         role: newUser.role,
         createdAt: newUser.createdAt,
+      },
+    });
+  });
+});
+
+// POST /api/auth/google-session
+// Exchange the Supabase OAuth access token (picked up by /auth/callback) for a
+// normal httpOnly Express session — the ONLY endpoint that talks to Supabase
+// Auth, and the only place the browser ever holds a Supabase token.
+// The token is verified server-side with the service-role client; the
+// client-supplied id/email are untrusted hints that must match the token.
+authRouter.post('/google-session', loginRateLimiter, async (req: Request, res: Response) => {
+  const parsed = googleSessionSchema.safeParse(req.body);
+  if (!parsed.success) {
+    mirage.loginFailed(req, typeof req.body?.email === 'string' ? req.body.email : 'google');
+    return res.status(400).json({ error: 'Invalid Google session payload' });
+  }
+
+  const { id, email, access_token } = parsed.data;
+  const claimedEmail = email.toLowerCase().trim();
+
+  // 1. Verify the access token via supabaseAdmin.auth.getUser(token)
+  let verified;
+  try {
+    const admin = getSupabaseAdmin();
+    const { data, error } = await admin.auth.getUser(access_token);
+    if (error || !data?.user) {
+      mirage.loginFailed(req, claimedEmail);
+      return res.status(401).json({ error: 'Invalid or expired Supabase token' });
+    }
+    verified = data.user;
+  } catch (err: any) {
+    console.warn('[Auth:Google] Token verification failed:', err?.message || err);
+    mirage.loginFailed(req, claimedEmail);
+    return res.status(401).json({ error: 'Supabase token verification failed' });
+  }
+
+  // 2. The token must prove the claimed identity (id AND email must match).
+  const verifiedEmail = (verified.email || '').toLowerCase();
+  if (verified.id !== id || !verifiedEmail || verifiedEmail !== claimedEmail) {
+    mirage.loginFailed(req, claimedEmail);
+    return res.status(401).json({ error: 'Supabase token does not match the supplied identity' });
+  }
+
+  // 3. Email confirmation gate: an Express session is only created for a
+  //    confirmed identity (OAuth providers confirm on return; anything else
+  //    must finish Supabase's email confirmation first).
+  const emailConfirmed =
+    Boolean(verified.email_confirmed_at || verified.confirmed_at) ||
+    verified.app_metadata?.provider === 'google' ||
+    verified.user_metadata?.email_verified === true;
+  if (!emailConfirmed) {
+    mirage.loginFailed(req, verifiedEmail);
+    return res.status(403).json({ error: 'Email must be confirmed before a session is created' });
+  }
+
+  // 4. Find or create the profile. Role is ALWAYS 'customer' for this path —
+  //    no request body can ever produce role=pharmacist here. Existing users
+  //    are matched by email (never duplicated) and keep their existing role.
+  let user = await store.findUserByEmail(verifiedEmail);
+  if (!user) {
+    user = await store.createUser(verifiedEmail, '', 'customer');
+  }
+
+  // 5. Normal Express session (httpOnly cookie), same as email/wallet login.
+  const sessionUser = user;
+  req.session.userId = sessionUser.id;
+  req.session.role = sessionUser.role;
+  req.session.email = sessionUser.email;
+
+  mirage.loginSucceeded(req, verifiedEmail);
+
+  req.session.save((saveErr) => {
+    if (saveErr) {
+      console.warn('[Session:Save] Error saving google session:', saveErr.message);
+    }
+    return res.json({
+      message: 'Sanctum entry granted',
+      user: {
+        id: sessionUser.id,
+        email: sessionUser.email,
+        role: sessionUser.role,
+        address: sessionUser.address,
+        createdAt: sessionUser.createdAt,
       },
     });
   });

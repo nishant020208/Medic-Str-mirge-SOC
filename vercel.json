@@ -1,6 +1,6 @@
 {
-  "cleanUrls": true,
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
   "buildCommand": "npm run build",
   "installCommand": "npm install --include=dev",
   "outputDirectory": "client/dist",
@@ -45,15 +45,15 @@
       "destination": "/api"
     },
     {
-      "source": "/\.[eE][nN][vV](.*)",
+      "source": "/\\.[eE][nN][vV](.*)",
       "destination": "/api"
     },
     {
-      "source": "/[bB][aA][cC][kK][uU][pP]\.[zZ][iI][pP](.*)",
+      "source": "/[bB][aA][cC][kK][uU][pP]\\.[zZ][iI][pP](.*)",
       "destination": "/api"
     },
     {
-      "source": "/[wW][pP]-[lL][oO][gG][iI][nN]\.[pP][hH][pP](.*)",
+      "source": "/[wW][pP]-[lL][oO][gG][iI][nN]\\.[pP][hH][pP](.*)",
       "destination": "/api"
     },
     {
@@ -65,7 +65,7 @@
       "destination": "/api"
     },
     {
-      "source": "/((?!api/|healthz|[aA][dD][mM][iI][nN]-[oO][lL][dD]|\.[eE][nN][vV]|[bB][aA][cC][kK][uU][pP]\.[zZ][iI][pP]|[wW][pP]-[lL][oO][gG][iI][nN]\.[pP][hH][pP]|[pP][hH][pP][mM][yY][aA][dD][mM][iI][nN]|[aA][pP][iI]/[vV]1/[iI][nN][tT][eE][rR][nN][aA][lL]/[kK][eE][yY][sS]|.*\.[a-zA-Z0-9]+$).*)",
+      "source": "/((?!api/|healthz|[aA][dD][mM][iI][nN]-[oO][lL][dD]|\\.[eE][nN][vV]|[bB][aA][cC][kK][uU][pP]\\.[zZ][iI][pP]|[wW][pP]-[lL][oO][gG][iI][nN]\\.[pP][hH][pP]|[pP][hH][pP][mM][yY][aA][dD][mM][iI][nN]|[aA][pP][iI]/[vV]1/[iI][nN][tT][eE][rR][nN][aA][lL]/[kK][eE][yY][sS]|.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }
   ]

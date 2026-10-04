@@ -195,7 +195,7 @@ export function whenStoreReady(): Promise<void> {
  * Guarantees the returned promise settles, so a hanging connection can never
  * wedge a serverless invocation indefinitely.
  */
-export function initDatabaseInBackground(timeoutMs = 20_000): Promise<void> {
+export function initDatabaseInBackground(timeoutMs = 8_000): Promise<void> {
   readyPromise = Promise.race([
     initDatabase(),
     new Promise<void>((resolve) => {

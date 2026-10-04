@@ -39,12 +39,14 @@ Thumbs.db
 *.sln
 *.sw?
 
-# Testing
+# Testing & Audits
 test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
 coverage/
+docs/lighthouse/*.report.*
+docs/lighthouse/*/*.report.*
 
 # Misc
 .cache

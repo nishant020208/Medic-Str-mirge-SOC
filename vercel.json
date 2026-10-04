@@ -1,83 +1,71 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "services": {
-    "client": {
-      "root": "client",
-      "framework": "vite",
-      "bindings": [
+  "buildCommand": "npm run build",
+  "outputDirectory": "client/dist",
+  "framework": "vite",
+  "regions": ["iad1"],
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 10,
+      "runtime": "nodejs20.x"
+    }
+  },
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
         {
-          "type": "service",
-          "service": "server",
-          "format": "url",
-          "env": "SERVER_URL"
-        }
-      ],
-      "rewrites": [
-        {
-          "source": "/(.*)",
-          "destination": "/index.html"
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
         }
       ]
     },
-    "server": {
-      "root": "server",
-      "framework": "express"
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate"
+        }
+      ]
     }
-  },
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": {
-        "service": "server"
-      }
+      "destination": "/api"
     },
     {
       "source": "/healthz",
-      "destination": {
-        "service": "server"
-      }
+      "destination": "/api"
     },
     {
-      "source": "/admin-old(.*)",
-      "destination": {
-        "service": "server"
-      }
+      "source": "/[aA][dD][mM][iI][nN]-[oO][lL][dD](.*)",
+      "destination": "/api"
     },
     {
-      "source": "/ADMIN-OLD(.*)",
-      "destination": {
-        "service": "server"
-      }
+      "source": "/\\.[eE][nN][vV](.*)",
+      "destination": "/api"
     },
     {
-      "source": "/.env",
-      "destination": {
-        "service": "server"
-      }
+      "source": "/[bB][aA][cC][kK][uU][pP]\\.[zZ][iI][pP](.*)",
+      "destination": "/api"
     },
     {
-      "source": "/backup.zip",
-      "destination": {
-        "service": "server"
-      }
+      "source": "/[wW][pP]-[lL][oO][gG][iI][nN]\\.[pP][hH][pP](.*)",
+      "destination": "/api"
     },
     {
-      "source": "/wp-login.php",
-      "destination": {
-        "service": "server"
-      }
+      "source": "/[pP][hH][pP][mM][yY][aA][dD][mM][iI][nN](.*)",
+      "destination": "/api"
     },
     {
-      "source": "/phpmyadmin(.*)",
-      "destination": {
-        "service": "server"
-      }
+      "source": "/[aA][pP][iI]/[vV]1/[iI][nN][tT][eE][rR][nN][aA][lL]/[kK][eE][yY][sS](.*)",
+      "destination": "/api"
     },
     {
-      "source": "/(.*)",
-      "destination": {
-        "service": "client"
-      }
+      "source": "/((?!api/|healthz|[aA][dD][mM][iI][nN]-[oO][lL][dD]|\\.[eE][nN][vV]|[bB][aA][cC][kK][uU][pP]\\.[zZ][iI][pP]|[wW][pP]-[lL][oO][gG][iI][nN]\\.[pP][hH][pP]|[pP][hH][pP][mM][yY][aA][dD][mM][iI][nN]|[aA][pP][iI]/[vV]1/[iI][nN][tT][eE][rR][nN][aA][lL]/[kK][eE][yY][sS]|.*\\.[a-zA-Z0-9]+$).*)",
+      "destination": "/index.html"
     }
   ]
 }

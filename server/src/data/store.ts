@@ -39,14 +39,17 @@ class UnifiedStore {
     this.adapter = newAdapter;
   }
 
-  public reset() {
+  public reset(): Promise<void> {
     this.memoryFallback.resetSync();
     this.nonces.clear();
     if (this.adapter !== this.memoryFallback) {
-      this.adapter.reset().catch((err) => {
+      // Attach a catch so un-awaited callers can never trigger an unhandled
+      // rejection, and return the same promise so scripts can await the wipe.
+      return this.adapter.reset().catch((err) => {
         console.warn('[Database] Reset error:', err.message);
       });
     }
+    return Promise.resolve();
   }
 
   // Product methods
@@ -161,7 +164,7 @@ class UnifiedStore {
     return await this.adapter.isWhitelisted(email);
   }
 
-  // Nonces (PostgreSQL backed on Neon, memory fallback in offline tests)
+  // Nonces (PostgreSQL backed, memory fallback in offline tests)
   public async createNonce(domain: string): Promise<string> {
     if (this.adapter.createNonce) {
       return await this.adapter.createNonce(domain);
@@ -205,7 +208,7 @@ export function whenStoreReady(): Promise<void> {
 
 /**
  * How long an API request may wait for the database before falling back to the
- * in-memory store. Deliberately short: Neon's cold start can take ~5s, and a
+ * in-memory store. Deliberately short: a cold pooler connection can take ~5s, and a
  * request that blocks longer than the caller's timeout fails outright, which is
  * worse than briefly serving seed data from memory.
  */
@@ -242,7 +245,8 @@ export async function initDatabase(): Promise<void> {
 
   if (dbUrl) {
     try {
-      const masked = dbUrl.replace(/:([^:@]+)@/, ':****@');
+      // Mask ALL userinfo: passwords may themselves contain '@'.
+      const masked = dbUrl.replace(/^(.*:\/\/)[^/]*@/, '$1****@');
       console.log(`[Database] DATABASE_URL detected. Connecting to PostgreSQL (${masked})...`);
       const pgAdapter = new PostgresAdapter(dbUrl);
       await pgAdapter.initialize();

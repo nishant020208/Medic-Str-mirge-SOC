@@ -24,6 +24,8 @@
     "lint:colors": "npx tsx scripts/lint-colors.ts",
     "test:contrast": "npx tsx scripts/check-contrast.ts",
     "seed": "npm run seed -w server",
+    "db:migrate": "npx tsx scripts/db-migrate.ts",
+    "db:seed": "npx tsx scripts/db-seed.ts",
     "audit:lighthouse": "node scripts/run-lighthouse.js",
     "test:lighthouse": "node scripts/run-lighthouse.js"
   },
@@ -31,6 +33,7 @@
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.50.0",
     "concurrently": "^9.1.2",
+    "typescript": "^5.7.3",
     "vitest": "^4.1.11"
   },
   "engines": {

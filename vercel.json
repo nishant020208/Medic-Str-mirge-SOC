@@ -2,10 +2,10 @@
   "cleanUrls": true,
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build",
-  "installCommand": "npm ci",
+  "installCommand": "npm install --include=dev",
   "outputDirectory": "client/dist",
   "framework": "vite",
-  "regions": ["iad1"],
+  "regions": ["hnd1"],
   "functions": {
     "api/index.ts": {
       "maxDuration": 10

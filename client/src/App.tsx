@@ -33,6 +33,9 @@ const TerminalPage = lazy(() =>
 const NotFoundPage = lazy(() =>
   import('./pages/NotFound').then((m) => ({ default: m.NotFoundPage }))
 );
+const AuthCallbackPage = lazy(() =>
+  import('./pages/AuthCallback').then((m) => ({ default: m.AuthCallbackPage }))
+);
 
 const PageFallback: React.FC = () => (
   <div className="w-full min-h-[60vh] flex items-center justify-center p-12">
@@ -64,6 +67,7 @@ export const App: React.FC = () => {
               <Route path="oracle" element={<OraclePage />} />
               <Route path="quest" element={<QuestPage />} />
               <Route path="terminal" element={<TerminalPage />} />
+              <Route path="auth/callback" element={<AuthCallbackPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>

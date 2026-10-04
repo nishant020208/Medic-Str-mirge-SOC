@@ -112,7 +112,7 @@ The dispensary is pre-seeded with the following credentials (enter directly on `
 
 MediStore features zero-downtime, plug-and-play database support. By default, it operates with zero configuration using its built-in in-memory dispensary store. When you are ready to connect your database, simply supply either environment variable:
 
-### 1. PostgreSQL (Supabase / Neon / Railway / Vercel Postgres / AWS RDS)
+### 1. PostgreSQL (Supabase Postgres — session pooler)
 ```env
 DATABASE_URL=postgres://user:password@hostname:5432/medistore?sslmode=require
 ```

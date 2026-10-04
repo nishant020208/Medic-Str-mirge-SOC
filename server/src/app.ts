@@ -62,7 +62,7 @@ app.use(
   })
 );
 
-// Stateless Session setup: connect-pg-simple on Neon Postgres, fallback to MemoryStore
+// Stateless Session setup: connect-pg-simple on the Supabase session pooler, fallback to MemoryStore
 const PgStore = pgSession(session);
 const MemoryStore = memorystore(session);
 

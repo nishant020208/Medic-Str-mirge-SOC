@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   // The theme-matrix tests walk 12 pages per test and each page performs
-  // Neon-backed API calls (~1s each), so the per-test budget must cover the
+  // Postgres-backed API calls (~1s each), so the per-test budget must cover the
   // whole loop rather than a single navigation.
   timeout: 180 * 1000,
   expect: {

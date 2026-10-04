@@ -81,10 +81,10 @@ export function getPostgresPool(connectionString?: string): pg.Pool | null {
     singletonPool = new Pool({
       connectionString: url,
       ssl: isLocal ? false : { rejectUnauthorized: false },
-      // Serverless functions are highly concurrent and the pooled Neon endpoint
-      // charges nothing extra for idle sessions, so keep headroom for the
-      // request, session-store and rate-limiter queries running in parallel.
-      max: 10,
+      // Serverless functions are highly concurrent and the pooled Supabase endpoint
+      // charges nothing extra for idle sessions, but the spec pins the pool to 3 so
+      // one invocation can never exhaust the Supabase project connection limit.
+      max: 3,
       connectionTimeoutMillis: 10000,
       // Keep idle sessions well above the browser's keep-alive window so the
       // pool never closes a socket a client is about to reuse.
@@ -106,7 +106,7 @@ export async function checkDatabaseHealth(): Promise<'ok' | 'down'> {
   }
   let client: pg.PoolClient | null = null;
   try {
-    // Neon's pooled endpoint can take ~2s to finish the TLS handshake on a cold
+    // The pooled endpoint can take ~2s to finish the TLS handshake on a cold
     // connection, so the deadline must exceed that or a healthy database
     // reports as "down".
     client = await Promise.race([
@@ -140,7 +140,7 @@ export class PostgresAdapter implements StorageAdapter {
 
   constructor(connectionString: string) {
     if (!connectionString) {
-      throw new Error('[Database] DATABASE_URL is missing. Please configure Neon POOLED DATABASE_URL in Vercel Environment Variables.');
+      throw new Error('[Database] DATABASE_URL is missing. Please configure the pooled (session pooler) DATABASE_URL in Vercel Environment Variables.');
     }
     const pool = getPostgresPool(connectionString);
     if (!pool) {
@@ -160,9 +160,9 @@ export class PostgresAdapter implements StorageAdapter {
         client = await this.pool.connect();
         break;
       } catch (err: any) {
-        console.warn(`[Database] Neon cold-start connection attempt ${attempts} failed: ${err.message}`);
+        console.warn(`[Database] Postgres cold-start connection attempt ${attempts} failed: ${err.message}`);
         if (attempts >= maxAttempts) {
-          throw new Error(`[Database] Failed to connect to Neon PostgreSQL after ${maxAttempts} attempts: ${err.message}`);
+          throw new Error(`[Database] Failed to connect to PostgreSQL after ${maxAttempts} attempts: ${err.message}`);
         }
         await new Promise((res) => setTimeout(res, attempts * 500));
       }

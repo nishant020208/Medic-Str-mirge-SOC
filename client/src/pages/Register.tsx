@@ -8,6 +8,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Card } from '../ui/Card';
 import { GreekDivider } from '../ui/GreekDivider';
+import { GoogleSignInButton } from '../ui/GoogleSignInButton';
 import { useAuthStore } from '../store/authStore';
 import { toast } from '../ui/Toast';
 import { SEO } from '../components/SEO';
@@ -143,6 +144,11 @@ export const RegisterPage: React.FC = () => {
         </form>
 
         <GreekDivider className="my-6" />
+
+        {/* Google Sign-In */}
+        <div className="mb-6">
+          <GoogleSignInButton variant="secondary" size="lg" className="w-full" />
+        </div>
 
         <div className="text-center text-xs text-text-muted">
           <span>Already consecrated? </span>

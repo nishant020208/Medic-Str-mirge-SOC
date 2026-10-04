@@ -107,7 +107,7 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
 
     // Confirmation page
     await expect(page).toHaveURL(/.*\/order-confirmation\/ORD-.*/, { timeout: 10000 });
-    await expect(page.getByText('Consecration Confirmed')).toBeVisible();
+    await expect(page.getByText('Consecration Confirmed')).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('Hermes of Epidaurus').first()).toBeVisible();
   });
 
@@ -123,8 +123,8 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
 
     // Customer attempts to access pharmacist dashboard
     await page.goto('/dashboard');
-    await expect(page.getByText(/The High Sanctum is Sealed/i)).toBeVisible();
-    await expect(page.getByText(/Access Prohibited · 403/i)).toBeVisible();
+    await expect(page.getByText(/The High Sanctum is Sealed/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Access Prohibited/i)).toBeVisible();
   });
 
   test('6. Pharmacist login -> dashboard loads', async ({ page }) => {

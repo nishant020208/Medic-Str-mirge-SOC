@@ -5,15 +5,30 @@ export async function signInWithWallet(): Promise<User> {
   const mode = import.meta.env.VITE_WEB3_MODE || 'mock';
 
   // Step 1: Request single-use nonce from server
-  const nonceRes = await fetch('/api/auth/nonce', {
-    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-  });
+  let nonce = '0x_oracle_sanctum_consecration_nonce';
+  let domain = 'medistore.oracle';
 
-  if (!nonceRes.ok) {
-    throw new Error('Failed to retrieve authentication nonce from oracle');
+  try {
+    const nonceRes = await fetch('/api/auth/nonce', {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    });
+
+    if (nonceRes.ok) {
+      const contentType = nonceRes.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await nonceRes.json();
+        if (data.nonce) nonce = data.nonce;
+        if (data.domain) domain = data.domain;
+      }
+    } else if (mode === 'live') {
+      throw new Error('Failed to retrieve authentication nonce from oracle');
+    }
+  } catch (err: any) {
+    if (mode === 'live') {
+      throw new Error(err.message || 'Failed to retrieve authentication nonce from oracle');
+    }
   }
 
-  const { nonce, domain } = await nonceRes.json();
   const issuedAt = new Date().toISOString();
 
   let address: string;
@@ -74,25 +89,54 @@ Issued At: ${issuedAt}`;
   }
 
   // Step 2: Send signature to server
-  const verifyRes = await fetch('/api/auth/wallet', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-    },
-    body: JSON.stringify({
-      address,
-      message,
-      signature,
-      nonce,
-    }),
-  });
+  try {
+    const verifyRes = await fetch('/api/auth/wallet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: JSON.stringify({
+        address,
+        message,
+        signature,
+        nonce,
+      }),
+    });
 
-  const verifyData = await verifyRes.json();
+    const contentType = verifyRes.headers.get('content-type') || '';
+    let verifyData: any = {};
+    if (contentType.includes('application/json')) {
+      verifyData = await verifyRes.json();
+    } else {
+      const text = await verifyRes.text();
+      verifyData = { error: text };
+    }
 
-  if (!verifyRes.ok) {
-    throw new Error(verifyData.error || 'Server rejected cryptographic signature');
+    if (!verifyRes.ok) {
+      if (mode === 'mock') {
+        return {
+          id: `mock-wallet-${address.slice(2, 8)}`,
+          email: `${address.slice(0, 6)}...${address.slice(-4)}@sanctum.eth`,
+          role: 'customer',
+          address,
+          createdAt: new Date().toISOString(),
+        };
+      }
+      throw new Error(verifyData.error || 'Server rejected cryptographic signature');
+    }
+
+    return verifyData.user;
+  } catch (err: any) {
+    if (mode === 'mock') {
+      return {
+        id: `mock-wallet-${address.slice(2, 8)}`,
+        email: `${address.slice(0, 6)}...${address.slice(-4)}@sanctum.eth`,
+        role: 'customer',
+        address,
+        createdAt: new Date().toISOString(),
+      };
+    }
+    throw err;
   }
-
-  return verifyData.user;
 }

@@ -11,6 +11,34 @@ import {
 
 const { Pool } = pg;
 
+export interface WhitelistEntry {
+  email: string;
+  role: 'customer' | 'pharmacist';
+  addedBy: string;
+  createdAt: string;
+}
+
+export const DEFAULT_WHITELIST: WhitelistEntry[] = [
+  {
+    email: 'pharmacist@medistore.test',
+    role: 'pharmacist',
+    addedBy: 'Asclepeion Genesis',
+    createdAt: '2026-01-01T00:00:00Z',
+  },
+  {
+    email: 'customer@medistore.test',
+    role: 'customer',
+    addedBy: 'Asclepeion Genesis',
+    createdAt: '2026-01-01T00:00:00Z',
+  },
+  {
+    email: 'apprentice@medistore.test',
+    role: 'customer',
+    addedBy: 'Asclepeion Genesis',
+    createdAt: '2026-01-01T00:00:00Z',
+  },
+];
+
 export interface StorageAdapter {
   type: 'postgres' | 'mongodb' | 'memory';
   getProducts(filters?: {
@@ -30,6 +58,10 @@ export interface StorageAdapter {
   getOrderById(id: string): Promise<OrderData | undefined>;
   createOrder(order: Omit<OrderData, 'id' | 'createdAt'>): Promise<OrderData>;
   updateOrderStatus(id: string, status: OrderData['status']): Promise<OrderData | null>;
+  getWhitelist(): Promise<WhitelistEntry[]>;
+  addToWhitelist(email: string, role?: 'customer' | 'pharmacist', addedBy?: string): Promise<WhitelistEntry>;
+  removeFromWhitelist(email: string): Promise<boolean>;
+  isWhitelisted(email: string): Promise<boolean>;
   reset(): Promise<void>;
 }
 
@@ -158,6 +190,28 @@ export class PostgresAdapter implements StorageAdapter {
               o.status,
               o.createdAt,
             ]
+          );
+        }
+      }
+
+      // 4. Whitelist Table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS whitelist (
+          email TEXT PRIMARY KEY,
+          role TEXT NOT NULL DEFAULT 'customer',
+          added_by TEXT NOT NULL DEFAULT 'pharmacist@medistore.test',
+          created_at TEXT NOT NULL
+        );
+      `);
+
+      const wlCount = await client.query('SELECT COUNT(*) FROM whitelist');
+      if (parseInt(wlCount.rows[0].count, 10) === 0) {
+        console.log('[Database:Postgres] Seeding initial whitelist...');
+        for (const w of DEFAULT_WHITELIST) {
+          await client.query(
+            `INSERT INTO whitelist (email, role, added_by, created_at)
+             VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO NOTHING`,
+            [w.email, w.role, w.addedBy, w.createdAt]
           );
         }
       }
@@ -467,10 +521,61 @@ export class PostgresAdapter implements StorageAdapter {
     };
   }
 
+  public async getWhitelist(): Promise<WhitelistEntry[]> {
+    const res = await this.pool.query(
+      'SELECT email, role, added_by, created_at FROM whitelist ORDER BY created_at DESC'
+    );
+    return res.rows.map((r) => ({
+      email: r.email,
+      role: r.role as 'customer' | 'pharmacist',
+      addedBy: r.added_by,
+      createdAt: r.created_at,
+    }));
+  }
+
+  public async addToWhitelist(
+    email: string,
+    role: 'customer' | 'pharmacist' = 'customer',
+    addedBy = 'pharmacist@medistore.test'
+  ): Promise<WhitelistEntry> {
+    const normalized = email.toLowerCase().trim();
+    const now = new Date().toISOString();
+    await this.pool.query(
+      `INSERT INTO whitelist (email, role, added_by, created_at)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (email) DO UPDATE SET role = EXCLUDED.role`,
+      [normalized, role, addedBy, now]
+    );
+
+    // Auto-create or ensure user exists in users table with Demo@12345 password
+    const existing = await this.findUserByEmail(normalized);
+    if (!existing) {
+      const { DEMO_PASSWORD_HASH } = await import('./seedData.js');
+      await this.createUser(normalized, DEMO_PASSWORD_HASH, role);
+    }
+
+    return { email: normalized, role, addedBy, createdAt: now };
+  }
+
+  public async removeFromWhitelist(email: string): Promise<boolean> {
+    const res = await this.pool.query('DELETE FROM whitelist WHERE LOWER(email) = LOWER($1)', [
+      email.toLowerCase().trim(),
+    ]);
+    return (res.rowCount ?? 0) > 0;
+  }
+
+  public async isWhitelisted(email: string): Promise<boolean> {
+    const res = await this.pool.query('SELECT 1 FROM whitelist WHERE LOWER(email) = LOWER($1)', [
+      email.toLowerCase().trim(),
+    ]);
+    return res.rows.length > 0;
+  }
+
   public async reset(): Promise<void> {
     await this.pool.query('DELETE FROM orders');
     await this.pool.query('DELETE FROM users');
     await this.pool.query('DELETE FROM products');
+    await this.pool.query('DELETE FROM whitelist');
     await this.initialize();
   }
 }
@@ -677,10 +782,53 @@ export class MongoAdapter implements StorageAdapter {
     return res || null;
   }
 
+  public async getWhitelist(): Promise<WhitelistEntry[]> {
+    return (await this.db
+      .collection<WhitelistEntry>('whitelist')
+      .find({}, { projection: { _id: 0 } })
+      .toArray()) as WhitelistEntry[];
+  }
+
+  public async addToWhitelist(
+    email: string,
+    role: 'customer' | 'pharmacist' = 'customer',
+    addedBy = 'pharmacist@medistore.test'
+  ): Promise<WhitelistEntry> {
+    const normalized = email.toLowerCase().trim();
+    const entry: WhitelistEntry = {
+      email: normalized,
+      role,
+      addedBy,
+      createdAt: new Date().toISOString(),
+    };
+    await this.db.collection('whitelist').updateOne(
+      { email: normalized },
+      { $set: entry },
+      { upsert: true }
+    );
+    const existing = await this.findUserByEmail(normalized);
+    if (!existing) {
+      const { DEMO_PASSWORD_HASH } = await import('./seedData.js');
+      await this.createUser(normalized, DEMO_PASSWORD_HASH, role);
+    }
+    return entry;
+  }
+
+  public async removeFromWhitelist(email: string): Promise<boolean> {
+    const res = await this.db.collection('whitelist').deleteOne({ email: email.toLowerCase().trim() });
+    return (res.deletedCount || 0) > 0;
+  }
+
+  public async isWhitelisted(email: string): Promise<boolean> {
+    const count = await this.db.collection('whitelist').countDocuments({ email: email.toLowerCase().trim() });
+    return count > 0;
+  }
+
   public async reset(): Promise<void> {
     await this.db.collection('orders').deleteMany({});
     await this.db.collection('users').deleteMany({});
     await this.db.collection('products').deleteMany({});
+    await this.db.collection('whitelist').deleteMany({});
     await this.initialize();
   }
 }
@@ -693,6 +841,7 @@ export class MemoryAdapter implements StorageAdapter {
   public products: ProductData[] = [];
   public users: UserData[] = [];
   public orders: OrderData[] = [];
+  public whitelist: WhitelistEntry[] = [];
 
   constructor() {
     this.resetSync();
@@ -702,6 +851,7 @@ export class MemoryAdapter implements StorageAdapter {
     this.products = JSON.parse(JSON.stringify(SEED_PRODUCTS));
     this.users = JSON.parse(JSON.stringify(SEED_USERS));
     this.orders = JSON.parse(JSON.stringify(SEED_ORDERS));
+    this.whitelist = JSON.parse(JSON.stringify(DEFAULT_WHITELIST));
   }
 
   public async reset(): Promise<void> {
@@ -829,5 +979,44 @@ export class MemoryAdapter implements StorageAdapter {
     if (!order) return null;
     order.status = status;
     return order;
+  }
+
+  public async getWhitelist(): Promise<WhitelistEntry[]> {
+    return [...this.whitelist];
+  }
+
+  public async addToWhitelist(
+    email: string,
+    role: 'customer' | 'pharmacist' = 'customer',
+    addedBy = 'pharmacist@medistore.test'
+  ): Promise<WhitelistEntry> {
+    const normalized = email.toLowerCase().trim();
+    const now = new Date().toISOString();
+    let entry = this.whitelist.find((w) => w.email.toLowerCase() === normalized);
+    if (entry) {
+      entry.role = role;
+    } else {
+      entry = { email: normalized, role, addedBy, createdAt: now };
+      this.whitelist.push(entry);
+    }
+    const existing = await this.findUserByEmail(normalized);
+    if (!existing) {
+      const { DEMO_PASSWORD_HASH } = await import('./seedData.js');
+      await this.createUser(normalized, DEMO_PASSWORD_HASH, role);
+    }
+    return entry;
+  }
+
+  public async removeFromWhitelist(email: string): Promise<boolean> {
+    const idx = this.whitelist.findIndex((w) => w.email.toLowerCase() === email.toLowerCase().trim());
+    if (idx !== -1) {
+      this.whitelist.splice(idx, 1);
+      return true;
+    }
+    return false;
+  }
+
+  public async isWhitelisted(email: string): Promise<boolean> {
+    return this.whitelist.some((w) => w.email.toLowerCase() === email.toLowerCase().trim());
   }
 }

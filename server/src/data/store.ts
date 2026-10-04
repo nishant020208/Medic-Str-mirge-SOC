@@ -3,6 +3,7 @@ import {
   PostgresAdapter,
   MongoAdapter,
   MemoryAdapter,
+  WhitelistEntry,
 } from './db.js';
 import { ProductData, UserData, OrderData } from './seedData.js';
 
@@ -131,6 +132,35 @@ class UnifiedStore {
     return updated;
   }
 
+  // Whitelist methods
+  public async getWhitelist(): Promise<WhitelistEntry[]> {
+    return await this.adapter.getWhitelist();
+  }
+
+  public async addToWhitelist(
+    email: string,
+    role: 'customer' | 'pharmacist' = 'customer',
+    addedBy = 'pharmacist@medistore.test'
+  ): Promise<WhitelistEntry> {
+    const entry = await this.adapter.addToWhitelist(email, role, addedBy);
+    if (this.adapter !== this.memoryFallback) {
+      await this.memoryFallback.addToWhitelist(email, role, addedBy);
+    }
+    return entry;
+  }
+
+  public async removeFromWhitelist(email: string): Promise<boolean> {
+    const res = await this.adapter.removeFromWhitelist(email);
+    if (this.adapter !== this.memoryFallback) {
+      await this.memoryFallback.removeFromWhitelist(email);
+    }
+    return res;
+  }
+
+  public async isWhitelisted(email: string): Promise<boolean> {
+    return await this.adapter.isWhitelisted(email);
+  }
+
   // Fast Ephemeral Nonces (stored with TTL for SIWE auth)
   public createNonce(domain: string): string {
     const nonce = Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -155,7 +185,7 @@ export const store = new UnifiedStore();
  * Fallbacks gracefully to high-performance in-memory store if unset or on error.
  */
 export async function initDatabase(): Promise<void> {
-  const dbUrl = process.env.DATABASE_URL;
+  const dbUrl = process.env.DATABASE_URL || process.env.database_url;
   const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL;
 
   if (dbUrl) {

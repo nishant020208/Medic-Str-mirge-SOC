@@ -58,7 +58,7 @@ export interface OrderData {
 
 // Pre-computed bcrypt hash for Demo@12345 with cost 10:
 // $2a$10$wT8m9Z1Kj4iY45P4YkHQ.eS7gDqv3Y0P5w2Zp9.ZlOaFkX8Gz1w7a (or runtime generated)
-const DEMO_PASSWORD_HASH = bcrypt.hashSync('Demo@12345', 10);
+export const DEMO_PASSWORD_HASH = bcrypt.hashSync('Demo@12345', 10);
 
 export const SEED_USERS: UserData[] = [
   {

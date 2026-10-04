@@ -87,7 +87,7 @@ build time.
    - Build Command: `npm run build`
    - Install Command: `npm install --include=dev`
    - Output Directory: `client/dist`
-   - Node version comes from `engines.node` (20.x); function region `hnd1`
+   - Node version comes from `engines.node` (24.x); function region `hnd1`
      (Tokyo — closest Vercel region to the Supabase project in `ap-northeast-2`);
      `maxDuration` 10s on `api/index.ts`.
 3. Add **all** variables from §2.1 and §2.2 to Production, Preview and Development.

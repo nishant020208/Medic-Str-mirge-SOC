@@ -181,6 +181,37 @@ class UnifiedStore {
 export const store = new UnifiedStore();
 
 /**
+ * Tracks database initialization so request handlers can wait for the real
+ * adapter instead of silently serving from the in-memory fallback.
+ */
+let readyPromise: Promise<void> = Promise.resolve();
+
+export function whenStoreReady(): Promise<void> {
+  return readyPromise;
+}
+
+/**
+ * Starts database initialization in the background and records readiness.
+ * Guarantees the returned promise settles, so a hanging connection can never
+ * wedge a serverless invocation indefinitely.
+ */
+export function initDatabaseInBackground(timeoutMs = 20_000): Promise<void> {
+  readyPromise = Promise.race([
+    initDatabase(),
+    new Promise<void>((resolve) => {
+      const t = setTimeout(() => {
+        console.warn('[Database] Initialization timed out; continuing with current store.');
+        resolve();
+      }, timeoutMs);
+      if (typeof t.unref === 'function') t.unref();
+    }),
+  ]).catch((err) => {
+    console.warn('[Database] Initialization error:', err.message);
+  });
+  return readyPromise;
+}
+
+/**
  * Initializes database connection if environment variables are provided.
  * Fallbacks gracefully to high-performance in-memory store if unset or on error.
  */

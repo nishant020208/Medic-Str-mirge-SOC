@@ -22,12 +22,13 @@ import {
 import { authRouter } from './routes/auth.js';
 import { productsRouter } from './routes/products.js';
 import { ordersRouter } from './routes/orders.js';
+import { oracleRouter } from './routes/oracle.js';
 import { initDatabase } from './data/store.js';
 
 dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const app = express();
 const server = http.createServer(app);
@@ -94,6 +95,7 @@ app.use('/api', apiRateLimiter);
 app.use('/api/auth', authRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
+app.use('/api/oracle', oracleRouter);
 
 // Explicit reserved trap paths for MirageSOC security triggers
 export const RESERVED_TRAP_PATHS = [
@@ -234,7 +236,7 @@ server.on('upgrade', (request, socket, head) => {
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   initDatabase().catch((err) => {
     console.warn('[Database] Initialization notice:', err.message);
   });
@@ -243,6 +245,10 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`[MediStore] Temple of Asclepius server listening on http://${HOST}:${PORT}`);
     console.log(`[MediStore] Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`[MediStore] MirageSOC security pass-through initialized as first middleware`);
+  });
+} else if (process.env.VERCEL) {
+  initDatabase().catch((err) => {
+    console.warn('[Database] Initialization notice on Vercel:', err.message);
   });
 }
 

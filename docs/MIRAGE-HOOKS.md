@@ -26,12 +26,12 @@ When integrating the actual **MirageSOC** firewall:
 
 ---
 
-## 2. Mounting Location in `server/src/index.ts`
+## 2. Mounting Location in `server/src/app.ts`
 
-To ensure MirageSOC can inspect, fingerprint, and intercept malicious requests before any framework or route handler touches them, the stub is mounted as the **very first middleware**:
+To ensure MirageSOC can inspect, fingerprint, and intercept malicious requests before any framework or route handler touches them, the stub is mounted as the **very first middleware** in `server/src/app.ts`:
 
 ```typescript
-// Rule 2: Trust proxy must be true for accurate client IP identification
+// Rule 2: Trust proxy must be true for accurate client IP identification on Vercel
 app.set('trust proxy', true);
 
 // Rule 2: Mirage MUST be the FIRST middleware mounted

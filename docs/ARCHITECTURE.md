@@ -65,7 +65,7 @@ medistore/
   e2e/
     medistore.spec.ts        # Playwright end-to-end smoke test suite
   docs/                      # ARCHITECTURE.md, WEB3.md, DEPLOY.md, MIRAGE-HOOKS.md
-  render.yaml                # Production deployment blueprint
+  vercel.json                # Vercel serverless deployment blueprint
   package.json               # Root monorepo orchestrator
 ```
 

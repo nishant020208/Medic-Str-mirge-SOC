@@ -34,7 +34,7 @@ Tailwind classes map strictly to these tokens without hardcoded hex, rgb, or raw
 | `--text-muted` | `text-text-muted`| Secondary metadata / labels | `#554D3D` (6.99:1) | `#9EABCF` (8.53:1) | `#644F6A` (6.64:1) |
 | `--primary` | `bg-primary` | Main action buttons / badges | `#0B1F4B` | `#E0B84A` | `#7A2E4D` |
 | `--primary-hover` | `hover:bg-primary-hover` | Hover state for primary actions | `#162E6B` | `#EECB68` | `#933B60` |
-| `--text-on-primary` | `text-text-on-primary` | Text rendered atop `--primary` | `#F5F1E8` (14.20:1) | `#0B1F4B` (8.48:1) | `#FFF7EE` (8.51:1) |
+| `--text-on-primary` | `text-text-on-primary` | Text displayed atop `--primary` | `#F5F1E8` (14.20:1) | `#0B1F4B` (8.48:1) | `#FFF7EE` (8.51:1) |
 | `--accent` | `text-accent` / `bg-accent` | Decorative icons, borders, sparks | `#C9A227` | `#C9A227` | `#B76E79` |
 | `--accent-text` | `text-accent-text` | Legible text-accent on surfaces | `#7A5C00` (5.90:1) | `#DEC267` (9.16:1) | `#773742` (8.19:1) |
 | `--success` | `text-success` | Healthy stock, completed rites | `#334B16` (7.35:1) | `#A3CC66` (8.85:1) | `#2E591B` (7.13:1) |
@@ -104,7 +104,7 @@ To eliminate flash-of-unstyled-content (FOUC) while maintaining an uncompromisin
 ## 5. Live Scene Reactions & Motion Resilience
 
 - **Three.js Hero (`AsclepiusHero3D.tsx`)**: The `<Canvas>` remains permanently mounted when switching themes. It subscribes to theme changes and updates material metalness, roughness, light intensities, and fog dynamically reading `--scene-*` and `--particle` tokens without webGL context destruction or memory leakage.
-- **Static SVG Fallback**: When WebGL is unavailable or when running in low-power/testing environments, a dedicated SVG fallback automatically renders with reactive theme stroke colors.
+- **Static SVG Fallback**: When WebGL is unavailable or when running in low-power/testing environments, a dedicated SVG fallback automatically displays with reactive theme stroke colors.
 - **Transitions & Reduced Motion**: Theme token changes trigger a smooth 250ms CSS transition across color, background, and borders. If `prefers-reduced-motion: reduce` is active, transitions become instant (0ms) to respect user accessibility preferences.
 
 ---

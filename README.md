@@ -53,7 +53,7 @@ MediStore features a three-mode design system where every component strictly con
 ### Theme Switcher Controls
 - **Segmented Radio Control:** 3-way toggle in navbar and mobile drawer (`Sun`, `Moon`, `Sparkles`).
 - **Keyboard Navigable:** Full Arrow Key (`ArrowLeft` / `ArrowRight` / `ArrowUp` / `ArrowDown`) navigation with active ARIA radio attributes.
-- **Zero-FOUC Guarantee:** Synchronous inline `<script>` in `index.html` sets `data-theme` and `class="dark"` before rendering, whitelisted by exact SHA-256 hash in Helmet CSP.
+- **Zero-FOUC Guarantee:** Synchronous inline `<script>` in `index.html` sets `data-theme` and `class="dark"` before first paint, whitelisted by exact SHA-256 hash in Helmet CSP.
 - **Live Reactive 3D Scene:** Three.js `<Canvas>` stays permanently mounted; scene lighting, fog, and serpent shaders react live to `--scene-*` variables.
 - **Motion Resilience:** Smooth 250ms CSS transition across colors and surfaces, instantly bypassing (0ms) when `prefers-reduced-motion: reduce` is enabled.
 - **Cross-Tab Synchronization:** Instant broadcast via window `storage` event listener.

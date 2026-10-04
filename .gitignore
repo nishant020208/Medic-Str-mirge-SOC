@@ -52,3 +52,6 @@ docs/lighthouse/*/*.report.*
 .cache
 stats.html
 client/stats.html
+
+.vercel
+.env*

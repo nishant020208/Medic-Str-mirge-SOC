@@ -90,7 +90,7 @@ It acts as the **VICTIM application** for the **MirageSOC** security architectur
 - **Session:** `express-session` with `memorystore`
 - **Security & Hardening:** `helmet` (strict CSP with inline script sha256 hash), `express-rate-limit` (10 login attempts/min threshold), CSRF check (`X-Requested-With`), Zod input validation
 - **Logging:** `morgan` logging real client IP (`req.ip`) with `trust proxy` enabled
-- **Terminal Daemon:** Safe placeholder WebSocket endpoint (`/terminal-ws`) OFF by default; enabled strictly via `ENABLE_LOCAL_TERMINAL_ECHO=true`
+- **Terminal Console:** HTTP polling only (`POST /api/terminal`, zod-validated ≤200 chars, canned replies) — no WebSockets anywhere; the badge reads **Console Offline** when `VITE_TERMINAL_API_URL` is empty
 
 ---
 
@@ -110,7 +110,7 @@ The dispensary is pre-seeded with the following credentials (enter directly on `
 
 ## 💾 Plug-and-Play Database Connection
 
-MediStore features zero-downtime, plug-and-play database support. By default, it operates with zero configuration using its built-in in-memory dispensary store. When you are ready to connect your database, simply supply either environment variable:
+MediStore features zero-downtime, plug-and-play database support backed by Supabase Postgres. By default, it operates with zero configuration using its built-in in-memory dispensary store. When you are ready to connect your database, supply the environment variable below:
 
 ### 1. PostgreSQL (Supabase Postgres — session pooler)
 ```env
@@ -119,13 +119,6 @@ DATABASE_URL=postgres://user:password@hostname:5432/medistore?sslmode=require
 - **Auto-Provisioning:** Creates tables (`users`, `products`, `orders`) on first boot.
 - **Auto-Seeding:** Automatically populates catalog and accounts if the database is newly initialized.
 - **Fail-Safe Fallback:** If the connection is unreachable or credentials invalid, it seamlessly falls back to in-memory store to prevent downtime.
-
-### 2. MongoDB (MongoDB Atlas / Self-Hosted)
-```env
-MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/medistore?retryWrites=true&w=majority
-```
-- **Auto-Provisioning:** Creates collections and unique indexes (`users.email`, `products.id`, `orders.id`).
-- **Auto-Seeding:** Seeds initial records if empty.
 
 ---
 
@@ -180,7 +173,7 @@ npm run build
 2. **Replaced Pass-Through:** `server/mirage.js` is the insertion point where MirageSOC hooks its inspection engine.
 3. **Authentication Callbacks:** Both email and wallet sign-ins dispatch `mirage.loginFailed(req, user)` and `mirage.loginSucceeded(req, user)`.
 4. **Reserved Trap Paths:** Endpoints (`/admin-old`, `/.env`, `/backup.zip`, `/wp-login.php`, `/phpmyadmin`, `/api/v1/internal/keys`, case-insensitive with or without trailing slash) return 404 plain text `"Not found"` and are never swallowed by the SPA fallback, leaving them open for MirageSOC canaries.
-5. **Terminal Daemon:** MirageSOC attaches its interactive sandbox by setting `VITE_TERMINAL_WS_URL`.
+5. **Terminal Console:** MirageSOC attaches its interactive sandbox by setting `VITE_TERMINAL_API_URL` (the page then polls that endpoint instead of showing “Console Offline”).
 
 ---
 

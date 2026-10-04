@@ -1,7 +1,6 @@
 import {
   StorageAdapter,
   PostgresAdapter,
-  MongoAdapter,
   MemoryAdapter,
   WhitelistEntry,
 } from './db.js';
@@ -31,7 +30,7 @@ class UnifiedStore {
     return this.memoryFallback.orders;
   }
 
-  public get storageType(): 'postgres' | 'mongodb' | 'memory' {
+  public get storageType(): 'postgres' | 'memory' {
     return this.adapter.type;
   }
 
@@ -241,7 +240,6 @@ export function initDatabaseInBackground(timeoutMs = 20_000): Promise<void> {
  */
 export async function initDatabase(): Promise<void> {
   const dbUrl = process.env.DATABASE_URL || process.env.database_url;
-  const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL;
 
   if (dbUrl) {
     try {
@@ -255,19 +253,6 @@ export async function initDatabase(): Promise<void> {
       return;
     } catch (err: any) {
       console.warn(`⚠️ [Database] PostgreSQL connection failed: ${err.message}`);
-      console.warn('⚠️ [Database] Falling back to In-Memory Dispensary Store to prevent downtime.');
-    }
-  } else if (mongoUri) {
-    try {
-      const masked = mongoUri.replace(/:([^:@]+)@/, ':****@');
-      console.log(`[Database] MONGODB_URI detected. Connecting to MongoDB (${masked})...`);
-      const mongoAdapter = new MongoAdapter(mongoUri);
-      await mongoAdapter.initialize();
-      await store.setAdapter(mongoAdapter);
-      console.log('✅ [Database] MongoDB connected successfully. Collections & indices synchronized.');
-      return;
-    } catch (err: any) {
-      console.warn(`⚠️ [Database] MongoDB connection failed: ${err.message}`);
       console.warn('⚠️ [Database] Falling back to In-Memory Dispensary Store to prevent downtime.');
     }
   } else {

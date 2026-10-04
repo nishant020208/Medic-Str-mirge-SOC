@@ -12,7 +12,11 @@ import { z } from 'zod';
 export const terminalRouter = Router();
 
 const terminalSchema = z.object({
-  cmd: z.string().min(1).max(200),
+  cmd: z
+    .string()
+    .min(1)
+    .max(200)
+    .refine((s) => s.trim().length > 0, { message: 'cmd must not be blank' }),
   history: z.array(z.string().max(200)).max(500).optional(),
 });
 

@@ -15,7 +15,7 @@ MediStore is a high-integrity, full-stack pharmaceutical application uniting 2,5
 ## Architectural Specifications
 - **Client Frontend:** React 18, Vite 6, TypeScript (Strict), Tailwind CSS with semantic design token variables across 3 palettes (Light "Marble Day", Dark "Night Temple", Aesthetic "Olympus Dusk").
 - **Backend API:** Node.js 20+, Express 4, TypeScript, session authentication with memory/database backing, strict CSP and Helmet protection, CSRF headers, rate limiting.
-- **Database Layer:** Zero-configuration plug-and-play architecture supporting PostgreSQL (`DATABASE_URL`), MongoDB (`MONGODB_URI`), and local fallback.
+- **Database Layer:** Zero-configuration plug-and-play architecture supporting Supabase PostgreSQL (`DATABASE_URL`) and local fallback.
 - **Web3 Blockchain Verification:** Ethereum Keccak-256 batch registry querying smart contract batch hashes on Sepolia testnet with zero-fee public verification.
 
 ## Pharmacopeia Categories

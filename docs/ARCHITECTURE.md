@@ -25,7 +25,7 @@
                    ┌────────────────────────────────────────┐
                    │         Express API Routes             │
                    │  /healthz, /api/auth, /api/products,   │
-                   │  /api/orders, /terminal-ws             │
+                   │  /api/orders, /api/terminal           │
                    └──────────────────┬─────────────────────┘
                                       │
                                       ▼
@@ -57,7 +57,7 @@ medistore/
       data/                  # Seed data, in-memory store, reset capabilities
       middleware/            # Security (Helmet, CSP, CSRF, Rate Limiting), Auth (session checks)
       routes/                # Auth, Products, Orders
-      index.ts               # Server entry, WebSocket server, SPA fallback router
+      index.ts               # Server entry, HTTP listener, SPA fallback router
     mirage.js                # MirageSOC first-line pass-through stub
     tests/                   # Vitest API and security test suite
   contracts/

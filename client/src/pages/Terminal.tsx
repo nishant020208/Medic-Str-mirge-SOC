@@ -10,8 +10,18 @@ interface TerminalLine {
   text: string;
 }
 
+/**
+ * Oracle Administrative Console — polling transport.
+ *
+ * No WebSockets anywhere: every typed line is a `POST` to the endpoint in
+ * VITE_TERMINAL_API_URL (a MirageSOC backend, or the local stub at
+ * /api/terminal). When that variable is empty the badge reads
+ * "Console Offline" and only the local built-in commands work.
+ * Command history lives client-side and is sent with each request so the
+ * stateless server can keep the fake filesystem consistent.
+ */
 export const TerminalPage: React.FC = () => {
-  const wsUrl = import.meta.env.VITE_TERMINAL_WS_URL;
+  const apiBase = import.meta.env.VITE_TERMINAL_API_URL;
   const [lines, setLines] = useState<TerminalLine[]>([
     {
       id: 'init-1',
@@ -34,13 +44,15 @@ export const TerminalPage: React.FC = () => {
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [connectionStatus, setConnectionStatus] = useState<
     'connected' | 'disconnected' | 'offline' | 'connecting'
-  >(wsUrl ? 'connecting' : 'offline');
+  >(apiBase ? 'connecting' : 'offline');
+  const [polling, setPolling] = useState(false);
 
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<any>(null);
-  const reconnectAttemptsRef = useRef(0);
   const terminalEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const pushLine = (type: TerminalLine['type'], text: string) => {
+    setLines((prev) => [...prev, { id: Math.random().toString(), type, text }]);
+  };
 
   const scrollToBottom = () => {
     terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -50,101 +62,30 @@ export const TerminalPage: React.FC = () => {
     scrollToBottom();
   }, [lines]);
 
-  // WebSocket lifecycle
+  // Polling channel bootstrap (replaces the old WebSocket lifecycle)
   useEffect(() => {
-    if (!wsUrl) {
+    if (!apiBase) {
       setConnectionStatus('offline');
-      setLines((prev) => [
-        ...prev,
-        {
-          id: 'offline-warn',
-          type: 'error',
-          text: '[SYSTEM NOTICE] VITE_TERMINAL_WS_URL is unset. Console is currently offline. The oracle channel sleeps.',
-        },
-      ]);
+      pushLine(
+        'error',
+        '[SYSTEM NOTICE] VITE_TERMINAL_API_URL is unset. Console is currently offline. The oracle channel sleeps.'
+      );
       return;
     }
 
-    let isMounted = true;
-
-    const connect = () => {
-      if (!isMounted) return;
-      setConnectionStatus('connecting');
-
-      try {
-        const ws = new WebSocket(wsUrl);
-        wsRef.current = ws;
-
-        ws.onopen = () => {
-          if (!isMounted) return;
-          setConnectionStatus('connected');
-          reconnectAttemptsRef.current = 0;
-          setLines((prev) => [
-            ...prev,
-            {
-              id: Math.random().toString(),
-              type: 'system',
-              text: `[SECURE UPLINK ESTABLISHED] Connected to ${wsUrl}`,
-            },
-          ]);
-        };
-
-        ws.onmessage = (event) => {
-          if (!isMounted) return;
-          try {
-            const data = JSON.parse(event.data);
-            if (data.reply) {
-              setLines((prev) => [
-                ...prev,
-                {
-                  id: Math.random().toString(),
-                  type: 'output',
-                  text: data.reply,
-                },
-              ]);
-            }
-          } catch {
-            setLines((prev) => [
-              ...prev,
-              {
-                id: Math.random().toString(),
-                type: 'output',
-                text: event.data,
-              },
-            ]);
-          }
-        };
-
-        ws.onerror = () => {
-          if (!isMounted) return;
-          setConnectionStatus('disconnected');
-        };
-
-        ws.onclose = () => {
-          if (!isMounted) return;
-          setConnectionStatus('disconnected');
-          // Exponential backoff reconnect
-          const backoff = Math.min(1000 * 2 ** reconnectAttemptsRef.current, 15000);
-          reconnectAttemptsRef.current += 1;
-          reconnectTimeoutRef.current = setTimeout(connect, backoff);
-        };
-      } catch (err) {
-        setConnectionStatus('disconnected');
-      }
-    };
-
-    connect();
-
-    return () => {
-      isMounted = false;
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      if (wsRef.current) wsRef.current.close();
-    };
-  }, [wsUrl]);
+    setConnectionStatus('connecting');
+    pushLine('system', `[POLLING CHANNEL CONFIGURED] Endpoint: ${apiBase}`);
+    // No persistent connection to establish — status flips to "connected"
+    // on the first successful poll and back to "disconnected" on failure.
+  }, [apiBase]);
 
   const handleCommand = (cmd: string) => {
     const trimmed = cmd.trim();
     if (!trimmed) return;
+
+    // Snapshot history BEFORE the current command is appended — the server
+    // replays it to reconstruct the fake current directory.
+    const pastHistory = [...history];
 
     // Add to input line
     setLines((prev) => [
@@ -161,79 +102,81 @@ export const TerminalPage: React.FC = () => {
     setHistoryIndex(-1);
     setInputVal('');
 
+    const firstWord = trimmed.toLowerCase().split(/\s+/)[0];
+
     // Built-in client commands
-    if (trimmed.toLowerCase() === 'clear') {
+    if (firstWord === 'clear') {
       setLines([]);
       return;
     }
 
-    if (trimmed.toLowerCase() === 'help') {
-      setLines((prev) => [
-        ...prev,
-        {
-          id: Math.random().toString(),
-          type: 'output',
-          text: `AVAILABLE SANCTUM COMMANDS:
+    if (firstWord === 'help') {
+      pushLine(
+        'output',
+        `AVAILABLE SANCTUM COMMANDS:
   help      - Display this list of directives
   clear     - Wipe clean the bronze console
   status    - Interrogate oracle node health
   whoami    - Display current session authority
   version   - Inspect release build manifest
-  exit      - Terminate console session`,
-        },
-      ]);
+  exit      - Terminate console session`
+      );
       return;
     }
 
-    if (trimmed.toLowerCase() === 'status') {
-      setLines((prev) => [
-        ...prev,
-        {
-          id: Math.random().toString(),
-          type: 'output',
-          text: `STATUS: Node operational. Gateway: ${wsUrl || 'Local Mock'}. Uplink: ${connectionStatus}.`,
-        },
-      ]);
+    if (firstWord === 'status') {
+      pushLine(
+        'output',
+        `STATUS: Node operational. Gateway: ${apiBase || 'unconfigured'}. Uplink: ${connectionStatus}.`
+      );
       return;
     }
 
-    if (trimmed.toLowerCase() === 'whoami') {
-      setLines((prev) => [
-        ...prev,
-        {
-          id: Math.random().toString(),
-          type: 'output',
-          text: `deploy (UID=1001, GID=1001, Groups=asclepius-ops,mirage-audit)`,
-        },
-      ]);
+    if (firstWord === 'version') {
+      pushLine(
+        'output',
+        'MediStore v1.0.0-asclepeion (Node 20, Vite 6, Strict TS, Mirage Hooked)'
+      );
       return;
     }
 
-    if (trimmed.toLowerCase() === 'version') {
-      setLines((prev) => [
-        ...prev,
-        {
-          id: Math.random().toString(),
-          type: 'output',
-          text: `MediStore v1.0.0-asclepeion (Node 20, Vite 6, Strict TS, Mirage Hooked)`,
-        },
-      ]);
+    // Everything else is polled over HTTP (POST /api/terminal or the
+    // MirageSOC backend configured via VITE_TERMINAL_API_URL).
+    if (!apiBase) {
+      pushLine(
+        'error',
+        `bash: ${trimmed}: command routed, but remote daemon is unreachable. (Status: offline)`
+      );
       return;
     }
 
-    // If connected via WebSocket, send JSON command
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ cmd: trimmed }));
-    } else {
-      setLines((prev) => [
-        ...prev,
-        {
-          id: Math.random().toString(),
-          type: 'error',
-          text: `bash: ${trimmed}: command routed, but remote daemon is unreachable. (Status: ${connectionStatus})`,
-        },
-      ]);
-    }
+    setPolling(true);
+    fetch(apiBase, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: JSON.stringify({ cmd: trimmed, history: pastHistory }),
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || `poll failed (HTTP ${res.status})`);
+        }
+        setConnectionStatus('connected');
+        if (typeof data.reply === 'string' && data.reply.length > 0) {
+          pushLine('output', data.reply);
+        }
+      })
+      .catch((err: any) => {
+        setConnectionStatus('disconnected');
+        pushLine(
+          'error',
+          `poll failed: ${err?.message || 'network error'} — ${trimmed} was not executed.`
+        );
+      })
+      .finally(() => setPolling(false));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -346,6 +289,7 @@ export const TerminalPage: React.FC = () => {
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown}
+            disabled={polling}
             className="flex-grow bg-transparent border-none outline-none text-text font-mono text-sm caret-primary"
             autoFocus
             aria-label="Oracle Terminal Command Input"
@@ -354,7 +298,7 @@ export const TerminalPage: React.FC = () => {
       </div>
 
       <div className="flex justify-between items-center text-xs text-text-muted mt-3 font-mono">
-        <span>Type "help" for commands · Max length 200 chars</span>
+        <span>Type "help" for commands · Max length 200 chars · HTTP polling (no sockets)</span>
         <button
           onClick={() => setLines([])}
           className="text-accent-text hover:underline"

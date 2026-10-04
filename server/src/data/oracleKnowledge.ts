@@ -81,9 +81,9 @@ export const ORACLE_KNOWLEDGE: KnowledgeEntry[] = [
     answer: "This application serves as the designated test vessel for MirageSOC. Curious wanderers should seek the forgotten paths hinted in /quest."
   },
   {
-    keywords: ["terminal", "console", "deploy", "ws"],
+    keywords: ["terminal", "console", "deploy", "poll"],
     question: "How do I access the Oracle Terminal?",
-    answer: "The retro console awaits at /terminal. It listens upon websocket frequencies to communicate with internal temple systems."
+    answer: "The retro console awaits at /terminal. It polls the temple systems over plain HTTP (POST /api/terminal) — no sockets, no websockets."
   },
   {
     keywords: ["hours", "open", "location", "temple address"],

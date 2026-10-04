@@ -49,7 +49,14 @@ export const LoginPage: React.FC = () => {
         body: JSON.stringify(data),
       });
 
-      const resData = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      let resData: any = {};
+      if (contentType.includes('application/json')) {
+        resData = await res.json();
+      } else {
+        const text = await res.text();
+        resData = { error: text || `HTTP ${res.status}: Sanctum entry error` };
+      }
 
       if (!res.ok) {
         throw new Error(resData.error || 'Sanctum entry denied. Verify credentials.');

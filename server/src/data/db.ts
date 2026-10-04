@@ -77,6 +77,21 @@ export class PostgresAdapter implements StorageAdapter {
     this.pool = new Pool({
       connectionString,
       ssl: isLocal ? false : { rejectUnauthorized: false },
+      // Serverless-safe pool sizing: keep it small so we never exhaust Neon's
+      // connection limit, and release idle clients quickly. Neon/Supabase poolers
+      // close idle connections, which makes pg-pool emit 'error' on the pool.
+      max: 5,
+      idleTimeoutMillis: 10_000,
+      connectionTimeoutMillis: 10_000,
+      allowExitOnIdle: true,
+    });
+
+    // CRITICAL: an EventEmitter 'error' event with no listener is thrown as an
+    // uncaught exception, which terminates the process. On serverless platforms
+    // that surfaces as FUNCTION_INVOCATION_FAILED. Idle clients dropped by the
+    // Neon pooler emit here, so this listener must stay attached.
+    this.pool.on('error', (err: Error) => {
+      console.warn('[Database] Idle client error (pool continues):', err.message);
     });
   }
 

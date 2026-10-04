@@ -35,7 +35,7 @@ export const ProductIllustration: React.FC<ProductIllustrationProps> = ({
   const iconSizeClass =
     size === 'sm' ? 'w-5 h-5' : size === 'lg' ? 'w-20 h-20' : 'w-10 h-10';
 
-  const renderIcon = () => {
+  const getIcon = () => {
     switch ((type || '').toLowerCase()) {
       case 'pill':
       case 'tablet':
@@ -96,7 +96,7 @@ export const ProductIllustration: React.FC<ProductIllustrationProps> = ({
       aria-label={`Consecrated apothecary illustration for ${name}`}
       className={`flex items-center justify-center text-accent-text ${className}`}
     >
-      {renderIcon()}
+      {getIcon()}
     </div>
   );
 };

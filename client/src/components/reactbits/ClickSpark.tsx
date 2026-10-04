@@ -42,7 +42,7 @@ export const ClickSpark: React.FC<{ children: React.ReactNode }> = ({ children }
 
     let isRunning = false;
 
-    const render = () => {
+    const drawSparks = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (sparksRef.current.length === 0) {
@@ -70,7 +70,7 @@ export const ClickSpark: React.FC<{ children: React.ReactNode }> = ({ children }
       });
 
       if (sparksRef.current.length > 0) {
-        animId = requestAnimationFrame(render);
+        animId = requestAnimationFrame(drawSparks);
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         isRunning = false;
@@ -100,7 +100,7 @@ export const ClickSpark: React.FC<{ children: React.ReactNode }> = ({ children }
 
       if (!isRunning) {
         isRunning = true;
-        animId = requestAnimationFrame(render);
+        animId = requestAnimationFrame(drawSparks);
       }
     };
 

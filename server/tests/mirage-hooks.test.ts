@@ -78,6 +78,7 @@ describe('Mirage Hook Order, Trust Proxy, and Auth Audit', () => {
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
+        'X-Forwarded-For': '198.51.100.81',
       },
       body: JSON.stringify({
         email: 'pharmacist@medistore.test',
@@ -98,6 +99,7 @@ describe('Mirage Hook Order, Trust Proxy, and Auth Audit', () => {
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
+        'X-Forwarded-For': '198.51.100.82',
       },
       body: JSON.stringify({
         email: 'pharmacist@medistore.test',
@@ -120,6 +122,7 @@ describe('Mirage Hook Order, Trust Proxy, and Auth Audit', () => {
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
+        'X-Forwarded-For': '198.51.100.83',
       },
       body: JSON.stringify({
         address: dummyWallet.address,
@@ -152,6 +155,7 @@ describe('Mirage Hook Order, Trust Proxy, and Auth Audit', () => {
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
+        'X-Forwarded-For': '198.51.100.84',
       },
       body: JSON.stringify({
         address: testWallet.address,

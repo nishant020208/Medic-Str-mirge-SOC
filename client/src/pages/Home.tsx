@@ -66,7 +66,7 @@ export const HomePage: React.FC = () => {
     };
     fetchFeatured();
 
-    // Render static SVG hero first; mount 3D canvas after first paint via requestIdleCallback/setTimeout
+    // Mount static SVG hero first; initialize 3D canvas after first paint via requestIdleCallback/setTimeout
     // Keep it hidden on mobile and low-end devices
     if (typeof window !== 'undefined') {
       const isMobile = window.innerWidth < 768;

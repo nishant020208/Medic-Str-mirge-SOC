@@ -27,11 +27,12 @@ afterAll(async () => {
 });
 
 describe('MediStore API & Security Suite', () => {
-  it('GET /healthz returns { status: "ok" }', async () => {
+  it('GET /healthz returns { status: "ok", db: "ok" | "down" }', async () => {
     const res = await fetch(`${baseUrl}/healthz`);
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual({ status: 'ok' });
+    expect(body.status).toBe('ok');
+    expect(['ok', 'down']).toContain(body.db);
   });
 
   it('GET /api/products returns seeded medicines', async () => {

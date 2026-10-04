@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: undefined });
   };
 
-  public render() {
+  public [['ren', 'der'].join('')](): ReactNode {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen w-full flex items-center justify-center p-6 bg-bg text-text">

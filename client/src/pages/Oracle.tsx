@@ -3,6 +3,7 @@ import { Sparkles, Send, Bot, User, HelpCircle } from 'lucide-react';
 import oracleQA from '../data/oracleKnowledge.json';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 import { GreekDivider } from '../ui/GreekDivider';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -12,6 +13,7 @@ interface ChatMessage {
   sender: 'oracle' | 'user';
   text: string;
   timestamp: string;
+  source?: 'ai' | 'scripted';
 }
 
 export const OraclePage: React.FC = () => {
@@ -21,6 +23,7 @@ export const OraclePage: React.FC = () => {
       sender: 'oracle',
       text: 'Hail, seeker of Epidaurus. I am the digital Pythia of MediStore. Enquire on herbal remedies, batch provenance, shipping, or temple rites.',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      source: 'scripted',
     },
   ]);
   const [inputVal, setInputVal] = useState('');
@@ -97,13 +100,18 @@ export const OraclePage: React.FC = () => {
 
       const contentType = res.headers.get('content-type') || '';
       let reply = '';
+      let source: 'ai' | 'scripted' = 'scripted';
       if (contentType.includes('application/json')) {
         const data = await res.json();
         reply = data.reply;
+        if (data.source === 'ai' || data.source === 'scripted') {
+          source = data.source;
+        }
       }
 
       if (!reply) {
         reply = matchAnswer(query);
+        source = 'scripted';
       }
 
       const oracleMsg: ChatMessage = {
@@ -111,6 +119,7 @@ export const OraclePage: React.FC = () => {
         sender: 'oracle',
         text: reply,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        source,
       };
       setMessages((prev) => [...prev, oracleMsg]);
     } catch (err) {
@@ -120,6 +129,7 @@ export const OraclePage: React.FC = () => {
         sender: 'oracle',
         text: fallback,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        source: 'scripted',
       };
       setMessages((prev) => [...prev, oracleMsg]);
     } finally {
@@ -202,7 +212,14 @@ export const OraclePage: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center justify-between gap-4 mb-1 text-[10px] opacity-75 font-cinzel">
-                  <span>{m.sender === 'oracle' ? 'Pythia Oracle' : 'Devotee'}</span>
+                  <span className="flex items-center gap-1.5">
+                    {m.sender === 'oracle' ? 'Pythia Oracle' : 'Devotee'}
+                    {m.sender === 'oracle' && m.source && (
+                      <Badge variant={m.source === 'ai' ? 'gold' : 'info'} size="sm">
+                        {m.source === 'ai' ? 'AI' : 'Scripted'}
+                      </Badge>
+                    )}
+                  </span>
                   <span>{m.timestamp}</span>
                 </div>
                 <p className="font-cormorant text-base leading-relaxed">{m.text}</p>

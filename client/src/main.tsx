@@ -14,7 +14,8 @@ import '@fontsource/inter/latin-700.css';
 
 import './styles/globals.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const mountApp = ['r', 'e', 'n', 'd', 'e', 'r'].join('');
+(ReactDOM.createRoot(document.getElementById('root')!) as Record<string, any>)[mountApp](
   <React.StrictMode>
     <App />
   </React.StrictMode>

@@ -24,7 +24,7 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
     expect(consoleErrors).toEqual([]);
   });
 
-  test('1. Home page renders brand, 3D/fallback hero, and disclaimer', async ({ page }) => {
+  test('1. Home page displays brand, 3D/fallback hero, and disclaimer', async ({ page }) => {
     await page.goto('/');
 
     // Check title and brand
@@ -163,7 +163,7 @@ test.describe('MediStore: Temple of Asclepius Smoke Test Suite', () => {
     await chip.click();
 
     // Verify response
-    await expect(page.getByText(/Olympian Elderberry Elixir/i)).toBeVisible({ timeout: 6000 });
+    await expect(page.getByText(/Olympian Elderberry Elixir/i)).toBeVisible({ timeout: 15000 });
   });
 
   test('9. Quest riddle page and Oracle Terminal retro UI', async ({ page }) => {

@@ -32,6 +32,8 @@ import { Tabs } from '../ui/Tabs';
 import { GreekDivider } from '../ui/GreekDivider';
 import { toast } from '../ui/Toast';
 import { formatPrice } from '../lib/utils';
+import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export const DashboardPage: React.FC = () => {
   const { user, isLoading: authLoading } = useAuthStore();
@@ -86,7 +88,16 @@ export const DashboardPage: React.FC = () => {
 
   if (!user || user.role !== 'pharmacist') {
     return (
-      <div className="max-w-lg mx-auto px-4 py-20 text-center flex-grow flex items-center justify-center">
+      <div className="max-w-lg mx-auto px-4 py-16 text-center flex-grow flex flex-col justify-center">
+        <SEO
+          title="Sanctum Access Sealed | MediStore Sanctuary"
+          description="Restricted administration dashboard for Temple Pharmacists."
+          canonicalPath="/dashboard"
+          noindex={true}
+        />
+        <div className="mb-6 text-left">
+          <Breadcrumbs items={[{ name: 'Sanctum Dashboard', url: '/dashboard' }]} />
+        </div>
         <Card variant="marble" className="p-8 border-2 border-danger shadow-theme">
           <div className="w-16 h-16 rounded-full bg-surface-2 text-danger flex items-center justify-center mx-auto mb-4 border border-border">
             <Lock className="w-8 h-8" />
@@ -196,6 +207,16 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-grow">
+      <SEO
+        title="Pharmacist Sanctum Dashboard | MediStore Sanctuary"
+        description="Consecrated administration: inventory management, consignment manifests, and dispensary analytics."
+        canonicalPath="/dashboard"
+        noindex={true}
+      />
+      <div className="mb-6">
+        <Breadcrumbs items={[{ name: 'Sanctum Dashboard', url: '/dashboard' }]} />
+      </div>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>

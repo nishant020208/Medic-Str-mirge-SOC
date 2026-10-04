@@ -4,6 +4,8 @@ import oracleQA from '../data/oracleKnowledge.json';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { GreekDivider } from '../ui/GreekDivider';
+import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 interface ChatMessage {
   id: string;
@@ -99,6 +101,15 @@ export const OraclePage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow flex flex-col">
+      <SEO
+        title="Oracle of Asclepius | Digital Healing Knowledge Base"
+        description="Enquire on herbal remedies, pharmaceutical batch provenance, ancient ingredients, and temple dispensary rites."
+        canonicalPath="/oracle"
+      />
+      <div className="mb-4">
+        <Breadcrumbs items={[{ name: 'Oracle of Asclepius', url: '/oracle' }]} />
+      </div>
+
       {/* Oracle Header */}
       <div className="text-center mb-6">
         <div className="w-16 h-16 rounded-full bg-surface-2 border-2 border-border text-accent-text flex items-center justify-center mx-auto mb-3 shadow-theme">

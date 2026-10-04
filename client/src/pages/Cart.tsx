@@ -1,12 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { GreekDivider } from '../ui/GreekDivider';
 import { EmptyState } from '../ui/EmptyState';
 import { formatPrice } from '../lib/utils';
+import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
+import { ProductIllustration } from '../components/ProductIllustration';
 
 export const CartPage: React.FC = () => {
   const {
@@ -22,7 +25,21 @@ export const CartPage: React.FC = () => {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 w-full flex-grow flex items-center justify-center">
+      <div className="max-w-4xl mx-auto px-4 py-12 w-full flex-grow flex flex-col justify-center">
+        <SEO
+          title="Sacred Cart | MediStore Sanctuary"
+          description="View remedies and therapeutic offerings in your sacred requisition cart."
+          canonicalPath="/cart"
+          noindex={true}
+        />
+        <div className="mb-6">
+          <Breadcrumbs items={[{ name: 'Requisition Cart', url: '/cart' }]} />
+        </div>
+        <div className="text-center mb-6">
+          <h1 className="font-cinzel text-3xl font-bold text-text">
+            Sacred Requisition Basket
+          </h1>
+        </div>
         <EmptyState
           icon={<ShoppingBag className="w-8 h-8" />}
           title="Sacred Requisition Empty"
@@ -41,6 +58,15 @@ export const CartPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-grow">
+      <SEO
+        title="Sacred Cart | MediStore Sanctuary"
+        description="Review your pharmaceutical formulations and complete your requisition."
+        canonicalPath="/cart"
+        noindex={true}
+      />
+      <div className="mb-6">
+        <Breadcrumbs items={[{ name: 'Requisition Cart', url: '/cart' }]} />
+      </div>
       <div className="text-center mb-8">
         <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
           Sanctum Offerings
@@ -73,7 +99,7 @@ export const CartPage: React.FC = () => {
             >
               <div className="flex items-center gap-4 w-full sm:w-auto">
                 <div className="w-16 h-16 rounded-card bg-surface-2 border border-border flex items-center justify-center text-accent-text shrink-0">
-                  <ShieldCheck className="w-8 h-8" />
+                  <ProductIllustration type={product.illustration} name={product.name} size="sm" />
                 </div>
                 <div>
                   <Link

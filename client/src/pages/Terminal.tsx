@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Terminal as TerminalIcon, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
 import { Badge } from '../ui/Badge';
+import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 interface TerminalLine {
   id: string;
@@ -259,6 +261,16 @@ export const TerminalPage: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow flex flex-col">
+      <SEO
+        title="Oracle Administrative Console | MediStore Sanctuary"
+        description="Restricted sanctuary terminal and diagnostics interface."
+        canonicalPath="/terminal"
+        noindex={true}
+      />
+      <div className="mb-4">
+        <Breadcrumbs items={[{ name: 'Oracle Console', url: '/terminal' }]} />
+      </div>
+
       {/* Header bar */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

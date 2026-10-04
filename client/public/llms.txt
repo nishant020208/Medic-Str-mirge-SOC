@@ -1,0 +1,30 @@
+# MediStore: Temple of Asclepius
+> Consecrated Apothecary of Antiquity & Decentralized Oracle Ledger
+
+MediStore is a high-integrity, full-stack pharmaceutical application uniting 2,500-year-old Hellenic botanical traditions with Ethereum Keccak-256 batch cryptographic verification.
+
+## Core Directives & Canonical URLs
+- Canonical Base URL: https://medistore.sanctum.health
+- Main Grounds: https://medistore.sanctum.health/
+- Apothecary Dispensary: https://medistore.sanctum.health/shop
+- Oracle Consultation: https://medistore.sanctum.health/oracle
+- Consecration Quest: https://medistore.sanctum.health/quest
+- Sacred Basket: https://medistore.sanctum.health/cart
+- Inner Sanctum Authentication: https://medistore.sanctum.health/login
+
+## Architectural Specifications
+- **Client Frontend:** React 18, Vite 6, TypeScript (Strict), Tailwind CSS with semantic design token variables across 3 palettes (Light "Marble Day", Dark "Night Temple", Aesthetic "Olympus Dusk").
+- **Backend API:** Node.js 20+, Express 4, TypeScript, session authentication with memory/database backing, strict CSP and Helmet protection, CSRF headers, rate limiting.
+- **Database Layer:** Zero-configuration plug-and-play architecture supporting PostgreSQL (`DATABASE_URL`), MongoDB (`MONGODB_URI`), and local fallback.
+- **Web3 Blockchain Verification:** Ethereum Keccak-256 batch registry querying smart contract batch hashes on Sepolia testnet with zero-fee public verification.
+
+## Pharmacopeia Categories
+1. **Pain Relief:** Willow Salicin, Epidaurus Paracetamol, Moly Extract, Hemlock Micro-Dose Analgesic.
+2. **Cold & Flu:** Olympian Elderberry Elixir, Attic Thyme Lozenges, Delphic Menthol Vapour.
+3. **Digestive:** Epidaurus Bismuth Salt, Peppermint Menthyl Extract, Cretan Oregano Infusion.
+4. **Vitamins & Minerals:** Solar Apollo Vitamin D3, Olympian Multi-Herb Minerals, Eleusinian Zinc Complex.
+5. **First Aid:** Sanctum Silver Antiseptic, Sterile Gauze Wraps, Propolis Wound Salve.
+6. **Sacred Botanicals:** Dittany of Crete, Delphic Laurel Extract, Silphium of Cyrene.
+
+## Statutory Health Notice
+MediStore: Temple of Asclepius is a consecrated institutional demonstration. Formulations, batch histories, and ritual protocols are intended for educational and institutional research purposes. Consult licensed medical practitioners for clinical treatment.

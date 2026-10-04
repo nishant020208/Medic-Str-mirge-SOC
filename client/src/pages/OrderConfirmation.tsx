@@ -7,6 +7,8 @@ import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { GreekDivider } from '../ui/GreekDivider';
 import { formatPrice } from '../lib/utils';
+import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export const OrderConfirmationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,7 +47,19 @@ export const OrderConfirmationPage: React.FC = () => {
   if (!order) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center">
-        <h2 className="font-cinzel text-2xl font-bold mb-4 text-text">Consecration Receipt Not Found</h2>
+        <SEO
+          title="Receipt Not Found | MediStore Sanctuary"
+          description="The requested order consecration receipt could not be found."
+          canonicalPath={`/order-confirmation/${id || ''}`}
+          noindex={true}
+        />
+        <div className="mb-6">
+          <Breadcrumbs items={[{ name: 'Receipt Not Found', url: `/order-confirmation/${id || ''}` }]} />
+        </div>
+        <h1 className="font-cinzel text-2xl font-bold mb-4 text-text">Consecration Receipt Not Found</h1>
+        <p className="font-cormorant text-text-muted mb-6">
+          The requested receipt is not registered in the temple archives.
+        </p>
         <Link to="/shop">
           <Button variant="primary">Return to Apothecary</Button>
         </Link>
@@ -55,6 +69,20 @@ export const OrderConfirmationPage: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full flex-grow">
+      <SEO
+        title={`Consecration #${order.id} Confirmed | MediStore Sanctuary`}
+        description="Your sacred order has been consecrated by the Asclepeion."
+        canonicalPath={`/order-confirmation/${order.id}`}
+        noindex={true}
+      />
+      <div className="mb-6">
+        <Breadcrumbs
+          items={[
+            { name: 'Dispensary', url: '/shop' },
+            { name: `Receipt #${order.id}`, url: `/order-confirmation/${order.id}` },
+          ]}
+        />
+      </div>
       {/* Sanctum Receipt Card */}
       <Card variant="papyrus" className="p-8 border-2 border-border shadow-theme relative">
         <div className="text-center mb-6">

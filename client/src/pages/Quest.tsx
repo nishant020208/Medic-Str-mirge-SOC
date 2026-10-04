@@ -4,10 +4,20 @@ import { ShieldAlert, Terminal, Compass } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { GreekDivider } from '../ui/GreekDivider';
+import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 export const QuestPage: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full flex-grow flex items-center justify-center">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full flex-grow flex flex-col items-center">
+      <SEO
+        title="The Riddle of the Broken Seal | MediStore Sanctum"
+        description="Sanctum epigraph and challenge instructions for investigative inquiries and temple defense trials."
+        canonicalPath="/quest"
+      />
+      <div className="w-full max-w-2xl mb-6">
+        <Breadcrumbs items={[{ name: 'Asclepeion Trials', url: '/quest' }]} />
+      </div>
       <Card
         variant="papyrus"
         className="p-8 sm:p-12 border-2 border-border shadow-theme relative overflow-hidden text-center max-w-2xl w-full"

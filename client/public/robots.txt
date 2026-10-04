@@ -1,3 +1,8 @@
 User-agent: *
-Disallow: /admin-old
 Allow: /
+Disallow: /admin-old
+Disallow: /dashboard
+Disallow: /terminal
+Disallow: /api/
+
+Sitemap: https://medistore.sanctum.health/sitemap.xml

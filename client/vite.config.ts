@@ -40,16 +40,24 @@ export default defineConfig({
   build: {
     target: 'esnext',
     modulePreload: false,
-    chunkSizeWarningLimit: 1200,
+    sourcemap: false, // Production source maps explicitly disabled
+    minify: 'esbuild',
+    cssMinify: true,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks(id: string) {
+          if (id.includes('node_modules/framer-motion/')) {
+            return 'motion';
+          }
+          if (id.includes('node_modules/lucide-react/')) {
+            return 'icons';
+          }
           if (
             id.includes('node_modules/react/') ||
             id.includes('node_modules/react-dom/') ||
             id.includes('node_modules/react-router-dom/') ||
             id.includes('node_modules/zustand/') ||
-            id.includes('node_modules/framer-motion/') ||
             id.includes('node_modules/clsx/') ||
             id.includes('node_modules/tailwind-merge/')
           ) {

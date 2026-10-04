@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Search, SlidersHorizontal, ShoppingCart, ShieldCheck, Check } from 'lucide-react';
+import { Search, SlidersHorizontal, ShoppingCart, Check } from 'lucide-react';
 import { Product, ProductCategory } from '../types';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -11,6 +11,9 @@ import { SpotlightCard } from '../components/reactbits/SpotlightCard';
 import { useCartStore } from '../store/cartStore';
 import { toast } from '../ui/Toast';
 import { formatPrice } from '../lib/utils';
+import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
+import { ProductIllustration } from '../components/ProductIllustration';
 
 export const CataloguePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -80,6 +83,13 @@ export const CataloguePage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+      <SEO
+        title="The Apothecary Archives | MediStore Pharmacopeia"
+        description="Browse all 40 consecrated botanical medicines, analgesics, and sacred remedies. Sealed with cryptographic on-chain batch authentication."
+        canonicalPath="/shop"
+      />
+      <Breadcrumbs items={[{ name: 'Apothecary Dispensary', url: '/shop' }]} />
+
       {/* Title */}
       <div className="text-center mb-8">
         <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
@@ -227,8 +237,8 @@ export const CataloguePage: React.FC = () => {
 
                 {/* Illustration / Icon Box */}
                 <div className="w-full h-40 bg-surface-2 rounded-card border border-border flex items-center justify-center mb-4 group-hover:scale-[1.02] transition-transform shadow-inner">
-                  <div className="w-16 h-16 rounded-full bg-surface border border-border flex items-center justify-center text-accent shadow-inner">
-                    <ShieldCheck className="w-8 h-8" />
+                  <div className="w-16 h-16 rounded-full bg-surface border border-border flex items-center justify-center shadow-inner">
+                    <ProductIllustration type={product.illustration} name={product.name} size="md" />
                   </div>
                 </div>
 

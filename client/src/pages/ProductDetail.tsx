@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import {
   ShieldCheck,
   ShoppingCart,
-  ArrowLeft,
   CheckCircle2,
   AlertCircle,
   ExternalLink,
@@ -19,6 +18,10 @@ import { GreekDivider } from '../ui/GreekDivider';
 import { useCartStore } from '../store/cartStore';
 import { toast } from '../ui/Toast';
 import { formatPrice } from '../lib/utils';
+import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
+import { ProductIllustration } from '../components/ProductIllustration';
+import { getProductSchema } from '../utils/seo';
 
 export const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -109,7 +112,16 @@ export const ProductDetailPage: React.FC = () => {
   if (!product) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center">
-        <h2 className="font-cinzel text-2xl font-bold mb-4 text-text">Remedy Not Found in Archives</h2>
+        <SEO
+          title="Remedy Not Found | MediStore Sanctuary"
+          description="The requested pharmaceutical formulation could not be located in our sanctuary archives."
+          canonicalPath={`/shop/${id || ''}`}
+          noindex={true}
+        />
+        <h1 className="font-cinzel text-2xl font-bold mb-4 text-text">Remedy Not Found in Archives</h1>
+        <p className="font-cormorant text-text-muted mb-6">
+          The requested formulation could not be retrieved from the Asclepeion registry.
+        </p>
         <Link to="/shop">
           <Button variant="primary">Return to Apothecary</Button>
         </Link>
@@ -119,14 +131,23 @@ export const ProductDetailPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
-      {/* Back Link */}
-      <Link
-        to="/shop"
-        className="inline-flex items-center gap-2 text-xs font-cinzel font-bold text-text-muted hover:text-text mb-8 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Return to Apothecary Dispensary</span>
-      </Link>
+      <SEO
+        title={`${product.name} | MediStore Sanctuary Dispensary`}
+        description={product.description}
+        canonicalPath={`/shop/${product.id}`}
+        jsonLd={getProductSchema(product)}
+        ogType="product"
+      />
+
+      <div className="mb-6">
+        <Breadcrumbs
+          items={[
+            { name: 'Sanctuary Dispensary', url: '/shop' },
+            { name: product.category, url: `/shop?category=${encodeURIComponent(product.category)}` },
+            { name: product.name, url: `/shop/${product.id}` },
+          ]}
+        />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-16">
         {/* Left: Product Visual Presentation */}
@@ -137,7 +158,7 @@ export const ProductDetailPage: React.FC = () => {
           </div>
 
           <div className="w-48 h-48 rounded-full bg-surface-2 border-2 border-border flex items-center justify-center text-accent my-8 shadow-inner">
-            <ShieldCheck className="w-24 h-24" />
+            <ProductIllustration type={product.illustration} name={product.name} size="lg" />
           </div>
 
           <div className="text-center">
@@ -267,9 +288,12 @@ export const ProductDetailPage: React.FC = () => {
               <Link key={item.id} to={`/shop/${item.id}`} className="group block focus:outline-none">
                 <Card variant="marble" className="h-full flex flex-col justify-between group-hover:border-accent">
                   <div>
-                    <Badge variant="info" size="sm" className="mb-2">
-                      {item.category}
-                    </Badge>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="info" size="sm">
+                        {item.category}
+                      </Badge>
+                      <ProductIllustration type={item.illustration} name={item.name} size="sm" />
+                    </div>
                     <h3 className="font-cinzel font-bold text-sm text-text group-hover:text-accent-text mb-1">
                       {item.name}
                     </h3>

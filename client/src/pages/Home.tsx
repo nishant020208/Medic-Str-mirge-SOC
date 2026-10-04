@@ -23,6 +23,9 @@ import { Product } from '../types';
 import { useCartStore } from '../store/cartStore';
 import { toast } from '../ui/Toast';
 import { formatPrice } from '../lib/utils';
+import { SEO } from '../components/SEO';
+import { ProductIllustration } from '../components/ProductIllustration';
+import { getPharmacySchema, getWebSiteSchema } from '../utils/seo';
 
 // Lazy load the 3D Canvas and ScrollVelocity to optimize initial load & keep mobile lightweight
 const AsclepiusHero3D = lazy(() =>
@@ -94,6 +97,12 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="flex-grow flex flex-col">
+      <SEO
+        title="MediStore: Temple of Asclepius | Consecrated Ancient Pharmacopeia"
+        description="Sanctified botanical apothecary and decentralized pharmaceutical dispensary. High-potency herbal remedies with on-chain Ethereum batch provenance."
+        canonicalPath="/"
+        jsonLd={[getPharmacySchema(), getWebSiteSchema()]}
+      />
       {/* Hero Section with Static SVG first, deferred 3D Canvas */}
       <section className="relative min-h-[90vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 overflow-hidden">
         {/* Decorative column flutes */}
@@ -227,8 +236,8 @@ export const HomePage: React.FC = () => {
                   </div>
 
                   <div className="w-full h-36 bg-surface-2 rounded-card border border-border flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                    <div className="w-14 h-14 rounded-full bg-surface border border-border flex items-center justify-center text-accent shadow-inner">
-                      <ShieldCheck className="w-7 h-7" />
+                    <div className="w-14 h-14 rounded-full bg-surface border border-border flex items-center justify-center shadow-inner">
+                      <ProductIllustration type={product.illustration} name={product.name} size="md" />
                     </div>
                   </div>
 

@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ShieldCheck, CreditCard, Lock, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, CreditCard, Lock } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useAuthStore } from '../store/authStore';
 import { Button } from '../ui/Button';
@@ -12,6 +12,8 @@ import { Card } from '../ui/Card';
 import { GreekDivider } from '../ui/GreekDivider';
 import { formatPrice } from '../lib/utils';
 import { toast } from '../ui/Toast';
+import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -61,7 +63,19 @@ export const CheckoutPage: React.FC = () => {
   if (items.length === 0) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center">
-        <h2 className="font-cinzel text-2xl font-bold mb-4 text-text">No Offerings in Basket</h2>
+        <SEO
+          title="Sanctuary Checkout | MediStore Sanctuary"
+          description="Complete your medicinal order and consecration."
+          canonicalPath="/checkout"
+          noindex={true}
+        />
+        <div className="mb-6">
+          <Breadcrumbs items={[{ name: 'Sacred Basket', url: '/cart' }, { name: 'Checkout', url: '/checkout' }]} />
+        </div>
+        <h1 className="font-cinzel text-2xl font-bold mb-4 text-text">No Offerings in Basket</h1>
+        <p className="font-cormorant text-text-muted mb-6">
+          Your sacred requisition basket contains no remedies to checkout.
+        </p>
         <Link to="/shop">
           <Button variant="primary">Return to Apothecary</Button>
         </Link>
@@ -123,13 +137,20 @@ export const CheckoutPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-grow">
-      <Link
-        to="/cart"
-        className="inline-flex items-center gap-2 text-xs font-cinzel font-bold text-text-muted hover:text-accent-text mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Modify Requisition Basket</span>
-      </Link>
+      <SEO
+        title="Sanctuary Checkout | MediStore Sanctuary"
+        description="Secure pharmaceutical ordering and tribute checkout at MediStore Temple of Asclepius."
+        canonicalPath="/checkout"
+        noindex={true}
+      />
+      <div className="mb-6">
+        <Breadcrumbs
+          items={[
+            { name: 'Sacred Basket', url: '/cart' },
+            { name: 'Checkout & Consecration', url: '/checkout' },
+          ]}
+        />
+      </div>
 
       <div className="text-center mb-8">
         <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">

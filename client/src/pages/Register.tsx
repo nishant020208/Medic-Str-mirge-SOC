@@ -10,6 +10,8 @@ import { Card } from '../ui/Card';
 import { GreekDivider } from '../ui/GreekDivider';
 import { useAuthStore } from '../store/authStore';
 import { toast } from '../ui/Toast';
+import { SEO } from '../components/SEO';
+import { Breadcrumbs } from '../components/Breadcrumbs';
 
 const registerSchema = z
   .object({
@@ -74,7 +76,16 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16 w-full flex-grow flex flex-col justify-center">
+    <div className="max-w-md mx-auto px-4 py-12 w-full flex-grow flex flex-col justify-center">
+      <SEO
+        title="Sanctuary Inscription | MediStore Sanctuary"
+        description="Join the sanctuary fellowship and inscribe your credentials into the Temple of Asclepius ledger."
+        canonicalPath="/register"
+      />
+      <div className="mb-6">
+        <Breadcrumbs items={[{ name: 'Sanctuary Inscription', url: '/register' }]} />
+      </div>
+
       <Card variant="marble" className="p-8 border-2 border-border shadow-theme">
         <div className="text-center mb-6">
           <div className="w-14 h-14 rounded-full bg-surface-2 border border-border text-accent-text flex items-center justify-center mx-auto mb-3 shadow-sm">

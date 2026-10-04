@@ -20,15 +20,15 @@ import {
 } from 'lucide-react';
 
 interface ProductIllustrationProps {
-  type: string;
-  name: string;
+  type?: string;
+  name?: string;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
 }
 
 export const ProductIllustration: React.FC<ProductIllustrationProps> = ({
-  type,
-  name,
+  type = '',
+  name = '',
   className = '',
   size = 'md',
 }) => {
@@ -36,7 +36,7 @@ export const ProductIllustration: React.FC<ProductIllustrationProps> = ({
     size === 'sm' ? 'w-5 h-5' : size === 'lg' ? 'w-20 h-20' : 'w-10 h-10';
 
   const renderIcon = () => {
-    switch (type.toLowerCase()) {
+    switch ((type || '').toLowerCase()) {
       case 'pill':
       case 'tablet':
         return <Pill className={iconSizeClass} aria-hidden="true" />;

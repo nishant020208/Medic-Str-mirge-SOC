@@ -23,7 +23,7 @@ import { authRouter } from './routes/auth.js';
 import { productsRouter } from './routes/products.js';
 import { ordersRouter } from './routes/orders.js';
 import { oracleRouter } from './routes/oracle.js';
-import { initDatabase } from './data/store.js';
+import { initDatabaseInBackground, whenStoreReady } from './data/store.js';
 
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
@@ -92,6 +92,17 @@ app.use(csrfProtection);
 
 // API Rate Limiting and Routes
 app.use('/api', apiRateLimiter);
+
+// Gate API requests until the database adapter is ready so cold starts never
+// silently serve from the in-memory fallback.
+app.use('/api', async (_req, _res, next) => {
+  try {
+    await whenStoreReady();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 app.use('/api/auth', authRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
@@ -237,7 +248,7 @@ const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';
 
 if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
-  initDatabase().catch((err) => {
+  initDatabaseInBackground().catch((err) => {
     console.warn('[Database] Initialization notice:', err.message);
   });
 
@@ -247,7 +258,7 @@ if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
     console.log(`[MediStore] MirageSOC security pass-through initialized as first middleware`);
   });
 } else if (process.env.VERCEL) {
-  initDatabase().catch((err) => {
+  initDatabaseInBackground().catch((err) => {
     console.warn('[Database] Initialization notice on Vercel:', err.message);
   });
 }

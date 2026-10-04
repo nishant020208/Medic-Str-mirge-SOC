@@ -47,7 +47,12 @@ export class ErrorBoundary extends Component<Props, State> {
               An ominous disturbance occurred within the temple corridors. The Oracle was unable to complete the rite.
             </p>
             {this.state.error && (
-              <pre className="p-3 mb-6 bg-surface-2 rounded-card text-left text-xs font-mono text-danger overflow-x-auto max-h-32 border border-border">
+              <pre
+                tabIndex={0}
+                role="region"
+                aria-label="Sanctum error details"
+                className="p-3 mb-6 bg-surface-2 rounded-card text-left text-xs font-mono text-danger overflow-x-auto max-h-32 border border-border"
+              >
                 {this.state.error.message}
               </pre>
             )}

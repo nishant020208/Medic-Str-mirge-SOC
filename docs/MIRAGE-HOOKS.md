@@ -94,3 +94,129 @@ Neither `/admin-old` nor `/.env` or other trap paths are handled by the client a
   <!-- TODO remove old admin panel at /admin-old before launch -->
   ```
 This attracts automated web crawlers and adversaries directly into the MirageSOC deception web.
+
+---
+
+## 6. Running on Vercel: Statelessness Contract
+
+The production deployment runs the API as a Vercel Node.js serverless function
+(`api/index.ts` -> `server/src/app.ts`). Function instances are ephemeral, are not
+guaranteed to be the same instance for two consecutive requests, and are frozen
+between invocations. The real MirageSOC middleware **must therefore keep no state
+in function memory**.
+
+### 6.1 Forbidden: In-Memory State
+
+The middleware must not keep any of the following in module scope or a `Map`/`Set`
+declared at module scope:
+
+- A **blocklist / denylist** of IPs, user agents, or paths.
+- **Counters** for rate decisions, hit tallies, or "seen this IP" logic.
+- **Session or correlation state** used to link a login hook to the request that
+  triggered it.
+- Any long-lived cache that assumes a warm instance.
+
+Any of the above would silently reset on every cold start, so a blocked attacker
+would be admitted the next time a fresh instance served the request. The only
+place durable state may live is the MirageSOC backend or Postgres.
+
+### 6.2 Blocklist Check: Short Timeout, Per Request, With A Tiny Per-Invocation Cache
+
+Blocklist decisions must come from the MirageSOC backend, queried per request
+with an aggressive timeout:
+
+```javascript
+// Pseudocode — shape of the real implementation
+const BLOCKLIST_TIMEOUT_MS = 150;   // hard ceiling; never block the user for longer
+const CACHE_TTL_MS = 5000;          // tiny, per-invocation only (resets on cold start)
+let invocationCache = new Map();    // module scope is OK ONLY as a sub-request cache
+
+async function isBlocked(key) {
+  const hit = invocationCache.get(key);
+  const now = Date.now();
+  if (hit && now - hit.at < CACHE_TTL_MS) return hit.blocked;
+
+  let blocked = false;
+  try {
+    const res = await fetch(`${MIRAGE_BACKEND}/blocklist?key=${encodeURIComponent(key)}`, {
+      signal: AbortSignal.timeout(BLOCKLIST_TIMEOUT_MS),
+      headers: { authorization: `Bearer ${MIRAGE_TOKEN}` },
+    });
+    blocked = res.ok && (await res.json()).blocked === true;
+  } catch {
+    blocked = false;  // fail open — never let a MirageSOC outage break the store
+  }
+
+  invocationCache.set(key, { blocked, at: now });
+  if (invocationCache.size > 256) invocationCache.clear(); // bounded, disposable
+  return blocked;
+}
+```
+
+Rules that follow from this:
+
+- The timeout must be **shorter than the remaining `maxDuration` budget** (10 s in
+  `vercel.json`). A slow backend must never eat the function's time budget.
+- The cache is an optimisation, **never** a source of truth. It is allowed to be
+  empty or wrong on a cold start; correctness comes from the per-request call.
+- On timeout, DNS failure, 5xx, or malformed JSON: **fail open** and call `next()`.
+  A degraded security layer must degrade to pass-through, not to a 500.
+
+### 6.3 Event Reporting: Fire-and-Forget With `waitUntil`
+
+Login hooks and other telemetry must not delay the response. Send them without
+awaiting, and hand the promise to `waitUntil` so Vercel keeps the invocation alive
+long enough for the report to land after the response has been flushed:
+
+```javascript
+import { waitUntil } from '@vercel/functions';
+
+function report(event) {
+  const promise = fetch(`${MIRAGE_BACKEND}/events`, {
+    method: 'POST',
+    body: JSON.stringify(event),
+    signal: AbortSignal.timeout(1000),
+    headers: { authorization: `Bearer ${MIRAGE_TOKEN}`, 'content-type': 'application/json' },
+  }).catch(() => {});           // swallow: reporting must never surface to the user
+
+  waitUntil?.(promise);          // available on Vercel; no-op guard for local dev
+}
+```
+
+`loginFailed(req, username)` and `loginSucceeded(req, username)` therefore return
+**immediately**. They must not be awaited by the auth handlers beyond the call, and
+they must not throw: wrap the body in `try/catch` so a MirageSOC bug can never
+turn a successful login into a 500.
+
+### 6.4 Never Break the Real App
+
+`mirage(req, res, next)` is the **first** middleware, so a throw inside it aborts
+every request before a single route runs. Therefore:
+
+- The entire body must be wrapped so that any failure ends in `next()`, never in a
+  thrown error.
+- When the backend is down, the correct behaviour is **silently pass through**.
+- Trap paths must still be answered as `404 Not found` (plain text) by the app
+  itself, so that removing MirageSOC never turns `/admin-old` into a 200 SPA
+  response. `server/tests/mirage-hooks.test.ts` and
+  `server/tests/serverless.test.ts` lock both properties in place.
+
+### 6.5 What This Means for the Current Stub
+
+`server/mirage.js` today is a pure pass-through that delegates to
+`mirage.handler` when one is attached. That already satisfies the statelessness
+contract: it stores nothing, times nothing out, and reports nothing. When
+MirageSOC replaces the file, the rules above — and the two Vitest suites — are the
+acceptance criteria.
+
+---
+
+## 7. Coverage Requirement for the Real Integration
+
+Replacing the stub must keep these Vitest suites green:
+
+- `server/tests/mirage-hooks.test.ts` — proves the stub still runs **first** in
+  the middleware chain (before body parsing, before rate limiting).
+- `server/tests/serverless.test.ts` — proves the **Vercel handler** itself returns
+  `404` for `/admin-old`, `/.env`, `/backup.zip`, `/wp-login.php`, `/phpmyadmin`
+  and `/api/v1/internal/keys`, with the Mirage middleware having run.

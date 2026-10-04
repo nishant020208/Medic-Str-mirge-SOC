@@ -70,7 +70,7 @@ export const OraclePage: React.FC = () => {
     return 'The Omens are clouded regarding this inquiry. The Oracle suggests consulting our Apothecary Dispensary catalog or enlisting the Chief Pharmacist at /dashboard.';
   };
 
-  const handleSend = (textToSend?: string) => {
+  const handleSend = async (textToSend?: string) => {
     const query = (textToSend || inputVal).trim();
     if (!query) return;
 
@@ -85,18 +85,46 @@ export const OraclePage: React.FC = () => {
     if (!textToSend) setInputVal('');
     setIsTyping(true);
 
-    // Simulate mystic oracle response typing delay
-    setTimeout(() => {
-      const answer = matchAnswer(query);
+    try {
+      const res = await fetch('/api/oracle/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify({ message: query }),
+      });
+
+      const contentType = res.headers.get('content-type') || '';
+      let reply = '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        reply = data.reply;
+      }
+
+      if (!reply) {
+        reply = matchAnswer(query);
+      }
+
       const oracleMsg: ChatMessage = {
         id: Math.random().toString(),
         sender: 'oracle',
-        text: answer,
+        text: reply,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, oracleMsg]);
+    } catch (err) {
+      const fallback = matchAnswer(query);
+      const oracleMsg: ChatMessage = {
+        id: Math.random().toString(),
+        sender: 'oracle',
+        text: fallback,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, oracleMsg]);
+    } finally {
       setIsTyping(false);
-    }, 600);
+    }
   };
 
   return (

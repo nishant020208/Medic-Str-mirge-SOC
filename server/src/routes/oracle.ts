@@ -29,81 +29,88 @@ function matchCodex(query: string): string | null {
   return null;
 }
 
+import { oracleIpLimiter, oracleSessionLimiter } from '../middleware/rateLimiter.js';
+import { store } from '../data/store.js';
+import { waitUntil } from '@vercel/functions';
+
 // POST /api/oracle/chat
-oracleRouter.post('/chat', async (req: Request, res: Response) => {
-  const { message } = req.body || {};
-  if (!message || typeof message !== 'string' || !message.trim()) {
-    return res.status(400).json({ error: 'The Oracle requires a written petition.' });
-  }
+oracleRouter.post(
+  '/chat',
+  oracleIpLimiter,
+  oracleSessionLimiter,
+  async (req: Request, res: Response) => {
+    const { message } = req.body || {};
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ error: 'The Oracle requires a written petition.' });
+    }
 
-  const userQuery = message.trim();
+    const userQuery = message.trim();
+    const apiKey = process.env.GEMINI_API_KEY || process.env.gemini_api_key;
+    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-  // If query directly matches an established sanctum codex query (e.g. winter coughs, batch verification),
-  // return the consecrated canonical answer immediately
-  const codexAnswer = matchCodex(userQuery);
-  if (codexAnswer) {
+    let finalReply: string | null = null;
+    let finalSource: 'ai' | 'scripted' = 'scripted';
+
+    if (apiKey && (apiKey.startsWith('AIza') || process.env.NODE_ENV === 'production')) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: AbortSignal.timeout(6000), // 6s timeout as required
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [{ text: ORACLE_SYSTEM_INSTRUCTION }],
+              },
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: userQuery }],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 300,
+              },
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const data = (await response.json()) as any;
+          const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+          if (replyText) {
+            finalReply = replyText;
+            finalSource = 'ai';
+          }
+        }
+      } catch {
+        // Fall back cleanly to scripted responses; never expose raw errors
+      }
+    }
+
+    if (!finalReply) {
+      finalReply =
+        matchCodex(userQuery) ||
+        'The sacred incense curls upward, seeker. The spirits whisper of patience and balance. Drink steeped mountain thyme, rest beneath the cypress shade, and consult the Chief Pharmacist for tailored salves.';
+      finalSource = 'scripted';
+    }
+
+    // Log asynchronously via waitUntil so response is not delayed
+    try {
+      waitUntil(store.logOracle(userQuery, finalReply, finalSource));
+    } catch {
+      store.logOracle(userQuery, finalReply, finalSource).catch(() => {});
+    }
+
     return res.json({
-      reply: codexAnswer,
-      source: 'sanctum-codex',
-      oracle: 'Pythia of Asclepius',
+      reply: finalReply,
+      source: finalSource,
+      oracle: finalSource === 'ai' ? 'Pythia of Asclepius' : 'Pythia of Asclepius (Ancient Codex)',
     });
   }
-
-  const apiKey = process.env.GEMINI_API_KEY || process.env.gemini_api_key;
-
-  if (apiKey) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [{ text: ORACLE_SYSTEM_INSTRUCTION }],
-            },
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: userQuery }],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 300,
-            },
-          }),
-        }
-      );
-
-      if (response.ok) {
-        const data = (await response.json()) as any;
-        const replyText =
-          data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-        if (replyText) {
-          return res.json({
-            reply: replyText,
-            source: 'gemini',
-            oracle: 'Pythia of Asclepius',
-          });
-        }
-      }
-    } catch (err) {
-      // Fall through to local fallback
-    }
-  }
-
-  // Graceful local wisdom fallback
-  const fallbackReply =
-    matchCodex(userQuery) ||
-    'The sacred incense curls upward, seeker. The spirits whisper of patience and balance. Drink steeped mountain thyme, rest beneath the cypress shade, and consult the Chief Pharmacist for tailored salves.';
-
-  return res.json({
-    reply: fallbackReply,
-    source: 'sanctum-codex',
-    oracle: 'Pythia of Asclepius (Ancient Codex)',
-  });
-});
+);
 
 // GET /api/oracle/topics
 oracleRouter.get('/topics', (_req: Request, res: Response) => {

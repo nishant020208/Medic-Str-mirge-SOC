@@ -94,15 +94,20 @@ authRouter.post('/login', loginRateLimiter, async (req: Request, res: Response) 
   // Mirage success hook
   mirage.loginSucceeded(req, email);
 
-  return res.json({
-    message: 'Sanctum entry granted',
-    user: {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      address: user.address,
-      createdAt: user.createdAt,
-    },
+  req.session.save((saveErr) => {
+    if (saveErr) {
+      console.warn('[Session:Save] Error saving session:', saveErr.message);
+    }
+    return res.json({
+      message: 'Sanctum entry granted',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        address: user.address,
+        createdAt: user.createdAt,
+      },
+    });
   });
 });
 
@@ -129,21 +134,26 @@ authRouter.post('/register', async (req: Request, res: Response) => {
 
   mirage.loginSucceeded(req, email);
 
-  return res.status(201).json({
-    message: 'Identity consecrated',
-    user: {
-      id: newUser.id,
-      email: newUser.email,
-      role: newUser.role,
-      createdAt: newUser.createdAt,
-    },
+  req.session.save((saveErr) => {
+    if (saveErr) {
+      console.warn('[Session:Save] Error saving register session:', saveErr.message);
+    }
+    return res.status(201).json({
+      message: 'Identity consecrated',
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        role: newUser.role,
+        createdAt: newUser.createdAt,
+      },
+    });
   });
 });
 
 // GET /api/auth/nonce
-authRouter.get('/nonce', (req: Request, res: Response) => {
+authRouter.get('/nonce', async (req: Request, res: Response) => {
   const domain = req.headers.host || 'medistore.oracle';
-  const nonce = store.createNonce(domain);
+  const nonce = await store.createNonce(domain);
   return res.json({ nonce, domain });
 });
 
@@ -159,7 +169,7 @@ authRouter.post('/wallet', loginRateLimiter, async (req: Request, res: Response)
   const lowerAddress = address.toLowerCase();
 
   // Nonce check
-  const isNonceValid = store.verifyAndConsumeNonce(nonce);
+  const isNonceValid = await store.verifyAndConsumeNonce(nonce);
   if (!isNonceValid) {
     mirage.loginFailed(req, lowerAddress);
     return res.status(401).json({ error: 'Authentication nonce expired or already consumed' });
@@ -186,15 +196,20 @@ authRouter.post('/wallet', loginRateLimiter, async (req: Request, res: Response)
 
   mirage.loginSucceeded(req, lowerAddress);
 
-  return res.json({
-    message: 'Wallet signature confirmed',
-    user: {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      address: user.address,
-      createdAt: user.createdAt,
-    },
+  req.session.save((saveErr) => {
+    if (saveErr) {
+      console.warn('[Session:Save] Error saving wallet session:', saveErr.message);
+    }
+    return res.json({
+      message: 'Wallet signature confirmed',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        address: user.address,
+        createdAt: user.createdAt,
+      },
+    });
   });
 });
 

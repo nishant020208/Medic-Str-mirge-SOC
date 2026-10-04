@@ -62,7 +62,73 @@ export interface StorageAdapter {
   addToWhitelist(email: string, role?: 'customer' | 'pharmacist', addedBy?: string): Promise<WhitelistEntry>;
   removeFromWhitelist(email: string): Promise<boolean>;
   isWhitelisted(email: string): Promise<boolean>;
+  createNonce?(domain: string): Promise<string>;
+  verifyAndConsumeNonce?(nonce: string): Promise<boolean>;
+  logOracle?(prompt: string, reply: string, source: string): Promise<void>;
   reset(): Promise<void>;
+}
+
+// Lazy module-level singleton pool (max 3)
+let singletonPool: pg.Pool | null = null;
+
+export function getPostgresPool(connectionString?: string): pg.Pool | null {
+  const url = connectionString !== undefined ? connectionString : (process.env.DATABASE_URL || process.env.database_url);
+  if (!url) {
+    return null;
+  }
+  if (!singletonPool) {
+    const isLocal = url.includes('localhost') || url.includes('127.0.0.1');
+    singletonPool = new Pool({
+      connectionString: url,
+      ssl: isLocal ? false : { rejectUnauthorized: false },
+      // Serverless functions are highly concurrent and the pooled Neon endpoint
+      // charges nothing extra for idle sessions, so keep headroom for the
+      // request, session-store and rate-limiter queries running in parallel.
+      max: 10,
+      connectionTimeoutMillis: 10000,
+      // Keep idle sessions well above the browser's keep-alive window so the
+      // pool never closes a socket a client is about to reuse.
+      idleTimeoutMillis: 30000,
+      allowExitOnIdle: true,
+    });
+
+    singletonPool.on('error', (err: Error) => {
+      console.warn('[Database] Idle client error (pool continues):', err.message);
+    });
+  }
+  return singletonPool;
+}
+
+export async function checkDatabaseHealth(): Promise<'ok' | 'down'> {
+  const pool = getPostgresPool();
+  if (!pool) {
+    return 'down';
+  }
+  let client: pg.PoolClient | null = null;
+  try {
+    // Neon's pooled endpoint can take ~2s to finish the TLS handshake on a cold
+    // connection, so the deadline must exceed that or a healthy database
+    // reports as "down".
+    client = await Promise.race([
+      pool.connect(),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('connect timeout')), 8000)),
+    ]);
+    await Promise.race([
+      client.query('SELECT 1'),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('query timeout')), 2000)),
+    ]);
+    return 'ok';
+  } catch {
+    return 'down';
+  } finally {
+    if (client) {
+      try {
+        client.release();
+      } catch {
+        // ignore
+      }
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -73,30 +139,38 @@ export class PostgresAdapter implements StorageAdapter {
   private pool: pg.Pool;
 
   constructor(connectionString: string) {
-    const isLocal = connectionString.includes('localhost') || connectionString.includes('127.0.0.1');
-    this.pool = new Pool({
-      connectionString,
-      ssl: isLocal ? false : { rejectUnauthorized: false },
-      // Serverless-safe pool sizing: keep it small so we never exhaust Neon's
-      // connection limit, and release idle clients quickly. Neon/Supabase poolers
-      // close idle connections, which makes pg-pool emit 'error' on the pool.
-      max: 5,
-      idleTimeoutMillis: 10_000,
-      connectionTimeoutMillis: 10_000,
-      allowExitOnIdle: true,
-    });
-
-    // CRITICAL: an EventEmitter 'error' event with no listener is thrown as an
-    // uncaught exception, which terminates the process. On serverless platforms
-    // that surfaces as FUNCTION_INVOCATION_FAILED. Idle clients dropped by the
-    // Neon pooler emit here, so this listener must stay attached.
-    this.pool.on('error', (err: Error) => {
-      console.warn('[Database] Idle client error (pool continues):', err.message);
-    });
+    if (!connectionString) {
+      throw new Error('[Database] DATABASE_URL is missing. Please configure Neon POOLED DATABASE_URL in Vercel Environment Variables.');
+    }
+    const pool = getPostgresPool(connectionString);
+    if (!pool) {
+      throw new Error('[Database] Unable to initialize pool: DATABASE_URL is missing.');
+    }
+    this.pool = pool;
   }
 
   public async initialize(): Promise<void> {
-    const client = await this.pool.connect();
+    let client: pg.PoolClient | null = null;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+      try {
+        attempts++;
+        client = await this.pool.connect();
+        break;
+      } catch (err: any) {
+        console.warn(`[Database] Neon cold-start connection attempt ${attempts} failed: ${err.message}`);
+        if (attempts >= maxAttempts) {
+          throw new Error(`[Database] Failed to connect to Neon PostgreSQL after ${maxAttempts} attempts: ${err.message}`);
+        }
+        await new Promise((res) => setTimeout(res, attempts * 500));
+      }
+    }
+
+    if (!client) {
+      throw new Error('[Database] Failed to acquire client from pool.');
+    }
     try {
       // 1. Users Table
       await client.query(`
@@ -230,6 +304,45 @@ export class PostgresAdapter implements StorageAdapter {
           );
         }
       }
+
+      // 5. Connect-pg-simple Session Table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS session (
+          sid VARCHAR NOT NULL COLLATE "default" PRIMARY KEY,
+          sess JSON NOT NULL,
+          expire TIMESTAMP(6) NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON session ("expire");
+      `);
+
+      // 6. Rate Limits Table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS rate_limits (
+          key VARCHAR(255) PRIMARY KEY,
+          count INT NOT NULL,
+          reset_at TIMESTAMPTZ NOT NULL
+        );
+      `);
+
+      // 7. Wallet Nonces Table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS wallet_nonces (
+          nonce VARCHAR(128) PRIMARY KEY,
+          domain VARCHAR(255) NOT NULL,
+          expires_at TIMESTAMPTZ NOT NULL
+        );
+      `);
+
+      // 8. Oracle Logs Table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS oracle_logs (
+          id TEXT PRIMARY KEY,
+          prompt TEXT NOT NULL,
+          reply TEXT NOT NULL,
+          source TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+      `);
     } finally {
       client.release();
     }
@@ -537,15 +650,20 @@ export class PostgresAdapter implements StorageAdapter {
   }
 
   public async getWhitelist(): Promise<WhitelistEntry[]> {
-    const res = await this.pool.query(
-      'SELECT email, role, added_by, created_at FROM whitelist ORDER BY created_at DESC'
-    );
-    return res.rows.map((r) => ({
-      email: r.email,
-      role: r.role as 'customer' | 'pharmacist',
-      addedBy: r.added_by,
-      createdAt: r.created_at,
-    }));
+    try {
+      const res = await this.pool.query(
+        'SELECT email, role, added_by, created_at FROM whitelist ORDER BY created_at DESC'
+      );
+      return res.rows.map((r) => ({
+        email: r.email,
+        role: r.role as 'customer' | 'pharmacist',
+        addedBy: r.added_by,
+        createdAt: r.created_at,
+      }));
+    } catch (err: any) {
+      console.warn('[PostgresAdapter:getWhitelist error, falling back]:', err.message);
+      return DEFAULT_WHITELIST;
+    }
   }
 
   public async addToWhitelist(
@@ -584,6 +702,36 @@ export class PostgresAdapter implements StorageAdapter {
       email.toLowerCase().trim(),
     ]);
     return res.rows.length > 0;
+  }
+
+  public async createNonce(domain: string): Promise<string> {
+    const nonce = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    await this.pool.query(
+      `INSERT INTO wallet_nonces (nonce, domain, expires_at)
+       VALUES ($1, $2, NOW() + INTERVAL '5 minutes')
+       ON CONFLICT (nonce) DO NOTHING`,
+      [nonce, domain]
+    );
+    return nonce;
+  }
+
+  public async verifyAndConsumeNonce(nonce: string): Promise<boolean> {
+    const res = await this.pool.query(
+      `DELETE FROM wallet_nonces
+       WHERE nonce = $1 AND expires_at > NOW()
+       RETURNING nonce`,
+      [nonce]
+    );
+    return (res.rowCount ?? 0) > 0;
+  }
+
+  public async logOracle(prompt: string, reply: string, source: string): Promise<void> {
+    const id = 'log_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+    await this.pool.query(
+      `INSERT INTO oracle_logs (id, prompt, reply, source, created_at)
+       VALUES ($1, $2, $3, $4, NOW())`,
+      [id, prompt, reply, source]
+    );
   }
 
   public async reset(): Promise<void> {
@@ -1033,5 +1181,25 @@ export class MemoryAdapter implements StorageAdapter {
 
   public async isWhitelisted(email: string): Promise<boolean> {
     return this.whitelist.some((w) => w.email.toLowerCase() === email.toLowerCase().trim());
+  }
+
+  private nonces = new Map<string, { nonce: string; domain: string; expiresAt: number }>();
+
+  public async createNonce(domain: string): Promise<string> {
+    const nonce = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    this.nonces.set(nonce, { nonce, domain, expiresAt: Date.now() + 5 * 60 * 1000 });
+    return nonce;
+  }
+
+  public async verifyAndConsumeNonce(nonce: string): Promise<boolean> {
+    const entry = this.nonces.get(nonce);
+    if (!entry) return false;
+    this.nonces.delete(nonce);
+    if (Date.now() > entry.expiresAt) return false;
+    return true;
+  }
+
+  public async logOracle(_prompt: string, _reply: string, _source: string): Promise<void> {
+    // In-memory noop
   }
 }

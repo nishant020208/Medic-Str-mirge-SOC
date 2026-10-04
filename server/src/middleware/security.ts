@@ -1,5 +1,4 @@
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import { Request, Response, NextFunction } from 'express';
 
@@ -38,23 +37,7 @@ export function configureHelmet() {
   });
 }
 
-export const apiRateLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 120, // 120 requests per minute
-  standardHeaders: true,
-  legacyHeaders: false,
-  validate: { trustProxy: false },
-  message: { error: 'Too many sanctum inquiries. Please await the next celestial minute.' },
-});
-
-export const loginRateLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 10, // 10 attempts per minute
-  standardHeaders: true,
-  legacyHeaders: false,
-  validate: { trustProxy: false },
-  message: { error: 'Too many unauthorized entry attempts. Sanctum veil locked for 60 seconds.' },
-});
+export { apiRateLimiter, loginRateLimiter } from './rateLimiter.js';
 
 // Custom morgan logger including real client IP (req.ip)
 morgan.token('client-ip', (req: Request) => req.ip || req.socket.remoteAddress || '-');

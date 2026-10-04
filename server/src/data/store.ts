@@ -161,20 +161,25 @@ class UnifiedStore {
     return await this.adapter.isWhitelisted(email);
   }
 
-  // Fast Ephemeral Nonces (stored with TTL for SIWE auth)
-  public createNonce(domain: string): string {
-    const nonce = Math.random().toString(36).substring(2) + Date.now().toString(36);
-    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 min expiry
-    this.nonces.set(nonce, { nonce, domain, expiresAt });
-    return nonce;
+  // Nonces (PostgreSQL backed on Neon, memory fallback in offline tests)
+  public async createNonce(domain: string): Promise<string> {
+    if (this.adapter.createNonce) {
+      return await this.adapter.createNonce(domain);
+    }
+    return this.memoryFallback.createNonce(domain);
   }
 
-  public verifyAndConsumeNonce(nonce: string): boolean {
-    const entry = this.nonces.get(nonce);
-    if (!entry) return false;
-    this.nonces.delete(nonce);
-    if (Date.now() > entry.expiresAt) return false;
-    return true;
+  public async verifyAndConsumeNonce(nonce: string): Promise<boolean> {
+    if (this.adapter.verifyAndConsumeNonce) {
+      return await this.adapter.verifyAndConsumeNonce(nonce);
+    }
+    return this.memoryFallback.verifyAndConsumeNonce(nonce);
+  }
+
+  public async logOracle(prompt: string, reply: string, source: string): Promise<void> {
+    if (this.adapter.logOracle) {
+      await this.adapter.logOracle(prompt, reply, source);
+    }
   }
 }
 
@@ -187,15 +192,31 @@ export const store = new UnifiedStore();
 let readyPromise: Promise<void> = Promise.resolve();
 
 export function whenStoreReady(): Promise<void> {
-  return readyPromise;
+  // Bound how long any single request waits. Past this we serve from the
+  // in-memory store rather than risk an upstream client timeout.
+  return Promise.race([
+    readyPromise,
+    new Promise<void>((resolve) => {
+      const t = setTimeout(resolve, READY_WAIT_MS);
+      if (typeof t.unref === 'function') t.unref();
+    }),
+  ]);
 }
+
+/**
+ * How long an API request may wait for the database before falling back to the
+ * in-memory store. Deliberately short: Neon's cold start can take ~5s, and a
+ * request that blocks longer than the caller's timeout fails outright, which is
+ * worse than briefly serving seed data from memory.
+ */
+const READY_WAIT_MS = 2_000;
 
 /**
  * Starts database initialization in the background and records readiness.
  * Guarantees the returned promise settles, so a hanging connection can never
  * wedge a serverless invocation indefinitely.
  */
-export function initDatabaseInBackground(timeoutMs = 8_000): Promise<void> {
+export function initDatabaseInBackground(timeoutMs = 20_000): Promise<void> {
   readyPromise = Promise.race([
     initDatabase(),
     new Promise<void>((resolve) => {

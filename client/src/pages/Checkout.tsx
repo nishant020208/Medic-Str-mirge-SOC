@@ -136,7 +136,7 @@ export const CheckoutPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-grow">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 w-full flex-grow">
       <SEO
         title="Sanctuary Checkout | MediStore Sanctuary"
         description="Secure pharmaceutical ordering and tribute checkout at MediStore Temple of Asclepius."
@@ -152,21 +152,21 @@ export const CheckoutPage: React.FC = () => {
         />
       </div>
 
-      <div className="text-center mb-8">
+      <div className="text-center mb-6 sm:mb-8">
         <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
           Final Rite
         </span>
-        <h1 className="font-cinzel text-3xl font-bold text-text">
+        <h1 className="font-cinzel text-2xl sm:text-3xl font-bold text-text">
           Sanctuary Checkout &amp; Consecration
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
         {/* Form Column */}
         <div className="lg:col-span-7">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Courier / Shipping Details */}
-            <Card variant="marble" className="p-6 space-y-4">
+            <Card variant="marble" className="p-4 sm:p-6 space-y-4">
               <h3 className="font-cinzel text-base font-bold text-text flex items-center gap-2 border-b border-border pb-2">
                 <span>1. Courier Consignment Details</span>
               </h3>
@@ -194,7 +194,7 @@ export const CheckoutPage: React.FC = () => {
                 placeholder="42 Epidaurus Way, Sanctuary Square"
               />
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Input
                   label="City"
                   {...register('city')}
@@ -217,7 +217,7 @@ export const CheckoutPage: React.FC = () => {
             </Card>
 
             {/* Payment Details */}
-            <Card variant="marble" className="p-6 space-y-4">
+            <Card variant="marble" className="p-4 sm:p-6 space-y-4">
               <div className="flex justify-between items-center border-b border-border pb-2">
                 <h3 className="font-cinzel text-base font-bold text-text flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-accent-text" />
@@ -273,7 +273,7 @@ export const CheckoutPage: React.FC = () => {
 
         {/* Order Summary Column */}
         <div className="lg:col-span-5">
-          <Card variant="papyrus" className="p-6">
+          <Card variant="papyrus" className="p-4 sm:p-6">
             <h3 className="font-cinzel text-base font-bold text-text mb-4 border-b border-border pb-2">
               Consignment Items ({items.length})
             </h3>

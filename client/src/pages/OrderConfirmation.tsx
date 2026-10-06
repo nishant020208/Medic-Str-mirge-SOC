@@ -68,7 +68,7 @@ export const OrderConfirmationPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full flex-grow">
+    <div className="max-w-3xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-12 w-full flex-grow">
       <SEO
         title={`Consecration #${order.id} Confirmed | MediStore Sanctuary`}
         description="Your sacred order has been consecrated by the Asclepeion."
@@ -84,7 +84,7 @@ export const OrderConfirmationPage: React.FC = () => {
         />
       </div>
       {/* Sanctum Receipt Card */}
-      <Card variant="papyrus" className="p-8 border-2 border-border shadow-theme relative">
+      <Card variant="papyrus" className="p-4 sm:p-8 border-2 border-border shadow-theme relative">
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-full bg-surface-2 border-2 border-success text-success flex items-center justify-center mx-auto mb-4 shadow-sm">
             <CheckCircle2 className="w-8 h-8" />
@@ -190,11 +190,12 @@ export const OrderConfirmationPage: React.FC = () => {
             size="sm"
             onClick={() => window.print()}
             leftIcon={<Printer className="w-4 h-4" />}
+            className="w-full sm:w-auto justify-center"
           >
             Print Sacred Scroll
           </Button>
-          <Link to="/shop">
-            <Button variant="primary" size="sm" leftIcon={<ShoppingBag className="w-4 h-4" />}>
+          <Link to="/shop" className="w-full sm:w-auto">
+            <Button variant="primary" size="sm" className="w-full sm:w-auto justify-center" leftIcon={<ShoppingBag className="w-4 h-4" />}>
               Return to Apothecary
             </Button>
           </Link>

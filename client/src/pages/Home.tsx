@@ -104,7 +104,7 @@ export const HomePage: React.FC = () => {
         jsonLd={[getPharmacySchema(), getWebSiteSchema()]}
       />
       {/* Hero Section with Static SVG first, deferred 3D Canvas */}
-      <section className="relative min-h-[90vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 overflow-hidden">
+      <section className="relative min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center px-3 sm:px-6 lg:px-8 py-8 sm:py-12 overflow-hidden">
         {/* Decorative column flutes */}
         <div className="absolute inset-y-0 left-4 w-12 hidden md:block opacity-20 column-fluted pointer-events-none" />
         <div className="absolute inset-y-0 right-4 w-12 hidden md:block opacity-20 column-fluted pointer-events-none" />
@@ -112,30 +112,30 @@ export const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
           {/* Left Column: Copy & Actions */}
           <div className="lg:col-span-7 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-border text-accent-text text-xs font-cinzel font-bold mb-6 tracking-widest uppercase shadow-inner">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-2 border border-border text-accent-text text-xs font-cinzel font-bold mb-4 sm:mb-6 tracking-widest uppercase shadow-inner">
               <Sparkles className="w-3.5 h-3.5 text-accent" />
               <span>Consecrated Apothecary &amp; Oracle Ledger</span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl font-cinzel font-bold text-text tracking-tight leading-tight mb-6">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-cinzel font-bold text-text tracking-tight leading-tight mb-4 sm:mb-6">
               <BlurText text="TEMPLE OF ASCLEPIUS" animateBy="words" />
             </h1>
 
-            <p className="font-cormorant text-xl sm:text-2xl text-text-muted max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed italic">
+            <p className="font-cormorant text-lg sm:text-2xl text-text-muted max-w-xl mx-auto lg:mx-0 mb-6 sm:mb-8 leading-relaxed italic">
               "Let medicine be your offering, and healing your devotion." Ancient Hellenic herbal wisdom harmonized with immutable cryptographic batch authenticity.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
-              <Magnet>
-                <Link to="/shop">
-                  <Button variant="primary" size="lg" rightIcon={<ArrowRight className="w-5 h-5" />}>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start items-center w-full">
+              <Magnet className="w-full sm:w-auto">
+                <Link to="/shop" className="w-full sm:w-auto block">
+                  <Button variant="primary" size="lg" className="w-full sm:w-auto justify-center" rightIcon={<ArrowRight className="w-5 h-5" />}>
                     Explore Dispensary
                   </Button>
                 </Link>
               </Magnet>
-              <Magnet>
-                <Link to="/oracle">
-                  <Button variant="outline" size="lg" leftIcon={<Sparkles className="w-5 h-5" />}>
+              <Magnet className="w-full sm:w-auto">
+                <Link to="/oracle" className="w-full sm:w-auto block">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto justify-center" leftIcon={<Sparkles className="w-5 h-5" />}>
                     Consult The Oracle
                   </Button>
                 </Link>
@@ -144,7 +144,7 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Right Column: 3D Rod of Asclepius Emblem (Deferred or Static) */}
-          <div className="lg:col-span-5 h-[360px] sm:h-[450px] w-full flex items-center justify-center">
+          <div className="lg:col-span-5 h-[260px] sm:h-[380px] lg:h-[450px] w-full flex items-center justify-center">
             {mount3D ? (
               <Suspense fallback={<StaticAsclepiusHeroFallback />}>
                 <AsclepiusHero3D />
@@ -164,37 +164,37 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Stats Strip with CountUp (React Bits) */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div className="p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
-            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-accent-text mb-1">
+      <section className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-10 sm:py-16 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-center">
+          <div className="p-3.5 sm:p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
+            <div className="font-cinzel text-2xl sm:text-4xl font-bold text-accent-text mb-1">
               <CountUp to={40} suffix="+" />
             </div>
-            <div className="font-cinzel text-xs uppercase tracking-wider text-text-muted font-bold">
+            <div className="font-cinzel text-[11px] sm:text-xs uppercase tracking-wider text-text-muted font-bold">
               Formulated Remedies
             </div>
           </div>
-          <div className="p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
-            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-accent-text mb-1">
+          <div className="p-3.5 sm:p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
+            <div className="font-cinzel text-2xl sm:text-4xl font-bold text-accent-text mb-1">
               <CountUp to={100} suffix="%" />
             </div>
-            <div className="font-cinzel text-xs uppercase tracking-wider text-text-muted font-bold">
+            <div className="font-cinzel text-[11px] sm:text-xs uppercase tracking-wider text-text-muted font-bold">
               On-Chain Batch Sealed
             </div>
           </div>
-          <div className="p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
-            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-accent-text mb-1">
+          <div className="p-3.5 sm:p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
+            <div className="font-cinzel text-2xl sm:text-4xl font-bold text-accent-text mb-1">
               <CountUp to={1250} prefix="" suffix=" BCE" />
             </div>
-            <div className="font-cinzel text-xs uppercase tracking-wider text-text-muted font-bold">
+            <div className="font-cinzel text-[11px] sm:text-xs uppercase tracking-wider text-text-muted font-bold">
               Asclepeion Lineage
             </div>
           </div>
-          <div className="p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
-            <div className="font-cinzel text-3xl sm:text-4xl font-bold text-accent-text mb-1">
+          <div className="p-3.5 sm:p-6 rounded-card border border-border bg-surface shadow-theme floating-card">
+            <div className="font-cinzel text-2xl sm:text-4xl font-bold text-accent-text mb-1">
               <CountUp to={100} suffix="%" />
             </div>
-            <div className="font-cinzel text-xs uppercase tracking-wider text-text-muted font-bold">
+            <div className="font-cinzel text-[11px] sm:text-xs uppercase tracking-wider text-text-muted font-bold">
               Sanctum Security
             </div>
           </div>
@@ -203,7 +203,7 @@ export const HomePage: React.FC = () => {
 
       {/* Featured Medicines Section */}
       {featuredProducts.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-12 w-full">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
             <div>
               <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">

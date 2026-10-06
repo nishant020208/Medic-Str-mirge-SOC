@@ -57,7 +57,7 @@ export const CartPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-grow">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 w-full flex-grow">
       <SEO
         title="Sacred Cart | MediStore Sanctuary"
         description="Review your pharmaceutical formulations and complete your requisition."
@@ -67,16 +67,16 @@ export const CartPage: React.FC = () => {
       <div className="mb-6">
         <Breadcrumbs items={[{ name: 'Requisition Cart', url: '/cart' }]} />
       </div>
-      <div className="text-center mb-8">
+      <div className="text-center mb-6 sm:mb-8">
         <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
           Sanctum Offerings
         </span>
-        <h1 className="font-cinzel text-3xl font-bold text-text">
+        <h1 className="font-cinzel text-2xl sm:text-3xl font-bold text-text">
           Sacred Requisition Basket
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
         {/* Cart Items List */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex justify-between items-center px-1">
@@ -95,35 +95,35 @@ export const CartPage: React.FC = () => {
             <Card
               key={product.id}
               variant="marble"
-              className="p-4 flex flex-col sm:flex-row items-center gap-4 justify-between"
+              className="p-3.5 sm:p-4 flex flex-col sm:flex-row items-center gap-4 justify-between"
             >
-              <div className="flex items-center gap-4 w-full sm:w-auto">
-                <div className="w-16 h-16 rounded-card bg-surface-2 border border-border flex items-center justify-center text-accent-text shrink-0">
+              <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-card bg-surface-2 border border-border flex items-center justify-center text-accent-text shrink-0">
                   <ProductIllustration type={product.illustration} name={product.name} size="sm" />
                 </div>
                 <div>
                   <Link
                     to={`/shop/${product.id}`}
-                    className="font-cinzel font-bold text-sm text-text hover:text-accent-text"
+                    className="font-cinzel font-bold text-sm text-text hover:text-accent-text line-clamp-1"
                   >
                     {product.name}
                   </Link>
                   <span className="text-xs text-text-muted block font-mono">
                     Batch: {product.batchId}
                   </span>
-                  <span className="font-cinzel font-bold text-sm text-accent-text block mt-1">
+                  <span className="font-cinzel font-bold text-sm text-accent-text block mt-0.5">
                     {formatPrice(product.price)} each
                   </span>
                 </div>
               </div>
 
               {/* Quantity Controls & Total */}
-              <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-border">
-                <div className="flex items-center border border-border rounded-card bg-surface-2">
+              <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-border">
+                <div className="flex items-center border border-border rounded-card bg-surface-2 shadow-inner">
                   <button
                     type="button"
                     onClick={() => updateQuantity(product.id, quantity - 1)}
-                    className="p-2 text-text-muted hover:text-accent-text focus:outline-none"
+                    className="min-w-[40px] min-h-[40px] flex items-center justify-center p-2 text-text-muted hover:text-accent-text focus:outline-none"
                     aria-label="Decrease quantity"
                   >
                     <Minus className="w-3.5 h-3.5" />
@@ -135,7 +135,7 @@ export const CartPage: React.FC = () => {
                     type="button"
                     onClick={() => updateQuantity(product.id, quantity + 1)}
                     disabled={quantity >= product.stock}
-                    className="p-2 text-text-muted hover:text-accent-text focus:outline-none disabled:opacity-30"
+                    className="min-w-[40px] min-h-[40px] flex items-center justify-center p-2 text-text-muted hover:text-accent-text focus:outline-none disabled:opacity-30"
                     aria-label="Increase quantity"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -150,7 +150,7 @@ export const CartPage: React.FC = () => {
 
                 <button
                   onClick={() => removeItem(product.id)}
-                  className="p-1.5 text-text-muted hover:text-danger transition-colors"
+                  className="min-w-[40px] min-h-[40px] flex items-center justify-center p-2 text-text-muted hover:text-danger transition-colors"
                   aria-label={`Remove ${product.name} from cart`}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -162,7 +162,7 @@ export const CartPage: React.FC = () => {
 
         {/* Order Summary Card */}
         <div className="lg:col-span-1">
-          <Card variant="papyrus" className="p-6">
+          <Card variant="papyrus" className="p-4 sm:p-6">
             <h3 className="font-cinzel text-lg font-bold text-text mb-4 border-b border-border pb-2">
               Tribute Computation
             </h3>

@@ -130,7 +130,7 @@ export const ProductDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 w-full">
       <SEO
         title={`${product.name} | MediStore Sanctuary Dispensary`}
         description={product.description}
@@ -149,15 +149,15 @@ export const ProductDetailPage: React.FC = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-start mb-12 sm:mb-16">
         {/* Left: Product Visual Presentation */}
-        <div className="rounded-card border border-border bg-surface p-8 shadow-theme relative overflow-hidden flex flex-col items-center justify-center min-h-[420px] floating-card">
+        <div className="rounded-card border border-border bg-surface p-4 sm:p-8 shadow-theme relative overflow-hidden flex flex-col items-center justify-center min-h-[280px] sm:min-h-[420px] floating-card">
           <div className="absolute top-4 left-4 flex gap-2">
             <Badge variant="info">{product.category}</Badge>
             {product.rx && <Badge variant="danger">Rx Prescription</Badge>}
           </div>
 
-          <div className="w-48 h-48 rounded-full bg-surface-2 border-2 border-border flex items-center justify-center text-accent my-8 shadow-inner">
+          <div className="w-36 h-36 sm:w-48 sm:h-48 rounded-full bg-surface-2 border-2 border-border flex items-center justify-center text-accent my-6 sm:my-8 shadow-inner">
             <ProductIllustration type={product.illustration} name={product.name} size="lg" />
           </div>
 
@@ -172,16 +172,16 @@ export const ProductDetailPage: React.FC = () => {
         </div>
 
         {/* Right: Info & Actions */}
-        <div className="flex flex-col space-y-6">
+        <div className="flex flex-col space-y-5 sm:space-y-6">
           <div>
             <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
               Sanctum Formulation
             </span>
-            <h1 className="font-cinzel text-3xl sm:text-4xl font-bold text-text mb-3">
+            <h1 className="font-cinzel text-2xl sm:text-3xl lg:text-4xl font-bold text-text mb-3">
               {product.name}
             </h1>
             <div className="flex items-center gap-4">
-              <span className="font-cinzel text-3xl font-bold text-accent-text">
+              <span className="font-cinzel text-2xl sm:text-3xl font-bold text-accent-text">
                 {formatPrice(product.price)}
               </span>
               {product.stock > 0 ? (
@@ -196,7 +196,7 @@ export const ProductDetailPage: React.FC = () => {
             <h2 className="font-cinzel text-xs uppercase tracking-wider font-bold text-text mb-2">
               Asclepeion Description
             </h2>
-            <p className="font-cormorant text-lg text-text leading-relaxed">
+            <p className="font-cormorant text-base sm:text-lg text-text leading-relaxed">
               {product.description}
             </p>
           </Card>
@@ -212,12 +212,12 @@ export const ProductDetailPage: React.FC = () => {
           </div>
 
           {/* Quantity and Add to Cart */}
-          <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center pt-2">
-            <div className="flex items-center border border-border rounded-card bg-surface-2 shadow-inner">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center pt-2">
+            <div className="flex items-center justify-between sm:justify-start border border-border rounded-card bg-surface-2 shadow-inner">
               <button
                 type="button"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="p-3 text-text-muted hover:text-text focus:outline-none"
+                className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-text focus:outline-none"
                 aria-label="Decrease quantity"
               >
                 <Minus className="w-4 h-4" />
@@ -229,7 +229,7 @@ export const ProductDetailPage: React.FC = () => {
                 type="button"
                 onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
                 disabled={quantity >= product.stock}
-                className="p-3 text-text-muted hover:text-text focus:outline-none disabled:opacity-30"
+                className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-text-muted hover:text-text focus:outline-none disabled:opacity-30"
                 aria-label="Increase quantity"
               >
                 <Plus className="w-4 h-4" />
@@ -239,7 +239,7 @@ export const ProductDetailPage: React.FC = () => {
             <Button
               variant="primary"
               size="lg"
-              className="flex-1"
+              className="flex-1 w-full sm:w-auto"
               onClick={handleAddToCart}
               disabled={product.stock <= 0}
               leftIcon={<ShoppingCart className="w-5 h-5" />}

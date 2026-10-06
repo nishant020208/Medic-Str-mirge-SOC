@@ -82,7 +82,7 @@ export const CataloguePage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 w-full">
       <SEO
         title="The Apothecary Archives | MediStore Pharmacopeia"
         description="Browse all 40 consecrated botanical medicines, analgesics, and sacred remedies. Sealed with cryptographic on-chain batch authentication."
@@ -91,11 +91,11 @@ export const CataloguePage: React.FC = () => {
       <Breadcrumbs items={[{ name: 'Apothecary Dispensary', url: '/shop' }]} />
 
       {/* Title */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-6 sm:mb-8">
         <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
           Sanctuary Dispensary
         </span>
-        <h1 className="font-cinzel text-3xl sm:text-4xl font-bold text-text">
+        <h1 className="font-cinzel text-2xl sm:text-4xl font-bold text-text">
           The Apothecary Archives
         </h1>
         <p className="font-cormorant text-base text-text-muted max-w-xl mx-auto mt-2">
@@ -104,8 +104,8 @@ export const CataloguePage: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-surface-2 p-4 rounded-card border border-border mb-8 space-y-4 shadow-theme">
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-surface-2 p-3 sm:p-4 rounded-card border border-border mb-8 space-y-4 shadow-theme">
+        <div className="flex flex-col md:flex-row gap-3 sm:gap-4 items-center justify-between">
           <div className="w-full md:w-96 relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
             <Input
@@ -113,7 +113,7 @@ export const CataloguePage: React.FC = () => {
               placeholder="Search remedies, herbs, symptoms..."
               value={search}
               onChange={(e) => updateFilter('q', e.target.value || null)}
-              className="pl-9 min-h-[40px]"
+              className="pl-9 min-h-[44px]"
             />
           </div>
 
@@ -125,7 +125,7 @@ export const CataloguePage: React.FC = () => {
               aria-label="Sort remedies by"
               value={sort}
               onChange={(e) => updateFilter('sort', e.target.value)}
-              className="text-xs px-2.5 py-2 rounded-card bg-surface border border-border text-text font-cinzel shadow-inner"
+              className="text-xs px-2.5 py-2 min-h-[38px] rounded-card bg-surface border border-border text-text font-cinzel shadow-inner"
             >
               <option value="featured">Featured</option>
               <option value="price-asc">Price: Low to High</option>
@@ -135,7 +135,7 @@ export const CataloguePage: React.FC = () => {
 
             <button
               onClick={() => updateFilter('rx', rxFilter ? null : 'true')}
-              className={`px-3 py-1.5 text-xs font-cinzel rounded-card border transition-colors flex items-center gap-1 ${
+              className={`px-3 py-2 min-h-[38px] text-xs font-cinzel rounded-card border transition-colors flex items-center gap-1.5 ${
                 rxFilter
                   ? 'bg-danger text-text-on-primary border-border font-bold shadow-theme'
                   : 'bg-surface border-border text-text-muted hover:text-text'
@@ -147,7 +147,7 @@ export const CataloguePage: React.FC = () => {
 
             <button
               onClick={() => updateFilter('inStock', inStockFilter ? null : 'true')}
-              className={`px-3 py-1.5 text-xs font-cinzel rounded-card border transition-colors flex items-center gap-1 ${
+              className={`px-3 py-2 min-h-[38px] text-xs font-cinzel rounded-card border transition-colors flex items-center gap-1.5 ${
                 inStockFilter
                   ? 'bg-success text-text-on-primary border-border font-bold shadow-theme'
                   : 'bg-surface border-border text-text-muted hover:text-text'
@@ -163,7 +163,7 @@ export const CataloguePage: React.FC = () => {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           <button
             onClick={() => updateFilter('category', 'All')}
-            className={`px-3 py-1 text-xs font-cinzel uppercase tracking-wider rounded-card transition-all whitespace-nowrap ${
+            className={`px-3 py-1.5 min-h-[36px] text-xs font-cinzel uppercase tracking-wider rounded-card transition-all whitespace-nowrap ${
               selectedCategory === 'All'
                 ? 'bg-primary text-text-on-primary font-bold shadow-theme'
                 : 'bg-surface border border-border text-text-muted hover:text-text'
@@ -175,7 +175,7 @@ export const CataloguePage: React.FC = () => {
             <button
               key={cat}
               onClick={() => updateFilter('category', cat)}
-              className={`px-3 py-1 text-xs font-cinzel uppercase tracking-wider rounded-card transition-all whitespace-nowrap ${
+              className={`px-3 py-1.5 min-h-[36px] text-xs font-cinzel uppercase tracking-wider rounded-card transition-all whitespace-nowrap ${
                 selectedCategory === cat
                   ? 'bg-primary text-text-on-primary font-bold shadow-theme'
                   : 'bg-surface border border-border text-text-muted hover:text-text'
@@ -190,7 +190,7 @@ export const CataloguePage: React.FC = () => {
       {/* Product Grid */}
       <h2 className="sr-only">Apothecary Collection</h2>
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {[...Array(8)].map((_, i) => (
             <div
               key={i}

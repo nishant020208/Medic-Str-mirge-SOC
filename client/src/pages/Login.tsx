@@ -97,7 +97,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-12 w-full flex-grow flex flex-col justify-center">
+    <div className="max-w-md mx-auto px-3 sm:px-4 py-6 sm:py-12 w-full flex-grow flex flex-col justify-center">
       <SEO
         title="Initiate Sign In | MediStore Sanctuary"
         description="Authenticate to your MediStore account using consecrated credentials or Web3 wallet."
@@ -107,7 +107,7 @@ export const LoginPage: React.FC = () => {
         <Breadcrumbs items={[{ name: 'Sanctum Sign In', url: '/login' }]} />
       </div>
 
-      <Card variant="marble" className="p-8 border-2 border-border shadow-theme">
+      <Card variant="marble" className="p-5 sm:p-8 border-2 border-border shadow-theme">
         <div className="text-center mb-6">
           <div className="w-14 h-14 rounded-full bg-surface-2 border border-border text-accent-text flex items-center justify-center mx-auto mb-3 shadow-sm">
             <KeyRound className="w-7 h-7" />

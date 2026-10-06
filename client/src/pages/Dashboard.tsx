@@ -292,7 +292,7 @@ export const DashboardPage: React.FC = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-grow">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 w-full flex-grow">
       <SEO
         title="Pharmacist Sanctum Dashboard | MediStore Sanctuary"
         description="Consecrated administration: inventory management, consignment manifests, and dispensary analytics."
@@ -304,12 +304,12 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <div>
           <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
             Initiate Level IV Access
           </span>
-          <h1 className="font-cinzel text-3xl font-bold text-text">
+          <h1 className="font-cinzel text-2xl sm:text-3xl font-bold text-text">
             Pharmacist Sanctum Dashboard
           </h1>
           <p className="font-cormorant text-sm text-text-muted">
@@ -322,8 +322,8 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card variant="marble" className="p-5 flex items-center justify-between">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <Card variant="marble" className="p-4 sm:p-5 flex items-center justify-between">
           <div>
             <span className="text-xs font-cinzel text-text-muted uppercase tracking-wider block">
               Cumulative Tithe
@@ -332,12 +332,12 @@ export const DashboardPage: React.FC = () => {
               {formatPrice(totalRevenue)}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-surface-2 text-accent-text border border-border flex items-center justify-center">
-            <TrendingUp className="w-6 h-6" />
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-surface-2 text-accent-text border border-border flex items-center justify-center shrink-0">
+            <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
         </Card>
 
-        <Card variant="marble" className="p-5 flex items-center justify-between">
+        <Card variant="marble" className="p-4 sm:p-5 flex items-center justify-between">
           <div>
             <span className="text-xs font-cinzel text-text-muted uppercase tracking-wider block">
               Consignments
@@ -346,12 +346,12 @@ export const DashboardPage: React.FC = () => {
               {orders.length}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-surface-2 text-primary border border-border flex items-center justify-center">
-            <ShoppingCart className="w-6 h-6" />
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-surface-2 text-primary border border-border flex items-center justify-center shrink-0">
+            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
         </Card>
 
-        <Card variant="marble" className="p-5 flex items-center justify-between">
+        <Card variant="marble" className="p-4 sm:p-5 flex items-center justify-between">
           <div>
             <span className="text-xs font-cinzel text-text-muted uppercase tracking-wider block">
               Stock Reserves
@@ -360,12 +360,12 @@ export const DashboardPage: React.FC = () => {
               {totalUnitsInStock}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-surface-2 text-success border border-border flex items-center justify-center">
-            <Boxes className="w-6 h-6" />
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-surface-2 text-success border border-border flex items-center justify-center shrink-0">
+            <Boxes className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
         </Card>
 
-        <Card variant="marble" className="p-5 flex items-center justify-between">
+        <Card variant="marble" className="p-4 sm:p-5 flex items-center justify-between">
           <div>
             <span className="text-xs font-cinzel text-text-muted uppercase tracking-wider block">
               Low Stock Alerts
@@ -374,15 +374,15 @@ export const DashboardPage: React.FC = () => {
               {lowStockItems.length}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-full bg-surface-2 text-danger border border-border flex items-center justify-center">
-            <AlertTriangle className="w-6 h-6" />
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-surface-2 text-danger border border-border flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
         </Card>
       </div>
 
       {/* Analytics Charts (Recharts) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <Card variant="marble" className="p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8">
+        <Card variant="marble" className="p-4 sm:p-6">
           <h3 className="font-cinzel text-base font-bold text-text mb-4">
             Daily Tithe Flow (USD)
           </h3>
@@ -418,7 +418,7 @@ export const DashboardPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card variant="marble" className="p-6">
+        <Card variant="marble" className="p-4 sm:p-6">
           <h3 className="font-cinzel text-base font-bold text-text mb-4">
             Formulation Categorization
           </h3>
@@ -459,7 +459,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* Tab Content: Inventory Table */}
       {activeTab === 'inventory' && (
-        <Card variant="marble" className="p-6">
+        <Card variant="marble" className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
             <div className="w-full sm:w-80 relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
@@ -561,7 +561,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* Tab Content: Orders */}
       {activeTab === 'orders' && (
-        <Card variant="marble" className="p-6">
+        <Card variant="marble" className="p-4 sm:p-6">
           <Table>
             <TableHeader>
               <TableRow>
@@ -670,7 +670,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* Tab Content: Devotee Whitelist */}
       {activeTab === 'whitelist' && (
-        <Card variant="marble" className="p-6">
+        <Card variant="marble" className="p-4 sm:p-6">
           <div className="mb-6">
             <h3 className="font-cinzel text-lg font-bold text-text mb-1">
               Sanctum Access Whitelist

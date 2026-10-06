@@ -203,7 +203,7 @@ export const TerminalPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow flex flex-col">
+    <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 w-full flex-grow flex flex-col">
       <SEO
         title="Oracle Administrative Console | MediStore Sanctuary"
         description="Restricted sanctuary terminal and diagnostics interface."
@@ -215,10 +215,10 @@ export const TerminalPage: React.FC = () => {
       </div>
 
       {/* Header bar */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-4">
         <div className="flex items-center gap-2">
-          <TerminalIcon className="w-5 h-5 text-accent-text" />
-          <h1 className="font-cinzel text-lg font-bold text-text">
+          <TerminalIcon className="w-5 h-5 text-accent-text shrink-0" />
+          <h1 className="font-cinzel text-base sm:text-lg font-bold text-text">
             Oracle Administrative Console
           </h1>
         </div>
@@ -254,7 +254,7 @@ export const TerminalPage: React.FC = () => {
       {/* Retro Bronze Terminal Screen */}
       <div
         onClick={() => inputRef.current?.focus()}
-        className="flex-grow rounded-card bg-surface-2 text-text p-5 font-mono text-sm shadow-theme border-2 border-border overflow-hidden flex flex-col min-h-[500px] cursor-text selection:bg-accent selection:text-text-on-primary"
+        className="flex-grow rounded-card bg-surface-2 text-text p-3.5 sm:p-5 font-mono text-xs sm:text-sm shadow-theme border-2 border-border overflow-hidden flex flex-col min-h-[380px] sm:min-h-[500px] cursor-text selection:bg-accent selection:text-text-on-primary"
       >
         {/* Terminal output area */}
         <div className="flex-grow overflow-y-auto space-y-1.5 pr-2">
@@ -279,8 +279,11 @@ export const TerminalPage: React.FC = () => {
 
         {/* Prompt line */}
         <div className="flex items-center gap-2 pt-3 border-t border-border mt-2">
-          <span className="text-accent-text font-bold select-none whitespace-nowrap">
+          <span className="text-accent-text font-bold select-none whitespace-nowrap hidden sm:inline">
             deploy@medistore-prod:~$
+          </span>
+          <span className="text-accent-text font-bold select-none whitespace-nowrap sm:hidden">
+            $
           </span>
           <input
             ref={inputRef}
@@ -290,18 +293,18 @@ export const TerminalPage: React.FC = () => {
             onChange={(e) => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={polling}
-            className="flex-grow bg-transparent border-none outline-none text-text font-mono text-sm caret-primary"
+            className="flex-grow bg-transparent border-none outline-none text-text font-mono text-xs sm:text-sm caret-primary min-h-[36px]"
             autoFocus
             aria-label="Oracle Terminal Command Input"
           />
         </div>
       </div>
 
-      <div className="flex justify-between items-center text-xs text-text-muted mt-3 font-mono">
-        <span>Type "help" for commands · Max length 200 chars · HTTP polling (no sockets)</span>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs text-text-muted mt-3 font-mono">
+        <span>Type "help" for commands · Max length 200 chars · HTTP polling</span>
         <button
           onClick={() => setLines([])}
-          className="text-accent-text hover:underline"
+          className="text-accent-text hover:underline min-h-[36px] flex items-center"
         >
           Clear Screen
         </button>

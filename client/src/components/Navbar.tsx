@@ -22,30 +22,31 @@ export const Navbar: React.FC = () => {
   const { user, logout } = useAuthStore();
 
   const navItems = [
-    { label: 'Temple', path: '/', icon: Home },
-    { label: 'Apothecary', path: '/shop', icon: ShoppingBag },
-    { label: 'Oracle', path: '/oracle', icon: Sparkles },
+    { label: 'Temple', shortLabel: 'Temple', path: '/', icon: Home },
+    { label: 'Apothecary', shortLabel: 'Shop', path: '/shop', icon: ShoppingBag },
+    { label: 'Oracle', shortLabel: 'Oracle', path: '/oracle', icon: Sparkles },
     {
       label: 'Sacred Cart',
+      shortLabel: 'Cart',
       path: '/cart',
       icon: ShoppingCart,
       badge: itemCount > 0 ? itemCount : undefined,
     },
-    { label: 'Sanctum Quest', path: '/quest', icon: ShieldAlert },
-    { label: 'Console', path: '/terminal', icon: Terminal },
+    { label: 'Sanctum Quest', shortLabel: 'Quest', path: '/quest', icon: ShieldAlert },
+    { label: 'Console', shortLabel: 'Console', path: '/terminal', icon: Terminal },
   ];
 
   return (
     <>
       {/* Top Header Bar */}
       <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-surface/90 border-b border-border transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Logo & Brand */}
           <Link
             to="/"
-            className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-ring rounded-card"
+            className="flex items-center gap-2 sm:gap-3 group focus:outline-none focus:ring-2 focus:ring-ring rounded-card shrink-0"
           >
-            <div className="w-10 h-10 rounded-card bg-primary border border-border flex items-center justify-center text-text-on-primary group-hover:scale-105 transition-transform shadow-theme">
+            <div className="w-10 h-10 rounded-card bg-primary border border-border flex items-center justify-center text-text-on-primary group-hover:scale-105 transition-transform shadow-theme shrink-0">
               <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path
                   strokeLinecap="round"
@@ -59,7 +60,7 @@ export const Navbar: React.FC = () => {
               <span className="font-cinzel font-bold text-lg sm:text-xl tracking-wider text-text block leading-tight">
                 MEDISTORE
               </span>
-              <span className="text-[10px] sm:text-xs font-cormorant italic tracking-widest text-accent-text block -mt-1 uppercase">
+              <span className="text-[10px] sm:text-xs font-cormorant italic tracking-widest text-accent-text hidden sm:block -mt-1 uppercase">
                 Apothecary of Asclepius
               </span>
             </div>
@@ -111,20 +112,21 @@ export const Navbar: React.FC = () => {
                 {user.role === 'pharmacist' && (
                   <Link
                     to="/dashboard"
-                    className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-cinzel font-bold text-accent-text border border-border rounded-card hover:bg-surface-2 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-cinzel font-bold text-accent-text border border-border rounded-card hover:bg-surface-2 transition-colors shrink-0"
+                    title="Pharmacist Dashboard"
                   >
                     <LayoutDashboard className="w-3.5 h-3.5" />
-                    <span>Dashboard</span>
+                    <span className="hidden sm:inline">Dashboard</span>
                   </Link>
                 )}
-                <div className="flex items-center gap-2 bg-surface-2 px-3 py-1.5 rounded-card border border-border shadow-inner">
-                  <User className="w-3.5 h-3.5 text-accent-text" />
-                  <span className="text-xs font-medium max-w-[100px] truncate text-text">
+                <div className="flex items-center gap-2 bg-surface-2 px-2.5 sm:px-3 py-1.5 rounded-card border border-border shadow-inner shrink-0">
+                  <User className="w-3.5 h-3.5 text-accent-text shrink-0" />
+                  <span className="text-xs font-medium max-w-[70px] sm:max-w-[100px] truncate text-text">
                     {user.email.split('@')[0]}
                   </span>
                   <button
                     onClick={() => logout()}
-                    className="text-danger hover:opacity-80 p-0.5 ml-1 transition-opacity"
+                    className="text-danger hover:opacity-80 p-0.5 ml-0.5 sm:ml-1 transition-opacity shrink-0"
                     title="Sign Out"
                     aria-label="Sign out"
                   >
@@ -135,7 +137,7 @@ export const Navbar: React.FC = () => {
             ) : (
               <Link
                 to="/login"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-cinzel font-bold uppercase tracking-wider bg-primary hover:bg-primary-hover text-text-on-primary rounded-card transition-all shadow-theme"
+                className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 text-xs font-cinzel font-bold uppercase tracking-wider bg-primary hover:bg-primary-hover text-text-on-primary rounded-card transition-all shadow-theme shrink-0"
               >
                 <User className="w-3.5 h-3.5" />
                 <span>Enter</span>
@@ -149,7 +151,7 @@ export const Navbar: React.FC = () => {
       {/* Mobile Fixed Bottom Tab Bar */}
       <nav
         aria-label="Mobile Navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-lg border-t border-border shadow-theme px-2 py-1 flex items-center justify-around"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-lg border-t border-border shadow-theme px-1 sm:px-2 py-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] flex items-center justify-around"
       >
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -159,16 +161,16 @@ export const Navbar: React.FC = () => {
               key={item.path}
               to={item.path}
               className={cn(
-                'min-w-[48px] min-h-[48px] flex flex-col items-center justify-center py-1 px-2 rounded-card text-[10px] font-cinzel transition-colors relative',
+                'min-w-[44px] min-h-[48px] flex flex-col items-center justify-center py-1 px-1.5 rounded-card text-[10px] font-cinzel transition-colors relative',
                 isActive
                   ? 'text-accent-text font-bold'
                   : 'text-text-muted hover:text-text'
               )}
             >
               <Icon className="w-5 h-5 mb-0.5" />
-              <span className="truncate max-w-[60px]">{item.label}</span>
+              <span className="truncate max-w-[54px]">{item.shortLabel}</span>
               {item.badge !== undefined && (
-                <span className="absolute top-1 right-2 px-1.5 py-0.2 bg-primary text-text-on-primary font-bold text-[9px] rounded-full">
+                <span className="absolute top-1 right-1 sm:right-2 px-1.5 py-0.2 bg-primary text-text-on-primary font-bold text-[9px] rounded-full">
                   {item.badge}
                 </span>
               )}

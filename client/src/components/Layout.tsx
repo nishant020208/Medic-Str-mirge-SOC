@@ -42,7 +42,7 @@ export const Layout: React.FC = () => {
         <Navbar />
 
         {/* Main Routed Content */}
-        <main id="main-content" className="flex-grow flex flex-col focus:outline-none" tabIndex={-1}>
+        <main id="main-content" className="flex-grow flex flex-col focus:outline-none pb-16 lg:pb-0" tabIndex={-1}>
           <Outlet />
         </main>
 

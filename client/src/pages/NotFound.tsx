@@ -15,7 +15,7 @@ export const NotFoundPage: React.FC = () => {
   ];
 
   return (
-    <div className="flex-grow flex flex-col items-center justify-center py-12 px-4 max-w-4xl mx-auto w-full">
+    <div className="flex-grow flex flex-col items-center justify-center py-6 sm:py-12 px-3 sm:px-4 max-w-4xl mx-auto w-full">
       <SEO
         title="404 - Sacred Path Lost | MediStore Sanctuary"
         description="The chamber or formulation you sought could not be found within the Temple of Asclepius archives."
@@ -27,41 +27,41 @@ export const NotFoundPage: React.FC = () => {
         <Breadcrumbs items={[{ name: 'Chamber Not Found (404)', url: '/404' }]} />
       </div>
 
-      <div className="w-full text-center p-8 sm:p-12 rounded-card border border-border bg-surface shadow-theme backdrop-blur-md">
-        <div className="w-20 h-20 rounded-full bg-surface-2 border border-border text-accent-text flex items-center justify-center mx-auto mb-6 shadow-inner">
-          <Compass className="w-10 h-10" />
+      <div className="w-full text-center p-5 sm:p-12 rounded-card border border-border bg-surface shadow-theme backdrop-blur-md">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-surface-2 border border-border text-accent-text flex items-center justify-center mx-auto mb-6 shadow-inner">
+          <Compass className="w-8 h-8 sm:w-10 sm:h-10" />
         </div>
 
         <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-2">
           Sanctum Deviation · 404
         </span>
 
-        <h1 className="font-cinzel text-3xl sm:text-4xl font-bold text-text mb-4">
+        <h1 className="font-cinzel text-2xl sm:text-4xl font-bold text-text mb-4">
           Lost in the Labyrinth
         </h1>
 
-        <p className="font-cormorant text-lg text-text-muted leading-relaxed max-w-xl mx-auto mb-8">
+        <p className="font-cormorant text-base sm:text-lg text-text-muted leading-relaxed max-w-xl mx-auto mb-6 sm:mb-8">
           The corridor you seek has vanished into mythological obscurity or remains guarded by ancient oaths. Let the Asclepeion guide you back to wellness.
         </p>
 
-        <div className="flex flex-wrap gap-4 justify-center mb-8">
-          <Link to="/">
-            <Button variant="primary" leftIcon={<Home className="w-4 h-4" />}>
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center mb-8">
+          <Link to="/" className="w-full sm:w-auto">
+            <Button variant="primary" className="w-full sm:w-auto justify-center" leftIcon={<Home className="w-4 h-4" />}>
               Return to Temple Grounds
             </Button>
           </Link>
-          <Link to="/shop">
-            <Button variant="outline" leftIcon={<ShoppingBag className="w-4 h-4" />}>
+          <Link to="/shop" className="w-full sm:w-auto">
+            <Button variant="outline" className="w-full sm:w-auto justify-center" leftIcon={<ShoppingBag className="w-4 h-4" />}>
               Apothecary Dispensary
             </Button>
           </Link>
-          <Link to="/oracle">
-            <Button variant="ghost" leftIcon={<Sparkles className="w-4 h-4 text-accent" />}>
+          <Link to="/oracle" className="w-full sm:w-auto">
+            <Button variant="ghost" className="w-full sm:w-auto justify-center" leftIcon={<Sparkles className="w-4 h-4 text-accent" />}>
               Consult the Oracle
             </Button>
           </Link>
-          <Link to="/quest">
-            <Button variant="ghost" leftIcon={<ScrollText className="w-4 h-4 text-accent" />}>
+          <Link to="/quest" className="w-full sm:w-auto">
+            <Button variant="ghost" className="w-full sm:w-auto justify-center" leftIcon={<ScrollText className="w-4 h-4 text-accent" />}>
               Asclepeion Trials
             </Button>
           </Link>

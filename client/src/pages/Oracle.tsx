@@ -138,7 +138,7 @@ export const OraclePage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow flex flex-col">
+    <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 w-full flex-grow flex flex-col">
       <SEO
         title="Oracle of Asclepius | Digital Healing Knowledge Base"
         description="Enquire on herbal remedies, pharmaceutical batch provenance, ancient ingredients, and temple dispensary rites."
@@ -150,16 +150,16 @@ export const OraclePage: React.FC = () => {
 
       {/* Oracle Header */}
       <div className="text-center mb-6">
-        <div className="w-16 h-16 rounded-full bg-surface-2 border-2 border-border text-accent-text flex items-center justify-center mx-auto mb-3 shadow-theme">
-          <Sparkles className="w-8 h-8" />
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-surface-2 border-2 border-border text-accent-text flex items-center justify-center mx-auto mb-3 shadow-theme">
+          <Sparkles className="w-7 h-7 sm:w-8 sm:h-8" />
         </div>
         <span className="font-cinzel text-xs uppercase tracking-widest text-accent-text font-bold block mb-1">
           The Delphic Digital Hearth
         </span>
-        <h1 className="font-cinzel text-3xl font-bold text-text">
+        <h1 className="font-cinzel text-2xl sm:text-3xl font-bold text-text">
           The Oracle of Asclepius
         </h1>
-        <p className="font-cormorant text-base text-text-muted max-w-lg mx-auto mt-1">
+        <p className="font-cormorant text-sm sm:text-base text-text-muted max-w-lg mx-auto mt-1">
           Pose your questions to the ancient consecrated intelligence. Scripted answers synthesized from the sacred codex.
         </p>
       </div>
@@ -174,7 +174,7 @@ export const OraclePage: React.FC = () => {
             key={idx}
             type="button"
             onClick={() => handleSend(chip)}
-            className="px-3 py-1.5 text-xs font-cinzel rounded-full bg-surface-2 border border-border hover:border-accent text-text transition-colors whitespace-nowrap"
+            className="px-3 py-1.5 text-xs font-cinzel rounded-full bg-surface-2 border border-border hover:border-accent text-text transition-colors whitespace-nowrap min-h-[36px]"
           >
             {chip}
           </button>
@@ -184,7 +184,7 @@ export const OraclePage: React.FC = () => {
       {/* Chat Window */}
       <Card
         variant="papyrus"
-        className="flex-grow flex flex-col p-4 sm:p-6 min-h-[480px] max-h-[580px] border-2 border-border shadow-theme"
+        className="flex-grow flex flex-col p-3.5 sm:p-6 min-h-[420px] sm:min-h-[480px] max-h-[620px] border-2 border-border shadow-theme"
       >
         <div className="flex-grow overflow-y-auto space-y-4 pr-2">
           {messages.map((m) => (
@@ -259,8 +259,8 @@ export const OraclePage: React.FC = () => {
             type="text"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
-            placeholder="Inquire of remedies, shipping, batches, or myths..."
-            className="flex-grow min-h-[44px] px-4 py-2 text-sm bg-surface-2 border border-border rounded-card text-text focus:outline-none focus:ring-2 focus:ring-ring font-sans"
+            placeholder="Inquire of remedies, batches, shipping..."
+            className="flex-grow min-h-[44px] px-3 sm:px-4 py-2 text-sm bg-surface-2 border border-border rounded-card text-text focus:outline-none focus:ring-2 focus:ring-ring font-sans"
           />
           <Button
             type="submit"
@@ -268,6 +268,7 @@ export const OraclePage: React.FC = () => {
             size="md"
             disabled={!inputVal.trim() || isTyping}
             rightIcon={<Send className="w-4 h-4" />}
+            className="shrink-0"
           >
             Inquire
           </Button>

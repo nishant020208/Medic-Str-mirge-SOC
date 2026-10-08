@@ -4,25 +4,30 @@ This document details the exact integration contracts for merging **MirageSOC** 
 
 ---
 
-## 1. The Stub File (`server/mirage.js`)
+## 1. The MirageSOC Middleware (`server/mirage.js`)
 
-In this repository, `server/mirage.js` is a lightweight, zero-overhead pass-through stub.
+In this repository, `server/mirage.js` is fully connected to the live MirageSOC backend (`https://mirage-soc.vercel.app`), providing real-time telemetry, canary trap monitoring, IP blocklist enforcement, and fail-open resilience.
 
 ### Contract & Required Exports:
 ```javascript
-export default function mirage(req, res, next) {
-  next();
+export default async function mirage(req, res, next) {
+  // 1. IP Blocklist check via GET /api/blocklist (fails open on timeout/5xx)
+  // 2. Trap path detection (fires POST /api/event for reserved trap paths)
+  // 3. Attack signature detection (SQLi, XSS, Scanner UAs)
+  // 4. Calls next() unless IP is blocked (403 Forbidden)
 }
 
-export function loginFailed(req, username) {}
-export function loginSucceeded(req, username) {}
+export function loginFailed(req, username) {
+  // Fires POST /api/event (critical severity for honeytokens, fire-and-forget)
+}
+
+export function loginSucceeded(req, username) {
+  // Fires POST /api/event (info severity, fire-and-forget)
+}
 
 mirage.loginFailed = loginFailed;
 mirage.loginSucceeded = loginSucceeded;
 ```
-
-When integrating the actual **MirageSOC** firewall:
-> **Replace ONLY `server/mirage.js`.** Do not modify other core routes or middlewares.
 
 ---
 
@@ -120,103 +125,78 @@ Any of the above would silently reset on every cold start, so a blocked attacker
 would be admitted the next time a fresh instance served the request. The only
 place durable state may live is the MirageSOC backend or Postgres.
 
-### 6.2 Blocklist Check: Short Timeout, Per Request, With A Tiny Per-Invocation Cache
+### 6.2 Blocklist Check: GET /api/blocklist
 
-Blocklist decisions must come from the MirageSOC backend, queried per request
-with an aggressive timeout:
+Blocklist decisions are queried dynamically per request with a strict timeout (800ms) and per-invocation caching (stored directly on `req._mirageBlocked` so no state leaks between requests):
 
-```javascript
-// Pseudocode — shape of the real implementation
-const BLOCKLIST_TIMEOUT_MS = 150;   // hard ceiling; never block the user for longer
-const CACHE_TTL_MS = 5000;          // tiny, per-invocation only (resets on cold start)
-let invocationCache = new Map();    // module scope is OK ONLY as a sub-request cache
+- **Endpoint:** `GET https://mirage-soc.vercel.app/api/blocklist`
+- **Headers:** `x-api-key: MIRAGE_API_KEY`
+- **Timeout:** 800ms (`AbortSignal.timeout(800)`)
+- **Accepted Response Shapes:**
+  - `string[]` (e.g. `["203.0.113.88", "198.51.100.42"]`)
+  - `{ ips: string[] }` or `{ blocked: string[] }` or `{ blocklist: string[] }`
+  - `{ blocked: boolean }`
+- **Enforcement:**
+  - If caller's IP matches: immediate `403 Forbidden` (`text/plain`). `next()` is NOT called.
+  - **FAIL OPEN:** On timeout, network failure, 5xx, or malformed payload, MediStore logs a notice and calls `next()`. MediStore NEVER returns 500 or fails because MirageSOC is slow or down.
 
-async function isBlocked(key) {
-  const hit = invocationCache.get(key);
-  const now = Date.now();
-  if (hit && now - hit.at < CACHE_TTL_MS) return hit.blocked;
+### 6.3 Event Telemetry: POST /api/event
 
-  let blocked = false;
-  try {
-    const res = await fetch(`${MIRAGE_BACKEND}/blocklist?key=${encodeURIComponent(key)}`, {
-      signal: AbortSignal.timeout(BLOCKLIST_TIMEOUT_MS),
-      headers: { authorization: `Bearer ${MIRAGE_TOKEN}` },
-    });
-    blocked = res.ok && (await res.json()).blocked === true;
-  } catch {
-    blocked = false;  // fail open — never let a MirageSOC outage break the store
+Telemetry events (canary trap hits, reconnaissance scans, SQLi/XSS signatures, failed logins, and honeytoken triggers) are dispatched asynchronously to MirageSOC:
+
+- **Endpoint:** `POST https://mirage-soc.vercel.app/api/event`
+- **Headers:** `x-api-key: MIRAGE_API_KEY`, `content-type: application/json`
+- **Fire-and-Forget:** Handled via `@vercel/functions`'s `waitUntil` without awaiting or delaying client response times. Errors are caught and swallowed.
+- **Payload Shape:**
+  ```json
+  {
+    "ip": "203.0.113.42",
+    "user_agent": "Mozilla/5.0 ...",
+    "method": "GET",
+    "path": "/admin-old",
+    "kind": "trap_hit",
+    "detail": {
+      "path": "/admin-old",
+      "reason": "reserved_trap_path"
+    },
+    "severity": "high"
   }
+  ```
+- **Event Kinds & Severities:**
+  - Reserved trap hit (`/admin-old`, `/.env`, etc.): `kind: 'trap_hit'`, `severity: 'high'`
+  - Scanner user-agent: `kind: 'scanner'`, `severity: 'medium'`
+  - SQL injection signature: `kind: 'sqli'`, `severity: 'high'`
+  - XSS signature: `kind: 'xss'`, `severity: 'medium'`
+  - Honeytoken login (`admin@asclepeion.med`, `root`, etc.): `kind: 'honeytoken_triggered'`, `severity: 'critical'`
+  - Failed normal login: `kind: 'login_failed'`, `severity: 'low'`
+  - Successful login: `kind: 'login_succeeded'`, `severity: 'info'`
 
-  invocationCache.set(key, { blocked, at: now });
-  if (invocationCache.size > 256) invocationCache.clear(); // bounded, disposable
-  return blocked;
-}
-```
+### 6.4 Terminal Endpoint: /api/terminal
 
-Rules that follow from this:
+The Oracle Administrative Console (`/terminal`) connects to MirageSOC via `VITE_TERMINAL_API_URL`:
+- **Endpoint:** `POST https://mirage-soc.vercel.app/api/terminal`
+- **Payload:** `{ cmd: string, history: string[] }`
+- **Resilience:** If the endpoint is down, slow, or returning 404/5xx, `Terminal.tsx` catches the failure and displays a graceful offline/disconnected notice in the console screen without crashing or showing a blank page.
 
-- The timeout must be **shorter than the remaining `maxDuration` budget** (10 s in
-  `vercel.json`). A slow backend must never eat the function's time budget.
-- The cache is an optimisation, **never** a source of truth. It is allowed to be
-  empty or wrong on a cold start; correctness comes from the per-request call.
-- On timeout, DNS failure, 5xx, or malformed JSON: **fail open** and call `next()`.
-  A degraded security layer must degrade to pass-through, not to a 500.
+### 6.5 Fail-Open Guarantee
 
-### 6.3 Event Reporting: Fire-and-Forget With `waitUntil`
-
-Login hooks and other telemetry must not delay the response. Send them without
-awaiting, and hand the promise to `waitUntil` so Vercel keeps the invocation alive
-long enough for the report to land after the response has been flushed:
-
-```javascript
-import { waitUntil } from '@vercel/functions';
-
-function report(event) {
-  const promise = fetch(`${MIRAGE_BACKEND}/events`, {
-    method: 'POST',
-    body: JSON.stringify(event),
-    signal: AbortSignal.timeout(1000),
-    headers: { authorization: `Bearer ${MIRAGE_TOKEN}`, 'content-type': 'application/json' },
-  }).catch(() => {});           // swallow: reporting must never surface to the user
-
-  waitUntil?.(promise);          // available on Vercel; no-op guard for local dev
-}
-```
-
-`loginFailed(req, username)` and `loginSucceeded(req, username)` therefore return
-**immediately**. They must not be awaited by the auth handlers beyond the call, and
-they must not throw: wrap the body in `try/catch` so a MirageSOC bug can never
-turn a successful login into a 500.
-
-### 6.4 Never Break the Real App
-
-`mirage(req, res, next)` is the **first** middleware, so a throw inside it aborts
-every request before a single route runs. Therefore:
-
-- The entire body must be wrapped so that any failure ends in `next()`, never in a
-  thrown error.
-- When the backend is down, the correct behaviour is **silently pass through**.
-- Trap paths must still be answered as `404 Not found` (plain text) by the app
-  itself, so that removing MirageSOC never turns `/admin-old` into a 200 SPA
-  response. `server/tests/mirage-hooks.test.ts` and
-  `server/tests/serverless.test.ts` lock both properties in place.
-
-### 6.5 What This Means for the Current Stub
-
-`server/mirage.js` today is a pure pass-through that delegates to
-`mirage.handler` when one is attached. That already satisfies the statelessness
-contract: it stores nothing, times nothing out, and reports nothing. When
-MirageSOC replaces the file, the rules above — and the two Vitest suites — are the
-acceptance criteria.
+Because `mirage` is the first middleware in the pipeline:
+1. Every code path is wrapped in `try/catch` and defaults to `next()`.
+2. Outages in MirageSOC degrade MediStore to standard operation without performance penalties.
+3. Canary endpoints (`/admin-old`, `/.env`, etc.) are answered by the application's 404 handler (`404 Not found` plain text).
 
 ---
 
-## 7. Coverage Requirement for the Real Integration
+## 7. Verification & Resilience Test Suites
 
-Replacing the stub must keep these Vitest suites green:
+The integration is verified by comprehensive Vitest test suites:
 
-- `server/tests/mirage-hooks.test.ts` — proves the stub still runs **first** in
-  the middleware chain (before body parsing, before rate limiting).
-- `server/tests/serverless.test.ts` — proves the **Vercel handler** itself returns
-  `404` for `/admin-old`, `/.env`, `/backup.zip`, `/wp-login.php`, `/phpmyadmin`
-  and `/api/v1/internal/keys`, with the Mirage middleware having run.
+- `server/tests/mirage-resilience.test.ts`:
+  1. Unreachable MirageSOC (connection refused/timeout) fails open across all routes.
+  2. MirageSOC 500 error or malformed HTML/JSON payload fails open.
+  3. Blocklisted IP receives immediate 403 Forbidden (plain text).
+  4. Hitting `/admin-old` dispatches a `trap_hit` event and returns 404 plain text.
+  5. Honeytoken login (`admin@asclepeion.med`) dispatches a `critical` event.
+  6. Zero unhandled promise rejections occur under network faults.
+- `server/tests/mirage-hooks.test.ts`: Proves middleware mounting order and login hook invocations.
+- `server/tests/serverless.test.ts`: Verifies stateless serverless operation on Vercel.

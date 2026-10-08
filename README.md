@@ -167,13 +167,21 @@ npm run build
 
 ---
 
-## 🛡️ MirageSOC Hook Integration
+## 🛡️ MirageSOC Live Integration & Environment Variables
 
-1. **Mirage Middleware First:** `server/src/index.ts` mounts `mirage` as the very first middleware before static assets, API routers, and body parsers.
-2. **Replaced Pass-Through:** `server/mirage.js` is the insertion point where MirageSOC hooks its inspection engine.
-3. **Authentication Callbacks:** Both email and wallet sign-ins dispatch `mirage.loginFailed(req, user)` and `mirage.loginSucceeded(req, user)`.
-4. **Reserved Trap Paths:** Endpoints (`/admin-old`, `/.env`, `/backup.zip`, `/wp-login.php`, `/phpmyadmin`, `/api/v1/internal/keys`, case-insensitive with or without trailing slash) return 404 plain text `"Not found"` and are never swallowed by the SPA fallback, leaving them open for MirageSOC canaries.
-5. **Terminal Console:** MirageSOC attaches its interactive sandbox by setting `VITE_TERMINAL_API_URL` (the page then polls that endpoint instead of showing “Console Offline”).
+MediStore is fully connected to its live deployed MirageSOC backend at `https://mirage-soc.vercel.app`:
+
+1. **Mirage Middleware First:** `server/src/app.ts` mounts `mirage` as the very first middleware before static assets, API routers, and body parsers.
+2. **Live Inspection & Fail-Open Guarantee:** `server/mirage.js` performs real-time queries to `GET /api/blocklist` (strict 800ms timeout) and returns `403 Forbidden` for blocked IPs while failing open silently if MirageSOC is unreachable or degraded.
+3. **Telemetry & Canary Alerts:** Synthetic honeypot trap hits (`/admin-old`, `/.env`, etc.), SQLi/XSS signatures, scanner user-agents, and honeytoken logins (`admin@asclepeion.med`, `root`, etc.) trigger fire-and-forget `POST /api/event` calls via `@vercel/functions`'s `waitUntil`.
+4. **Terminal Console Sandbox:** The `/terminal` console page connects directly to `VITE_TERMINAL_API_URL` (`https://mirage-soc.vercel.app/api/terminal`), handling disconnection and error states gracefully.
+
+### Required Environment Variables
+
+Configure these in `.env.local` (local dev) or Vercel Environment Variables (production):
+- `MIRAGE_URL`: URL of the MirageSOC backend (e.g. `https://mirage-soc.vercel.app`).
+- `MIRAGE_API_KEY`: Secret API key passed in the `x-api-key` header to authenticate requests to MirageSOC.
+- `VITE_TERMINAL_API_URL`: Terminal console polling endpoint (e.g. `https://mirage-soc.vercel.app/api/terminal`).
 
 ---
 

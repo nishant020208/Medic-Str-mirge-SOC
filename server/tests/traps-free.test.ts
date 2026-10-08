@@ -39,16 +39,13 @@ describe('Trap Paths Must Be Free & Unswallowed by SPA Fallback', () => {
   ];
 
   for (const path of trapPaths) {
-    it(`Path "${path}" returns 404 plain text "Not found" and never HTML`, async () => {
+    it(`Path "${path}" returns convincing decoy and is never swallowed by SPA`, async () => {
       const res = await fetch(`${baseUrl}${path}`);
       const text = await res.text();
-      const contentType = res.headers.get('content-type') || '';
 
-      expect(res.status).toBe(404);
-      expect(contentType).not.toContain('text/html');
-      expect(text.trim()).toBe('Not found');
-      expect(text).not.toContain('<!DOCTYPE html>');
+      expect(res.status).toBe(200);
       expect(text).not.toContain('<div id="root">');
+      expect(text).not.toContain('React');
     });
   }
 

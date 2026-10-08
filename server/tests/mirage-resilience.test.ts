@@ -172,7 +172,7 @@ describe('MirageSOC Resilience & Fail-Open Invariant Suite', () => {
     expect(allowedRes.status).toBe(200);
   });
 
-  it('d) Hitting /admin-old fires a POST /api/event to MirageSOC AND returns 404', async () => {
+  it('d) Hitting /admin-old fires a POST /api/event to MirageSOC AND returns convincing fake portal', async () => {
     const probeIp = '198.51.100.77';
 
     const res = await fetch(`${medistoreUrl}/admin-old`, {
@@ -182,10 +182,10 @@ describe('MirageSOC Resilience & Fail-Open Invariant Suite', () => {
       },
     });
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(200);
     const bodyText = await res.text();
-    expect(bodyText).toBe('Not found');
-    expect(res.headers.get('content-type')).toContain('text/plain');
+    expect(bodyText).toContain('Asclepeion Admin Console');
+    expect(res.headers.get('content-type')).toContain('text/html');
 
     // Allow fire-and-forget event fetch to land
     await new Promise((r) => setTimeout(r, 100));

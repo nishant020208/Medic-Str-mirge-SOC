@@ -111,23 +111,31 @@ describe('Vercel Serverless & Stateless Invariant Tests', () => {
     expect(secondVerify).toBe(false);
   });
 
-  it('5. Trap paths return 404 plain text and mirage runs first', async () => {
-    const trapPaths = [
-      '/admin-old',
-      '/.env',
-      '/backup.zip',
-      '/wp-login.php',
-      '/phpmyadmin',
-      '/api/v1/internal/keys',
-    ];
+  it('5. Trap paths return convincing fake decoy responses and are never swallowed by SPA', async () => {
+    const resAdmin = await fetch(`${baseUrl}/admin-old`);
+    expect(resAdmin.status).toBe(200);
+    expect(await resAdmin.text()).toContain('Asclepeion Admin Console');
 
-    for (const trap of trapPaths) {
-      const res = await fetch(`${baseUrl}${trap}`);
-      expect(res.status).toBe(404);
-      const text = await res.text();
-      expect(text).toBe('Not found');
-      expect(res.headers.get('content-type')).toContain('text/plain');
-    }
+    const resEnv = await fetch(`${baseUrl}/.env`);
+    expect(resEnv.status).toBe(200);
+    expect(await resEnv.text()).toContain('DATABASE_URL');
+
+    const resBackup = await fetch(`${baseUrl}/backup.zip`);
+    expect(resBackup.status).toBe(200);
+    expect(resBackup.headers.get('content-type')).toContain('application/zip');
+
+    const resWp = await fetch(`${baseUrl}/wp-login.php`);
+    expect(resWp.status).toBe(200);
+    expect(await resWp.text()).toContain('WordPress');
+
+    const resPma = await fetch(`${baseUrl}/phpmyadmin`);
+    expect(resPma.status).toBe(200);
+    expect(await resPma.text()).toContain('phpMyAdmin');
+
+    const resKeys = await fetch(`${baseUrl}/api/v1/internal/keys`);
+    expect(resKeys.status).toBe(200);
+    const keysJson = await resKeys.json();
+    expect(keysJson.status).toBe('active');
   });
 
   it('6. Rate limiting enforces login threshold', async () => {

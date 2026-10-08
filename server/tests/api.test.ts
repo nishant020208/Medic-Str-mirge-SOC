@@ -116,8 +116,10 @@ describe('MediStore API & Security Suite', () => {
   });
 
   it('Security: Trap routes like /admin-old or /.env are not swallowed by SPA', async () => {
-    // A path like /.env has a dot in it, so it should not be served by the SPA fallback
+    // A path like /.env returns convincing decoy and is not swallowed by the SPA fallback
     const res = await fetch(`${baseUrl}/.env`);
-    expect(res.status).toBe(404);
+    const text = await res.text();
+    expect(text).toContain('DATABASE_URL');
+    expect(text).not.toContain('<div id="root">');
   });
 });

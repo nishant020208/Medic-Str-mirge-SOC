@@ -126,22 +126,26 @@ describe('Trap Paths & Full Round-Trip Proof Suite', () => {
 
     expect(eventRes.status).toBe(200);
 
-    // STEP 2: Wait briefly and query GET /api/blocklist to confirm IP is blocked
-    console.log(`\n[STEP 2] Waiting 2000ms and verifying IP presence on live blocklist`);
-    await new Promise((r) => setTimeout(r, 2000));
+    // STEP 2: Poll GET /api/blocklist to confirm IP is blocked (allowing for serverless propagation)
+    console.log(`\n[STEP 2] Verifying IP presence on live blocklist`);
+    let isBlocked = false;
+    let blocklistData: { ips?: string[] } = {};
 
-    console.log(`  Endpoint: GET ${mirageUrl}/api/blocklist`);
-    const blocklistRes = await fetch(`${mirageUrl}/api/blocklist`, {
-      headers: {
-        'x-api-key': mirageApiKey,
-      },
-    });
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      await new Promise((r) => setTimeout(r, 1200));
+      const blocklistRes = await fetch(`${mirageUrl}/api/blocklist`, {
+        headers: {
+          'x-api-key': mirageApiKey,
+        },
+      });
+      blocklistData = (await blocklistRes.json()) as { ips?: string[] };
+      if ((blocklistData.ips || []).includes(testIp)) {
+        isBlocked = true;
+        break;
+      }
+    }
 
-    const blocklistData = (await blocklistRes.json()) as { ips?: string[] };
-    console.log(`  Response Status: ${blocklistRes.status} ${blocklistRes.statusText}`);
     console.log(`  Blocked IPs:     ${JSON.stringify(blocklistData.ips || [])}`);
-
-    const isBlocked = (blocklistData.ips || []).includes(testIp);
     console.log(`  Verification:    IP ${testIp} present in blocklist? ${isBlocked ? 'YES (CONFIRMED)' : 'NO'}`);
     expect(isBlocked).toBe(true);
 

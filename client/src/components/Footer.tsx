@@ -66,9 +66,9 @@ export const Footer: React.FC = () => {
             </h3>
             <ul className="space-y-2 text-sm font-medium">
               <li>
-                <Link to="/quest" className="hover:text-accent-text transition-colors flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-accent" />
-                  <span>The Forgotten Quest</span>
+                <Link to="/quest" className="text-text-muted hover:text-accent-text transition-colors flex items-center gap-1.5 text-xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-accent/70" />
+                  <span>Sanctum Inscription</span>
                 </Link>
               </li>
               <li>

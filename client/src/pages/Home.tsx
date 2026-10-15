@@ -339,9 +339,9 @@ export const HomePage: React.FC = () => {
                 Inspect The Registry
               </Button>
             </Link>
-            <Link to="/quest">
-              <Button variant="outline" leftIcon={<ShieldCheck className="w-4 h-4" />}>
-                Read The Prophecy
+            <Link to="/oracle">
+              <Button variant="outline" leftIcon={<Sparkles className="w-4 h-4 text-accent" />}>
+                Consult The Oracle
               </Button>
             </Link>
           </div>

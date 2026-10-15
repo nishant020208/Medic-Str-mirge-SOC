@@ -5,7 +5,6 @@ import {
   ShoppingBag,
   Sparkles,
   ShoppingCart,
-  ShieldAlert,
   Terminal,
   User,
   LayoutDashboard,
@@ -32,7 +31,6 @@ export const Navbar: React.FC = () => {
       icon: ShoppingCart,
       badge: itemCount > 0 ? itemCount : undefined,
     },
-    { label: 'Sanctum Quest', shortLabel: 'Quest', path: '/quest', icon: ShieldAlert },
     { label: 'Console', shortLabel: 'Console', path: '/terminal', icon: Terminal },
   ];
 

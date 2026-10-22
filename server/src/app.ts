@@ -201,6 +201,9 @@ if (!process.env.VERCEL) {
 // 404 handler for unmatched backend paths, trap paths, and unknown assets
 // Every one must return 404 (plain "Not found", NOT index.html, NOT the React app)
 app.use((req, res) => {
+  if (typeof (mirage as any).reportEnumeration === 'function') {
+    (mirage as any).reportEnumeration(req);
+  }
   res.status(404).type('text/plain').send('Not found');
 });
 

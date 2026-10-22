@@ -6,7 +6,8 @@
   "description": "MediStore: Temple of Asclepius - Hackathon Victim Application",
   "overrides": {
     "braces": "^3.0.3",
-    "@vitest/mocker": "^4.1.11"
+    "@vitest/mocker": "^4.1.11",
+    "vite": "^7.3.7"
   },
   "workspaces": [
     "client",

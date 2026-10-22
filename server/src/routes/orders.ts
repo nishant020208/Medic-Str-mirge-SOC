@@ -60,12 +60,21 @@ ordersRouter.get('/', async (req: Request, res: Response) => {
   return res.json({ orders: [] });
 });
 
-// GET /api/orders/:id
+// GET /api/orders/:id (IDOR protected: customer can only view own order)
 ordersRouter.get('/:id', async (req: Request, res: Response) => {
   const order = await store.getOrderById(req.params.id);
   if (!order) {
     return res.status(404).json({ error: 'Order not found in sacred annals' });
   }
+
+  const userRole = req.session?.role;
+  const userId = req.session?.userId;
+
+  // Pharmacist can view any order; customer can only view their own order
+  if (userRole !== 'pharmacist' && (!userId || order.userId !== userId)) {
+    return res.status(403).json({ error: 'Access forbidden: unauthorized order inspection' });
+  }
+
   return res.json({ order });
 });
 

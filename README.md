@@ -167,6 +167,21 @@ npm run build
 
 ---
 
+## 🔌 Connect to MirageSOC
+
+MediStore is designed to pair seamlessly with MirageSOC as its deceptive defense shield and active firewall:
+
+1. **Deploy MirageSOC** (or obtain the deployed URL and API key from your MirageSOC instance).
+2. **Set Environment Variables on MediStore:**
+   - `MIRAGE_URL`: The base URL of your MirageSOC deployment (e.g. `https://mirage-soc.vercel.app`).
+   - `MIRAGE_API_KEY`: The pre-shared secret key configured in MirageSOC.
+   - `MIRAGE_MODE`: `enforce` (blocks flagged threats with 403) or `monitor` (logs only).
+   - `VITE_TERMINAL_API_URL`: The MirageSOC terminal endpoint (e.g. `https://mirage-soc.vercel.app/api/terminal`).
+3. **Verify the Connection:**
+   - Access `GET /healthz` — MediStore queries the blocklist in the background with a 3s cache and 800ms fail-open timeout.
+   - Access any trap path (`/admin-old`, `/.env`, `/backup.zip`, `/wp-login.php`, `/phpmyadmin`, `/api/v1/internal/keys`) — returns convincing decoy content and dispatches a high-severity `trap_hit` event to MirageSOC.
+   - Attempt login with decoy usernames (`admin`, `root`, `test`, `administrator`) — dispatches a `decoy_login` event resulting in immediate defense isolation.
+
 ## 🛡️ MirageSOC Live Integration & Environment Variables
 
 MediStore is fully connected to its live deployed MirageSOC backend at `https://mirage-soc.vercel.app`:

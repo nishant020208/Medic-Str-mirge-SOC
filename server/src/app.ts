@@ -59,10 +59,31 @@ app.get('/healthz', async (req, res) => {
 // Compression
 app.use(compression());
 
-// CORS - same-origin by default
+// CORS - explicit allowlist (no wildcard with credentials)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5000',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5000',
+  'http://127.0.0.1:3000',
+  process.env.APP_URL,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+].filter(Boolean) as string[];
+
 app.use(
   cors({
-    origin: true,
+    origin: (incomingOrigin, callback) => {
+      // Allow non-browser requests or same-origin without Origin header
+      if (!incomingOrigin) return callback(null, true);
+      if (
+        allowedOrigins.includes(incomingOrigin) ||
+        /^https:\/\/.*\.vercel\.app$/.test(incomingOrigin)
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true,
   })
 );

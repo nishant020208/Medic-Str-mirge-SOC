@@ -144,7 +144,7 @@ describe('MirageSOC Resilience & Fail-Open Invariant Suite', () => {
     expect(resMalformed.status).toBe(200);
   });
 
-  it('c) Blocks an IP on the blocklist with 403 Forbidden (plain text)', async () => {
+  it('c) Blocks an IP on the blocklist with 403 Access blocked JSON', async () => {
     const blockedIp = '203.0.113.88';
     mockBlocklistResponse = {
       status: 200,
@@ -159,9 +159,9 @@ describe('MirageSOC Resilience & Fail-Open Invariant Suite', () => {
     });
 
     expect(blockedRes.status).toBe(403);
-    const text = await blockedRes.text();
-    expect(text).toBe('Forbidden');
-    expect(blockedRes.headers.get('content-type')).toContain('text/plain');
+    const body = await blockedRes.json();
+    expect(body.error).toBe('Access blocked');
+    expect(blockedRes.headers.get('content-type')).toContain('application/json');
 
     // Request from unblocked IP
     const allowedRes = await fetch(`${medistoreUrl}/api/products`, {

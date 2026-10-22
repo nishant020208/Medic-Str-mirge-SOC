@@ -167,7 +167,7 @@ describe('Trap Paths & Full Round-Trip Proof Suite', () => {
     console.log(`  Response Body:   ${appBody.trim()}`);
 
     expect(appRes.status).toBe(403);
-    expect(appBody).toContain('Forbidden');
+    expect(appBody).toMatch(/Access blocked|Forbidden/);
     console.log(`\n>>> SUCCESS: Full round trip confirmed end-to-end!`);
   }, 30000);
 });

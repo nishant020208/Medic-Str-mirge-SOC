@@ -51,13 +51,17 @@ build time.
 | Key | Required | Notes |
 | :--- | :--- | :--- |
 | `DATABASE_URL` | Yes | Supabase **session pooler** connection string (Direct connection for local `db:migrate` is fine too). `sslmode=require`. |
-| `SUPABASE_URL` | Yes | e.g. `https://<project-ref>.supabase.co` |
-| `SUPABASE_ANON_KEY` | Yes | Public anon key (also needed server-side) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Server-only. **Never** exposed to the client bundle. |
 | `SESSION_SECRET` | Yes | `openssl rand -hex 32` |
+| `MIRAGE_URL` | Yes | MirageSOC firewall endpoint (e.g. `https://mirage-soc.vercel.app`) |
+| `MIRAGE_API_KEY` | Yes | Secret pre-shared key for MirageSOC communication (`x-api-key`) |
+| `MIRAGE_MODE` | No | `enforce` (default) or `monitor` |
+| `ALLOWLIST_IPS` | No | Comma-separated IPs that bypass blocklist and enforcement |
 | `NODE_ENV` | Yes | `production` on Vercel |
 | `GEMINI_API_KEY` | Optional | Pythia Oracle; falls back to scripted answers without it |
 | `GEMINI_MODEL` | Optional | e.g. `gemini-2.0-flash` |
+| `SUPABASE_URL` | Yes | e.g. `https://<project-ref>.supabase.co` |
+| `SUPABASE_ANON_KEY` | Yes | Public anon key (also needed server-side) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Server-only. **Never** exposed to the client bundle. |
 | `CSP_CONNECT_EXTRA` | Optional | Extra allowed connect origins for the CSP |
 
 ### 2.2 Client variables — build-time, inlined into the bundle

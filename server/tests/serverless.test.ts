@@ -33,7 +33,7 @@ describe('Vercel Serverless & Stateless Invariant Tests', () => {
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
-        'X-Forwarded-For': '198.51.100.99',
+        'X-Forwarded-For': '198.51.100.222',
       },
       body: JSON.stringify({
         email: 'pharmacist@medistore.test',
@@ -50,7 +50,7 @@ describe('Vercel Serverless & Stateless Invariant Tests', () => {
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
-        'X-Forwarded-For': '198.51.100.99',
+        'X-Forwarded-For': '198.51.100.222',
       },
       body: JSON.stringify({
         email: 'pharmacist@medistore.test',

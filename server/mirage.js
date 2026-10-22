@@ -22,13 +22,13 @@ export const RESERVED_TRAP_PATHS = [
 const SCANNER_UA_REGEX =
   /(sqlmap|nikto|nmap|masscan|wpscan|acunetix|nessus|gobuster|dirbuster|hydra|zgrab|arachni|openvas)/i;
 const SQLI_REGEX =
-  /(\b(UNION(\s+ALL)?\s+SELECT|SELECT.+FROM|INSERT\s+INTO|UPDATE.+SET|DELETE\s+FROM|DROP\s+TABLE|ALTER\s+TABLE)\b|'\s*OR\s*('?[0-9]+'?'?\s*=\s*'?[0-9]+|1\s*=\s*1|'a'='a')|\b(SLEEP|BENCHMARK)\s*\(|--|;--)/i;
+  /(\b(UNION(\s+ALL)?\s+SELECT|SELECT\s+[\s\S]+?\s+FROM|INSERT\s+INTO\s+[\s\S]+?\s+VALUES|UPDATE\s+\w+\s+SET|DELETE\s+FROM|DROP\s+TABLE|ALTER\s+TABLE)\b|(\b(OR|AND)\s+('?[0-9]+'?'?\s*=\s*'?[0-9]+|'?[a-zA-Z]+'?'?\s*=\s*'?[a-zA-Z]+|1\s*=\s*1)\b)|'\s*OR\s*('?[0-9]+'?'?\s*=\s*'?[0-9]+|1\s*=\s*1|'a'='a')|\b(SLEEP|BENCHMARK|PG_SLEEP)\s*\(\s*\d*\s*\)|(;\s*--|['"]\s*--|--$|\/\*.*?\*\/|;\s*EXEC\b))/i;
 const XSS_REGEX =
-  /(<script\b|javascript:|onerror\s*=|onload\s*=|alert\(|<svg|<img.+onerror)/i;
+  /(<script\b[^>]*>|javascript:[^"']+|onerror\s*=|onload\s*=|alert\s*\(|<svg[^>]*>|<img[^>]+onerror|<iframe\b)/i;
 const TRAVERSAL_REGEX =
   /(\.\.[\/\\]|%2e%2e[\/\\]|%2e%2e%2f|%2e%2e%5c|\.\.%2f|\.\.%5c)/i;
 const CMDI_REGEX =
-  /(\b(cat\s+\/etc\/passwd|nc\s+-e|bash\s+-i|curl\s+http|wget\s+http|chmod\s+\+x|;\s*(whoami|id|ls|cat)\b|\$\(.*\)|`.*`))/i;
+  /(;\s*(cat|ls|id|whoami|uname|curl|wget|bash|sh|rm|chmod)\b|\|\s*(cat|ls|id|whoami|uname|curl|wget|bash|sh)\b|`\s*(whoami|id|cat|uname|ls|sh|bash)[\s`]|`\s*[^`]+`|\$\(\s*(whoami|id|cat|uname|ls|sh|bash)[\s\)]|\b(nc\s+-e|bash\s+-i|curl\s+https?:|wget\s+https?:|cat\s+\/etc\/passwd))/i;
 
 const HONEYTOKEN_CANARY_VALUES = [
   'AKIA_CANARY_TRAP_TOKEN_89231',
@@ -467,7 +467,7 @@ export function sendEvent(eventPayload) {
   }
 }
 
-function detectSuspiciousActivity(req, reqPath, userAgent) {
+export function detectSuspiciousActivity(req, reqPath, userAgent) {
   // 1. TRACE / CONNECT
   if (req.method === 'TRACE' || req.method === 'CONNECT') {
     return {
@@ -528,7 +528,15 @@ function detectSuspiciousActivity(req, reqPath, userAgent) {
   }
 
   // 6. SQLi signatures
-  const fullUrl = req.originalUrl || req.url || reqPath;
+  const rawUrl = req.originalUrl || req.url || reqPath;
+  let decodedUrl = rawUrl;
+  try {
+    decodedUrl = decodeURIComponent(rawUrl);
+  } catch {
+    // Ignore malformed URI
+  }
+  const fullUrl = `${rawUrl} ${decodedUrl}`;
+
   if (fullUrl && SQLI_REGEX.test(fullUrl)) {
     return {
       kind: 'sqli',
@@ -815,3 +823,4 @@ mirage.isReservedTrapPath = isReservedTrapPath;
 mirage.isHoneytoken = isHoneytoken;
 mirage.serveFakeTrapResponse = serveFakeTrapResponse;
 mirage.generateFakeBackupZip = generateFakeBackupZip;
+mirage.detectSuspiciousActivity = detectSuspiciousActivity;

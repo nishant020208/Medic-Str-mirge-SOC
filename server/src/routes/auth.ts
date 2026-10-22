@@ -96,27 +96,32 @@ authRouter.post('/login', loginRateLimiter, async (req: Request, res: Response) 
     return res.status(401).json({ error: 'Invalid sanctum email or passphrase' });
   }
 
-  // Session establishment
-  req.session.userId = user.id;
-  req.session.role = user.role;
-  req.session.email = user.email;
-
-  // Mirage success hook
-  mirage.loginSucceeded(req, email);
-
-  req.session.save((saveErr) => {
-    if (saveErr) {
-      console.warn('[Session:Save] Error saving session:', saveErr.message);
+  // Session establishment with session rotation (prevents fixation)
+  req.session.regenerate((regenErr) => {
+    if (regenErr) {
+      console.warn('[Session:Regenerate] Notice during login session rotation:', regenErr.message);
     }
-    return res.json({
-      message: 'Sanctum entry granted',
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        address: user.address,
-        createdAt: user.createdAt,
-      },
+    req.session.userId = user.id;
+    req.session.role = user.role;
+    req.session.email = user.email;
+
+    // Mirage success hook
+    mirage.loginSucceeded(req, email);
+
+    req.session.save((saveErr) => {
+      if (saveErr) {
+        console.warn('[Session:Save] Error saving session:', saveErr.message);
+      }
+      return res.json({
+        message: 'Sanctum entry granted',
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          address: user.address,
+          createdAt: user.createdAt,
+        },
+      });
     });
   });
 });
@@ -138,24 +143,29 @@ authRouter.post('/register', async (req: Request, res: Response) => {
   const passwordHash = await bcrypt.hash(password, 10);
   const newUser = await store.createUser(email, passwordHash, 'customer');
 
-  req.session.userId = newUser.id;
-  req.session.role = newUser.role;
-  req.session.email = newUser.email;
-
-  mirage.loginSucceeded(req, email);
-
-  req.session.save((saveErr) => {
-    if (saveErr) {
-      console.warn('[Session:Save] Error saving register session:', saveErr.message);
+  req.session.regenerate((regenErr) => {
+    if (regenErr) {
+      console.warn('[Session:Regenerate] Notice during register session rotation:', regenErr.message);
     }
-    return res.status(201).json({
-      message: 'Identity consecrated',
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        role: newUser.role,
-        createdAt: newUser.createdAt,
-      },
+    req.session.userId = newUser.id;
+    req.session.role = newUser.role;
+    req.session.email = newUser.email;
+
+    mirage.loginSucceeded(req, email);
+
+    req.session.save((saveErr) => {
+      if (saveErr) {
+        console.warn('[Session:Save] Error saving register session:', saveErr.message);
+      }
+      return res.status(201).json({
+        message: 'Identity consecrated',
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          role: newUser.role,
+          createdAt: newUser.createdAt,
+        },
+      });
     });
   });
 });
@@ -221,25 +231,30 @@ authRouter.post('/google-session', loginRateLimiter, async (req: Request, res: R
 
   // 5. Normal Express session (httpOnly cookie), same as email/wallet login.
   const sessionUser = user;
-  req.session.userId = sessionUser.id;
-  req.session.role = sessionUser.role;
-  req.session.email = sessionUser.email;
-
-  mirage.loginSucceeded(req, verifiedEmail);
-
-  req.session.save((saveErr) => {
-    if (saveErr) {
-      console.warn('[Session:Save] Error saving google session:', saveErr.message);
+  req.session.regenerate((regenErr) => {
+    if (regenErr) {
+      console.warn('[Session:Regenerate] Notice during google session rotation:', regenErr.message);
     }
-    return res.json({
-      message: 'Sanctum entry granted',
-      user: {
-        id: sessionUser.id,
-        email: sessionUser.email,
-        role: sessionUser.role,
-        address: sessionUser.address,
-        createdAt: sessionUser.createdAt,
-      },
+    req.session.userId = sessionUser.id;
+    req.session.role = sessionUser.role;
+    req.session.email = sessionUser.email;
+
+    mirage.loginSucceeded(req, verifiedEmail);
+
+    req.session.save((saveErr) => {
+      if (saveErr) {
+        console.warn('[Session:Save] Error saving google session:', saveErr.message);
+      }
+      return res.json({
+        message: 'Sanctum entry granted',
+        user: {
+          id: sessionUser.id,
+          email: sessionUser.email,
+          role: sessionUser.role,
+          address: sessionUser.address,
+          createdAt: sessionUser.createdAt,
+        },
+      });
     });
   });
 });
@@ -284,25 +299,30 @@ authRouter.post('/wallet', loginRateLimiter, async (req: Request, res: Response)
   // Create or find wallet user
   const user = await store.findOrCreateWalletUser(lowerAddress);
 
-  req.session.userId = user.id;
-  req.session.role = user.role;
-  req.session.email = user.email;
-
-  mirage.loginSucceeded(req, lowerAddress);
-
-  req.session.save((saveErr) => {
-    if (saveErr) {
-      console.warn('[Session:Save] Error saving wallet session:', saveErr.message);
+  req.session.regenerate((regenErr) => {
+    if (regenErr) {
+      console.warn('[Session:Regenerate] Notice during wallet session rotation:', regenErr.message);
     }
-    return res.json({
-      message: 'Wallet signature confirmed',
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        address: user.address,
-        createdAt: user.createdAt,
-      },
+    req.session.userId = user.id;
+    req.session.role = user.role;
+    req.session.email = user.email;
+
+    mirage.loginSucceeded(req, lowerAddress);
+
+    req.session.save((saveErr) => {
+      if (saveErr) {
+        console.warn('[Session:Save] Error saving wallet session:', saveErr.message);
+      }
+      return res.json({
+        message: 'Wallet signature confirmed',
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          address: user.address,
+          createdAt: user.createdAt,
+        },
+      });
     });
   });
 });

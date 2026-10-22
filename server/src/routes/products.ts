@@ -42,7 +42,7 @@ productsRouter.get('/:id', async (req: Request, res: Response) => {
 // PATCH /api/products/:id/stock (Chief Pharmacist only)
 const stockUpdateSchema = z.object({
   stock: z.number().int().min(0),
-});
+}).strict();
 
 productsRouter.patch('/:id/stock', requirePharmacist, async (req: Request, res: Response) => {
   const parseResult = stockUpdateSchema.safeParse(req.body);

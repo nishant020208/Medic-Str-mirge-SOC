@@ -20,13 +20,25 @@ export const RESERVED_TRAP_PATHS = [
 ];
 
 const SCANNER_UA_REGEX =
-  /(sqlmap|nikto|nmap|masscan|wpscan|acunetix|nessus|gobuster|dirbuster|hydra|zgrab)/i;
+  /(sqlmap|nikto|nmap|masscan|wpscan|acunetix|nessus|gobuster|dirbuster|hydra|zgrab|arachni|openvas)/i;
 const SQLI_REGEX =
-  /(\b(UNION(\s+ALL)?\s+SELECT|SELECT.+FROM|INSERT\s+INTO|UPDATE.+SET|DELETE\s+FROM)\b|'\s*OR\s*('?[0-9]+'?'?\s*=\s*'?[0-9]+|1\s*=\s*1)|\b(SLEEP|BENCHMARK)\s*\(|--|;--)/i;
+  /(\b(UNION(\s+ALL)?\s+SELECT|SELECT.+FROM|INSERT\s+INTO|UPDATE.+SET|DELETE\s+FROM|DROP\s+TABLE|ALTER\s+TABLE)\b|'\s*OR\s*('?[0-9]+'?'?\s*=\s*'?[0-9]+|1\s*=\s*1|'a'='a')|\b(SLEEP|BENCHMARK)\s*\(|--|;--)/i;
 const XSS_REGEX =
   /(<script\b|javascript:|onerror\s*=|onload\s*=|alert\(|<svg|<img.+onerror)/i;
-const PROBE_PATH_REGEX =
-  /(\.git|\.aws|\.svn|\.config|wp-admin|actuator|phpinfo|eval-stdin)/i;
+const TRAVERSAL_REGEX =
+  /(\.\.[\/\\]|%2e%2e[\/\\]|%2e%2e%2f|%2e%2e%5c|\.\.%2f|\.\.%5c)/i;
+const CMDI_REGEX =
+  /(\b(cat\s+\/etc\/passwd|nc\s+-e|bash\s+-i|curl\s+http|wget\s+http|chmod\s+\+x|;\s*(whoami|id|ls|cat)\b|\$\(.*\)|`.*`))/i;
+
+const HONEYTOKEN_CANARY_VALUES = [
+  'AKIA_CANARY_TRAP_TOKEN_89231',
+  'ora_sec_live_99f82d1ab673024c0847937402a',
+  'key_live_oracle_priest_9021',
+  'key_canary_vault_token_8819',
+  'AsclepiusGoldPass2026!',
+];
+
+const DECOY_USERNAMES = new Set(['admin', 'root', 'test', 'administrator']);
 
 const HONEYTOKEN_ACCOUNTS = new Set([
   'admin@asclepeion.med',
@@ -38,6 +50,20 @@ const HONEYTOKEN_ACCOUNTS = new Set([
   'deploy',
   'mirage',
 ]);
+
+let blocklistCache = {
+  ips: new Set(),
+  fingerprints: new Set(),
+  expiresAt: 0,
+};
+
+export function resetBlocklistCache() {
+  blocklistCache = {
+    ips: new Set(),
+    fingerprints: new Set(),
+    expiresAt: 0,
+  };
+}
 
 export function isReservedTrapPath(urlPath) {
   const normalized = (urlPath || '').toLowerCase().replace(/\/+$/, '') || '/';
@@ -52,10 +78,32 @@ export function isHoneytoken(username) {
   return false;
 }
 
-function getMirageConfig() {
-  const url = (process.env.MIRAGE_URL || 'https://mirage-soc.vercel.app').replace(/\/+$/, '');
+export function getClientIp(req) {
+  // Client IP: only Vercel's trusted headers in production / reverse proxy environments.
+  // Never trust client-supplied x-forwarded-for when Vercel trusted headers are present.
+  const vercelHeader =
+    req?.headers?.['x-vercel-forwarded-for'] || req?.headers?.['x-real-ip'];
+  if (typeof vercelHeader === 'string' && vercelHeader.trim()) {
+    return vercelHeader.split(',')[0].trim().replace(/^::ffff:/, '');
+  }
+
+  // Fallback for local tests and environments without Vercel edge headers
+  const fallback =
+    req?.headers?.['x-forwarded-for'] ||
+    req?.ip ||
+    req?.socket?.remoteAddress ||
+    '';
+  return (typeof fallback === 'string' ? fallback.split(',')[0].trim() : '').replace(
+    /^::ffff:/,
+    ''
+  );
+}
+
+export function getMirageConfig() {
+  const url = (process.env.MIRAGE_URL || '').replace(/\/+$/, '');
   const apiKey = process.env.MIRAGE_API_KEY || '';
-  return { url, apiKey };
+  const mode = (process.env.MIRAGE_MODE || 'enforce').toLowerCase().trim();
+  return { url, apiKey, mode };
 }
 
 /**
@@ -295,14 +343,27 @@ TELEGRAM_BOT_TOKEN=7198234190:AAHqj7X88_CanaryWebhookNoticeToken`);
   }
 }
 
-export async function checkIpBlocked(ip) {
-  if (!ip) return false;
+/**
+ * Checks blocklist with 3s module-level cache, 800ms fetch timeout, and fail-open resilience.
+ */
+export async function checkIpBlocked(ip, fingerprint) {
+  if (!ip && !fingerprint) return false;
   const { url, apiKey } = getMirageConfig();
   if (!url || !apiKey) return false;
 
+  const normalizedIp = ip ? ip.trim().replace(/^::ffff:/, '') : '';
+  const now = Date.now();
+
+  // (b) 3s module-level cache check
+  if (now < blocklistCache.expiresAt) {
+    if (normalizedIp && blocklistCache.ips.has(normalizedIp)) return true;
+    if (fingerprint && blocklistCache.fingerprints.has(fingerprint)) return true;
+    return false;
+  }
+
   const timeoutMs =
     Number(process.env.MIRAGE_BLOCKLIST_TIMEOUT) ||
-    (process.env.NODE_ENV === 'test' && url.includes('vercel.app') ? 80 : 800);
+    (process.env.NODE_ENV === 'test' && url.includes('vercel.app') ? 120 : 800);
 
   try {
     const res = await fetch(`${url}/api/blocklist`, {
@@ -321,26 +382,31 @@ export async function checkIpBlocked(ip) {
     const data = await res.json().catch(() => null);
     if (!data) return false;
 
-    const normalizedIp = ip.trim().replace(/^::ffff:/, '');
+    const ttlSeconds = typeof data.ttl === 'number' ? data.ttl : 3;
+    const ips = Array.isArray(data.ips)
+      ? data.ips
+      : Array.isArray(data)
+      ? data
+      : Array.isArray(data.blocked)
+      ? data.blocked
+      : [];
+    const fingerprints = Array.isArray(data.fingerprints) ? data.fingerprints : [];
 
-    if (Array.isArray(data)) {
-      return data.some(
-        (entry) =>
-          typeof entry === 'string' && entry.trim().replace(/^::ffff:/, '') === normalizedIp
-      );
-    }
+    blocklistCache = {
+      ips: new Set(
+        ips.map((item) =>
+          typeof item === 'string' ? item.trim().replace(/^::ffff:/, '') : item
+        )
+      ),
+      fingerprints: new Set(
+        fingerprints.map((item) => (typeof item === 'string' ? item.trim() : item))
+      ),
+      expiresAt: now + ttlSeconds * 1000,
+    };
 
-    const list = data.ips || data.blocked || data.blocklist;
-    if (Array.isArray(list)) {
-      return list.some(
-        (entry) =>
-          typeof entry === 'string' && entry.trim().replace(/^::ffff:/, '') === normalizedIp
-      );
-    }
-
-    if (data.blocked === true) {
-      return true;
-    }
+    if (normalizedIp && blocklistCache.ips.has(normalizedIp)) return true;
+    if (fingerprint && blocklistCache.fingerprints.has(fingerprint)) return true;
+    if (data.blocked === true) return true;
 
     return false;
   } catch (err) {
@@ -349,9 +415,32 @@ export async function checkIpBlocked(ip) {
   }
 }
 
+/**
+ * Fires telemetry events to MirageSOC using fire-and-forget execution with waitUntil.
+ */
 export function sendEvent(eventPayload) {
   const { url, apiKey } = getMirageConfig();
   if (!url || !apiKey) return;
+
+  const userAgent = eventPayload.userAgent || eventPayload.user_agent || '';
+  const payload = {
+    ip: eventPayload.ip || '',
+    userAgent,
+    user_agent: userAgent,
+    method: eventPayload.method || 'GET',
+    path: eventPayload.path || '/',
+    kind: eventPayload.kind || 'scanner',
+    detail: eventPayload.detail || {},
+  };
+  if (eventPayload.fingerprint) {
+    payload.fingerprint = eventPayload.fingerprint;
+  }
+  if (eventPayload.severity) {
+    payload.severity = eventPayload.severity;
+  }
+  if (eventPayload.username) {
+    payload.username = eventPayload.username;
+  }
 
   try {
     const promise = fetch(`${url}/api/event`, {
@@ -360,7 +449,7 @@ export function sendEvent(eventPayload) {
         'x-api-key': apiKey,
         'content-type': 'application/json',
       },
-      body: JSON.stringify(eventPayload),
+      body: JSON.stringify(payload),
       signal: AbortSignal.timeout(1200),
     })
       .then(() => {})
@@ -371,14 +460,34 @@ export function sendEvent(eventPayload) {
         waitUntil(promise);
       }
     } catch {
-      // Ignore if outside Vercel runtime
+      // Outside Vercel runtime
     }
   } catch {
-    // Fail open safely
+    // Fail open safely, never throw
   }
 }
 
 function detectSuspiciousActivity(req, reqPath, userAgent) {
+  // 1. TRACE / CONNECT
+  if (req.method === 'TRACE' || req.method === 'CONNECT') {
+    return {
+      kind: 'scanner',
+      severity: 'medium',
+      detail: { reason: 'disallowed_http_method', method: req.method },
+    };
+  }
+
+  // 2. Oversized payload or headers (>100KB)
+  const contentLength = Number(req.headers?.['content-length']) || 0;
+  if (contentLength > 102400) {
+    return {
+      kind: 'flood',
+      severity: 'medium',
+      detail: { reason: 'oversized_body', contentLength },
+    };
+  }
+
+  // 3. Scanner user agent
   if (userAgent && SCANNER_UA_REGEX.test(userAgent)) {
     return {
       kind: 'scanner',
@@ -390,6 +499,35 @@ function detectSuspiciousActivity(req, reqPath, userAgent) {
     };
   }
 
+  // 4. Empty user-agent
+  if (typeof req.headers?.['user-agent'] === 'string' && req.headers['user-agent'].trim() === '') {
+    return {
+      kind: 'scanner',
+      severity: 'low',
+      detail: { reason: 'empty_user_agent' },
+    };
+  }
+
+  // 5. Honeytoken canary credential use anywhere
+  const queryStr = req.url ? req.url.split('?')[1] || '' : '';
+  const bodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || '');
+  const headersStr = JSON.stringify(req.headers || {});
+  const fullPayloadStr = `${reqPath} ${queryStr} ${bodyStr} ${headersStr}`;
+
+  for (const canary of HONEYTOKEN_CANARY_VALUES) {
+    if (fullPayloadStr.includes(canary)) {
+      return {
+        kind: 'honeytoken',
+        severity: 'critical',
+        detail: {
+          reason: 'honeytoken_token_used',
+          token: canary,
+        },
+      };
+    }
+  }
+
+  // 6. SQLi signatures
   const fullUrl = req.originalUrl || req.url || reqPath;
   if (fullUrl && SQLI_REGEX.test(fullUrl)) {
     return {
@@ -401,7 +539,17 @@ function detectSuspiciousActivity(req, reqPath, userAgent) {
       },
     };
   }
+  if (bodyStr && SQLI_REGEX.test(bodyStr)) {
+    return {
+      kind: 'sqli',
+      severity: 'high',
+      detail: {
+        reason: 'sql_injection_body_signature_detected',
+      },
+    };
+  }
 
+  // 7. XSS signatures
   if (fullUrl && XSS_REGEX.test(fullUrl)) {
     return {
       kind: 'xss',
@@ -412,14 +560,45 @@ function detectSuspiciousActivity(req, reqPath, userAgent) {
       },
     };
   }
-
-  if (reqPath && PROBE_PATH_REGEX.test(reqPath)) {
+  if (bodyStr && XSS_REGEX.test(bodyStr)) {
     return {
-      kind: 'scanner',
+      kind: 'xss',
       severity: 'medium',
       detail: {
-        reason: 'path_enumeration_probe_detected',
-        path: reqPath,
+        reason: 'xss_body_signature_detected',
+      },
+    };
+  }
+
+  // 8. Path traversal
+  if (fullUrl && TRAVERSAL_REGEX.test(fullUrl)) {
+    return {
+      kind: 'traversal',
+      severity: 'high',
+      detail: {
+        reason: 'path_traversal_signature_detected',
+        target: fullUrl,
+      },
+    };
+  }
+
+  // 9. Command injection
+  if (fullUrl && CMDI_REGEX.test(fullUrl)) {
+    return {
+      kind: 'cmdi',
+      severity: 'high',
+      detail: {
+        reason: 'command_injection_signature_detected',
+        target: fullUrl,
+      },
+    };
+  }
+  if (bodyStr && CMDI_REGEX.test(bodyStr)) {
+    return {
+      kind: 'cmdi',
+      severity: 'high',
+      detail: {
+        reason: 'command_injection_body_detected',
       },
     };
   }
@@ -433,16 +612,28 @@ export default async function mirage(req, res, next) {
   }
 
   try {
-    const rawIp =
-      req.ip || req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress || '';
-    const ip = (typeof rawIp === 'string' ? rawIp.split(',')[0].trim() : '').replace(
-      /^::ffff:/,
-      ''
-    );
+    const { url, apiKey, mode } = getMirageConfig();
+
+    // (g) If MIRAGE_URL or MIRAGE_API_KEY unset, behave as pass-through stub and log nothing sensitive.
+    // Without MirageSOC configured, trap paths fall through to Express 404.
+    if (!url || !apiKey) {
+      return next();
+    }
+
+    const ip = getClientIp(req);
     const userAgent = req.headers?.['user-agent'] || '';
     const reqPath = req.path || req.url || '/';
 
-    // Per-invocation cache: store decision on req object
+    // (a) Allowlist skip: allowlisted IPs bypass blocklist and enforcement
+    const allowlist = (process.env.ALLOWLIST_IPS || '')
+      .split(',')
+      .map((s) => s.trim().replace(/^::ffff:/, ''))
+      .filter(Boolean);
+    if (allowlist.includes(ip)) {
+      return next();
+    }
+
+    // (b) Blocklist check: 3s module-level cache, 800ms fetch timeout, fail-open
     let isBlocked = req._mirageBlocked;
     if (typeof isBlocked !== 'boolean') {
       isBlocked = await checkIpBlocked(ip);
@@ -450,14 +641,26 @@ export default async function mirage(req, res, next) {
     }
 
     if (isBlocked) {
-      return res.status(403).type('text/plain').send('Forbidden');
+      if (mode === 'enforce') {
+        return res.status(403).json({ error: 'Access blocked' });
+      }
+      // In monitor mode: report but allow request
+      sendEvent({
+        ip,
+        userAgent,
+        method: req.method,
+        path: reqPath,
+        kind: 'scanner',
+        detail: { reason: 'blocked_ip_monitor_pass', ip },
+        severity: 'high',
+      });
     }
 
-    // Check reserved trap paths
+    // (c) Trap path -> convincing FAKE response + event
     if (isReservedTrapPath(reqPath)) {
       sendEvent({
         ip,
-        user_agent: userAgent,
+        userAgent,
         method: req.method,
         path: reqPath,
         kind: 'trap_hit',
@@ -467,28 +670,57 @@ export default async function mirage(req, res, next) {
         },
         severity: 'high',
       });
-      // Return convincing decoy response
       return serveFakeTrapResponse(reqPath, res);
     }
 
-    // Check suspicious signatures
+    // (d) Enforce signatures: SQLi, XSS, path traversal, cmdi, scanners, empty UA, TRACE/CONNECT, oversized payload
     const detection = detectSuspiciousActivity(req, reqPath, userAgent);
     if (detection) {
       sendEvent({
         ip,
-        user_agent: userAgent,
+        userAgent,
         method: req.method,
         path: reqPath,
         kind: detection.kind,
         detail: detection.detail,
         severity: detection.severity,
       });
+
+      if (mode === 'enforce') {
+        return res.status(403).json({ error: 'Access blocked' });
+      }
     }
 
     return next();
   } catch (err) {
     console.warn('[Mirage] Error in mirage middleware, failing open:', err?.message || err);
     return next();
+  }
+}
+
+export function reportEnumeration(req) {
+  const { url, apiKey } = getMirageConfig();
+  if (!url || !apiKey) return;
+
+  try {
+    const ip = getClientIp(req);
+    const userAgent = req?.headers?.['user-agent'] || '';
+    const reqPath = req?.path || req?.url || '/';
+
+    sendEvent({
+      ip,
+      userAgent,
+      method: req?.method || 'GET',
+      path: reqPath,
+      kind: 'enumeration',
+      detail: {
+        reason: 'not_found_probing',
+        path: reqPath,
+      },
+      severity: 'medium',
+    });
+  } catch {
+    // Fail open
   }
 }
 
@@ -500,28 +732,41 @@ export function loginFailed(req, username) {
   }
 
   try {
-    const rawIp =
-      req?.ip || req?.headers?.['x-forwarded-for'] || req?.socket?.remoteAddress || '';
-    const ip = (typeof rawIp === 'string' ? rawIp.split(',')[0].trim() : '').replace(
-      /^::ffff:/,
-      ''
-    );
+    const ip = getClientIp(req);
     const userAgent = req?.headers?.['user-agent'] || '';
-    const honeytokenHit = isHoneytoken(username);
+    const rawUsername = typeof username === 'string' ? username : String(username || '');
+    const normalized = rawUsername.toLowerCase().trim();
+
+    // Decoy usernames (admin, root, test, administrator) on real login = decoy_login event
+    let kind = 'brute_force';
+    let severity = 'medium';
+
+    if (DECOY_USERNAMES.has(normalized)) {
+      kind = 'decoy_login';
+      severity = 'critical';
+    } else if (isHoneytoken(rawUsername)) {
+      kind = 'honeytoken';
+      severity = 'critical';
+    }
 
     sendEvent({
       ip,
-      user_agent: userAgent,
+      userAgent,
       method: req?.method || 'POST',
       path: req?.path || '/api/auth/login',
-      username: typeof username === 'string' ? username : String(username),
-      kind: honeytokenHit ? 'honeytoken' : 'brute_force',
+      username: rawUsername,
+      kind,
       detail: {
-        username: typeof username === 'string' ? username : String(username),
-        token: typeof username === 'string' ? username : String(username),
-        reason: honeytokenHit ? 'honeytoken_triggered' : 'authentication_failed',
+        username: rawUsername,
+        token: rawUsername,
+        reason:
+          kind === 'decoy_login'
+            ? 'decoy_username_login_attempt'
+            : kind === 'honeytoken'
+            ? 'honeytoken_triggered'
+            : 'authentication_failed',
       },
-      severity: honeytokenHit ? 'critical' : 'medium',
+      severity,
     });
   } catch {
     // Fail open, never throw
@@ -536,23 +781,19 @@ export function loginSucceeded(req, username) {
   }
 
   try {
-    const rawIp =
-      req?.ip || req?.headers?.['x-forwarded-for'] || req?.socket?.remoteAddress || '';
-    const ip = (typeof rawIp === 'string' ? rawIp.split(',')[0].trim() : '').replace(
-      /^::ffff:/,
-      ''
-    );
+    const ip = getClientIp(req);
     const userAgent = req?.headers?.['user-agent'] || '';
+    const rawUsername = typeof username === 'string' ? username : String(username || '');
 
     sendEvent({
       ip,
-      user_agent: userAgent,
+      userAgent,
       method: req?.method || 'POST',
       path: req?.path || '/api/auth/login',
-      username: typeof username === 'string' ? username : String(username),
-      kind: 'login_succeeded',
+      username: rawUsername,
+      kind: 'scanner', // using contract kind
       detail: {
-        username: typeof username === 'string' ? username : String(username),
+        username: rawUsername,
         reason: 'authentication_succeeded',
       },
       severity: 'info',
@@ -564,8 +805,12 @@ export function loginSucceeded(req, username) {
 
 mirage.loginFailed = loginFailed;
 mirage.loginSucceeded = loginSucceeded;
+mirage.reportEnumeration = reportEnumeration;
 mirage.checkIpBlocked = checkIpBlocked;
 mirage.sendEvent = sendEvent;
+mirage.getClientIp = getClientIp;
+mirage.getMirageConfig = getMirageConfig;
+mirage.resetBlocklistCache = resetBlocklistCache;
 mirage.isReservedTrapPath = isReservedTrapPath;
 mirage.isHoneytoken = isHoneytoken;
 mirage.serveFakeTrapResponse = serveFakeTrapResponse;

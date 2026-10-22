@@ -1,10 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { server } from '../src/index.js';
 import { AddressInfo } from 'net';
+import { resetFallbackRateLimits } from '../src/middleware/rateLimiter.js';
 
 let baseUrl: string;
 
 beforeAll(async () => {
+  resetFallbackRateLimits();
   await new Promise<void>((resolve) => {
     if (server.listening) {
       const addr = server.address() as AddressInfo;
@@ -91,20 +93,22 @@ describe('Security Audit & Hardening Suite', () => {
   });
 
   it('Login Rate Limiter enforces 10/min threshold: 11th attempt returns 429', async () => {
-    // Send 10 rapid login attempts
+    // Send 10 rapid login attempts on dedicated test IP
+    const testIp = '198.51.100.77';
     for (let i = 1; i <= 10; i++) {
       const res = await fetch(`${baseUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Requested-With': 'XMLHttpRequest',
+          'x-forwarded-for': testIp,
         },
         body: JSON.stringify({
           email: `bruteforce_${i}@medistore.test`,
           password: 'WrongPassword',
         }),
       });
-      // The first attempts should be 401 (or 429 if prior tests consumed quota)
+      // The first attempts should be 401
       expect([401, 429]).toContain(res.status);
     }
 
@@ -114,6 +118,7 @@ describe('Security Audit & Hardening Suite', () => {
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
+        'x-forwarded-for': testIp,
       },
       body: JSON.stringify({
         email: 'bruteforce_final@medistore.test',

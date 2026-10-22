@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { store } from '../data/store.js';
-import { requirePharmacist } from '../middleware/auth.js';
+import { requireAuth, requirePharmacist } from '../middleware/auth.js';
 import type { OrderData } from '../data/seedData.js';
 
 export const ordersRouter = Router();
@@ -40,8 +40,8 @@ const createOrderSchema = z.object({
   }),
 });
 
-// GET /api/orders
-ordersRouter.get('/', async (req: Request, res: Response) => {
+// GET /api/orders (requires authentication, customer sees only own orders, pharmacist sees all)
+ordersRouter.get('/', requireAuth, async (req: Request, res: Response) => {
   const userRole = req.session?.role;
   const userId = req.session?.userId;
   const allOrders = await store.getOrders();
@@ -51,17 +51,13 @@ ordersRouter.get('/', async (req: Request, res: Response) => {
     return res.json({ orders: allOrders });
   }
 
-  // Customer views their own orders, or empty list
-  if (userId) {
-    const userOrders = allOrders.filter((o) => o.userId === userId);
-    return res.json({ orders: userOrders });
-  }
-
-  return res.json({ orders: [] });
+  // Customer views only their own orders
+  const userOrders = allOrders.filter((o) => o.userId === userId);
+  return res.json({ orders: userOrders });
 });
 
-// GET /api/orders/:id (IDOR protected: customer can only view own order)
-ordersRouter.get('/:id', async (req: Request, res: Response) => {
+// GET /api/orders/:id (IDOR protected: customer can only view own order, pharmacist can view any)
+ordersRouter.get('/:id', requireAuth, async (req: Request, res: Response) => {
   const order = await store.getOrderById(req.params.id);
   if (!order) {
     return res.status(404).json({ error: 'Order not found in sacred annals' });
@@ -71,7 +67,7 @@ ordersRouter.get('/:id', async (req: Request, res: Response) => {
   const userId = req.session?.userId;
 
   // Pharmacist can view any order; customer can only view their own order
-  if (userRole !== 'pharmacist' && (!userId || order.userId !== userId)) {
+  if (userRole !== 'pharmacist' && order.userId !== userId) {
     return res.status(403).json({ error: 'Access forbidden: unauthorized order inspection' });
   }
 
@@ -85,7 +81,14 @@ ordersRouter.post('/', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Invalid order structure', details: parseResult.error });
   }
 
-  const userId = req.session?.userId || 'usr_guest_' + Math.random().toString(36).substring(2, 8);
+  let userId = req.session?.userId;
+  if (!userId) {
+    userId = 'usr_guest_' + Math.random().toString(36).substring(2, 8);
+    if (req.session) {
+      req.session.userId = userId;
+      req.session.role = 'customer';
+    }
+  }
 
   // createOrderSchema validated every field above, so the parsed data already carries
   // all OrderData fields except the store-assigned ones (id, userId, status, createdAt).
@@ -105,10 +108,10 @@ ordersRouter.post('/', async (req: Request, res: Response) => {
   });
 });
 
-// PATCH /api/orders/:id/status (Chief Pharmacist only)
+// PATCH /api/orders/:id/status (Chief Pharmacist only, rejects unknown fields)
 const statusSchema = z.object({
   status: z.enum(['Pending', 'Dispensed', 'Shipped', 'Delivered', 'Cancelled']),
-});
+}).strict();
 
 ordersRouter.patch('/:id/status', requirePharmacist, async (req: Request, res: Response) => {
   const parseResult = statusSchema.safeParse(req.body);

@@ -10,7 +10,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6.svg)
 ![Contrast](https://img.shields.io/badge/WCAG%20AA-100%25%20Passed-brightgreen.svg)
 ![Color Lint](https://img.shields.io/badge/Color%20Lint-0%20Violations-brightgreen.svg)
-![Tests](https://img.shields.io/badge/Vitest-31%2F31%20Passed-brightgreen.svg)
+![Tests](https://img.shields.io/badge/Vitest-88%2F88%20Passed-brightgreen.svg)
 ![E2E](https://img.shields.io/badge/Playwright-7%2F7%20Suites%20Passed-brightgreen.svg)
 
 ---
@@ -60,11 +60,152 @@ MediStore features a three-mode design system where every component strictly con
 
 ---
 
-## ⚕️ What It Is
+## 🌐 System Architecture & Autonomous Deception Grid
 
-**medistore-asclepius** is a complete, polished, fully operational pharmaceutical application blending ancient Hellenic mythic medicine with cryptographic provenance and state-of-the-art web performance.
+The **MediStore & MirageSOC Ecosystem** is a production-grade **Autonomous Cyber Deception Grid and Active SOC Defense Platform**. Rather than acting as a traditional passive firewall, the system combines an **authentic decoy e-commerce application** (*MediStore: Temple of Asclepius*) with an **active deception and threat intelligence fortress** (*MirageSOC*).
 
-It acts as the **VICTIM application** for the **MirageSOC** security architecture, presenting realistic healthcare e-commerce and inventory workflows while hosting intentional canary trap endpoints (`/admin-old`, `/.env`, `/backup.zip`, `/wp-login.php`, `/phpmyadmin`, `/api/v1/internal/keys`) that MirageSOC intercepts and defends.
+When adversaries or automated reconnaissance bots probe the application, the system actively misleads them with realistic decoy responses, fingerprints their infrastructure, calculates deterministic risk scores across the **MITRE ATT&CK kill-chain**, plots real-time geolocation telemetry on a tactical radar, and autonomously blocks the malicious IP at the edge within seconds—all backed by AI-generated threat dossiers and courtroom-ready forensic PDF exports.
+
+```mermaid
+flowchart LR
+    Attacker["Threat Actor / Judge Phone"]
+    
+    subgraph MediStore ["MediStore: Temple of Asclepius (Edge Decoy)"]
+        Edge["server/mirage.js (Fail-Open First Middleware)"]
+        DecoyShop["Apothecary Shop & Web3 Provenance"]
+        FakeDecoy["Convincing Fake Responses (/.env, /admin-old, /backup.zip)"]
+        HoneypotTerminal["Emulated Bash Sandbox (/terminal)"]
+    end
+    
+    subgraph MirageSOC ["MirageSOC (Command & Control Defense Grid)"]
+        Ingest["POST /api/event (Telemetry Ingestion)"]
+        Geo["Real-Time IP Geolocation (Live IP Resolver)"]
+        Engine["Deterministic Risk Engine & Kill-Chain Profiler"]
+        BlocklistAPI["GET /api/blocklist (Edge Sync)"]
+        Dashboard["Tactical SOC Operations (Radar, Feed, AI Dossier, PDF)"]
+    end
+
+    Attacker -->|"Probes Decoys / Sends Payloads"| Edge
+    Edge -->|"Legitimate Devotee"| DecoyShop
+    Edge -->|"Trap Path Triggered"| FakeDecoy
+    Edge -.->|"Fire-and-Forget Telemetry (x-api-key)"| Ingest
+    HoneypotTerminal -.->|"Logged Decoy Command"| Ingest
+    Ingest --> Geo --> Engine
+    Engine -->|"Risk Score >= 60"| BlocklistAPI
+    BlocklistAPI -.->|"Poll & Enforce (403)"| Edge
+    Engine --> Dashboard
+```
+
+---
+
+## ⚡ End-to-End Operational Lifecycle
+
+The deception engine operates with strict sub-second responsiveness without ever breaking legitimate traffic:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Attacker as Threat Actor / Judge Phone
+    participant MediStore as MediStore Edge (server/mirage.js)
+    participant MirageSOC as MirageSOC Core (/api/event)
+    participant DB as Postgres Storage
+    participant SOCUI as MirageSOC Dashboard
+
+    Attacker->>MediStore: GET /.env (or probes /admin-old)
+    Note over MediStore: 1. mirage.js intercepts request<br/>2. Checks 3s blocklist cache
+    MediStore-->>Attacker: HTTP 200 OK (Convincing Fake Canary Secrets)
+    
+    par Fire-and-Forget Telemetry
+        MediStore-)MirageSOC: POST /api/event (IP, Path, Severity: high)
+    end
+    
+    MirageSOC->>MirageSOC: Geocode IP (Live IP-API resolver)
+    MirageSOC->>DB: Upsert Attacker & Insert Event
+    MirageSOC->>MirageSOC: Calculate Risk (+25 pts -> Stage: Recon)
+    
+    SOCUI->>MirageSOC: Poll /api/feed (every 3000ms)
+    MirageSOC-->>SOCUI: New Event Stream Data
+    Note over SOCUI: Radar lights up, live stream animates event
+    
+    Attacker->>MediStore: POST /api/auth/login (Decoy / Honeytoken)
+    MediStore-->>Attacker: HTTP 401 Unauthorized
+    MediStore-)MirageSOC: POST /api/event (Severity: critical, +50 pts)
+    
+    MirageSOC->>DB: Risk reaches 75/100 -> Flag IP as Blocked
+    
+    Attacker->>MediStore: GET /shop (Any subsequent request)
+    MediStore->>MirageSOC: GET /api/blocklist
+    MirageSOC-->>MediStore: Attacker IP in Blocklist
+    MediStore-->>Attacker: HTTP 403 Forbidden (Blocked at Edge)
+```
+
+---
+
+## 🔍 How the System Works: End-to-End Deep Dive
+
+### A. MediStore: Temple of Asclepius (The Decoy Victim)
+* **What it looks like**: A luxurious Hellenic-themed pharmaceutical storefront dedicated to Asclepius (Greek deity of healing).
+* **Legitimate features**:
+  * **Apothecary Catalogue**: Functional catalog of herbal remedies, botanical tinctures, and therapeutic formulations.
+  * **Web3 Batch Provenance**: Cryptographic verification of pharmaceutical batch hashes using Ethereum smart contract Keccak-256 proofs on Sepolia testnet.
+  * **Oracle Pythia**: Knowledge assistant with scripted and AI responses answering questions on herbal formulations and dispensary rites.
+  * **Cart & Consecration Checkout**: Multi-step requisition cart and tokenized tribute checkout.
+  * **Pharmacist Dashboard**: Role-gated portal (HTTP 403 for unauthorized users) for inventory stock management, revenue analytics, and customer whitelisting.
+* **The Deception Layer**:
+  * Mounted as the **first middleware** (`server/mirage.js`) before static assets, routing, and SPA fallback.
+  * Intercepts probes on 6 known reconnaissance endpoints:
+    * `/.env` → Returns realistic fake production environment variables with canary database secrets.
+    * `/admin-old` → Returns a convincingly styled, non-functional legacy administrative authentication screen.
+    * `/backup.zip` → Returns realistic ZIP file headers.
+    * `/wp-login.php` & `/phpmyadmin` → Decoy CMS login interfaces.
+    * `/api/v1/internal/keys` → Emulated internal key vault payload.
+  * **Honeytokens & Decoy Logins**: Common attacker usernames (`admin`, `root`, `administrator`, `test`) or canary credentials trigger instant critical severity alerts to MirageSOC.
+  * **Fail-Open Resilience**: If MirageSOC is slow, down, or returning errors, MediStore **never breaks**. It fails open within 800ms, allowing legitimate shoppers to continue uninterrupted.
+
+### B. MirageSOC (Autonomous AI Deception & SOC Command Center)
+* **What it does**: A cyber defense command dashboard that tracks, analyzes, and neutralizes threat actors in real time.
+* **Key capabilities**:
+  1. **Telemetry Stream**: Ingests threat events (method, path, IP, user-agent, kind, severity) via `POST /api/event` authenticated with `x-api-key: MIRAGE_API_KEY`.
+  2. **Zero-Hardcoded Geolocation Radar**: Queries live IP geocoding on every incoming event and plots pulsing radar pins across an OpenStreetMap canvas.
+  3. **Adversary Fingerprinting**: Generates SHA-256 fingerprint hashes uniquely identifying each attacker machine.
+  4. **5-Phase Kill-Chain Progression**:
+     `Recon` → `Access` → `Discovery` → `Collection` → `Exfiltration`
+  5. **Deterministic Risk Profiler**:
+     * Recon / Scanner probe: +10 to +25 points
+     * SQL Injection / XSS attempt: +10 to +15 points
+     * Brute Force credential stuffing: +10 points
+     * Emulated Terminal probe: +15 points
+     * Honeytoken leak trigger: +50 points (Immediate Critical Escalation)
+  6. **Automated Edge Blocklist**: When an attacker accumulates ≥60 risk points, their IP is immediately flagged as blocked. MediStore reads this list on its next request and drops the connection with `403 Forbidden`.
+  7. **Gemini AI Threat Dossier**: An autonomous AI agent analyzes adversary event history to produce an intent summary, narrative threat story, and MITRE ATT&CK technique mapping.
+  8. **Courtroom Forensic PDF Dossier**: Generates signed downloadable PDF incident reports compiled via `pdf-lib`.
+
+---
+
+## 🎯 3-Minute Live Hackathon / Judge Evaluation Workflow
+
+```mermaid
+flowchart TD
+    Step1["Step 1: Open MirageSOC Dashboard (Navigate to /judge-qr on laptop)"]
+    Step2["Step 2: Scan QR with Mobile Camera (Opens Attack Simulator on smartphone)"]
+    Step3["Step 3: Tap 'LAUNCH ATTACK SEQUENCE' (Fires live exploit chain from phone IP)"]
+    Step4["Step 4: Watch MirageSOC React Live (Radar pins phone location, Live Feed updates in 3s)"]
+    Step5["Step 5: Autonomous Edge Lockout (Phone risk reaches 60+; MediStore serves HTTP 403)"]
+    Step6["Step 6: Export Forensic Dossier (Download courtroom-ready PDF incident report)"]
+
+    Step1 --> Step2 --> Step3 --> Step4 --> Step5 --> Step6
+```
+
+1. **Open MirageSOC**: Go to [https://mirage-soc.vercel.app](https://mirage-soc.vercel.app) and sign in (`admin123!`).
+2. **Access Judge QR**: Click **Judge QR** in the navigation bar.
+3. **Scan with Phone**: Use an iPhone or Android camera to scan the displayed QR code, opening the Mobile Attack Simulator.
+4. **Trigger Exploit**: Tap **🔥 LAUNCH ATTACK SEQUENCE**. Your phone will simulate reconnaissance traps, SQL injections, and honeytoken triggers.
+5. **Observe Real-Time SOC Telemetry**:
+   * **Live Feed**: Ingested events pulse with severity badges.
+   * **Live Map**: A tactical radar pin appears over your exact city and coordinates.
+   * **Threat Matrix**: Your phone is categorized as an active threat actor.
+   * **Edge Lockout**: Try visiting MediStore from your phone browser—you will receive an immediate **HTTP 403 Forbidden**.
+6. **Download Incident Dossier**: In MirageSOC under **Reports** or **Attackers**, tap **EXPORT PDF DOSSIER** to download the signed forensic report.
 
 > [!NOTE]
 > **Demo Application Notice:**  

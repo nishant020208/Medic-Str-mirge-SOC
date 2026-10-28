@@ -8,7 +8,8 @@
   "regions": ["hnd1"],
   "functions": {
     "api/index.ts": {
-      "maxDuration": 10
+      "maxDuration": 10,
+      "includeFiles": "client/dist/**"
     }
   },
   "headers": [
@@ -33,7 +34,7 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/:match*",
       "destination": "/api"
     },
     {
@@ -41,32 +42,56 @@
       "destination": "/api"
     },
     {
-      "source": "/[aA][dD][mM][iI][nN]-[oO][lL][dD](.*)",
+      "source": "/admin-old",
       "destination": "/api"
     },
     {
-      "source": "/\\.[eE][nN][vV](.*)",
+      "source": "/admin-old/:match*",
       "destination": "/api"
     },
     {
-      "source": "/[bB][aA][cC][kK][uU][pP]\\.[zZ][iI][pP](.*)",
+      "source": "/.env",
       "destination": "/api"
     },
     {
-      "source": "/[wW][pP]-[lL][oO][gG][iI][nN]\\.[pP][hH][pP](.*)",
+      "source": "/.env/:match*",
       "destination": "/api"
     },
     {
-      "source": "/[pP][hH][pP][mM][yY][aA][dD][mM][iI][nN](.*)",
+      "source": "/backup.zip",
       "destination": "/api"
     },
     {
-      "source": "/[aA][pP][iI]/[vV]1/[iI][nN][tT][eE][rR][nN][aA][lL]/[kK][eE][yY][sS](.*)",
+      "source": "/backup.zip/:match*",
       "destination": "/api"
     },
     {
-      "source": "/((?!api/|healthz|[aA][dD][mM][iI][nN]-[oO][lL][dD]|\\.[eE][nN][vV]|[bB][aA][cC][kK][uU][pP]\\.[zZ][iI][pP]|[wW][pP]-[lL][oO][gG][iI][nN]\\.[pP][hH][pP]|[pP][hH][pP][mM][yY][aA][dD][mM][iI][nN]|[aA][pP][iI]/[vV]1/[iI][nN][tT][eE][rR][nN][aA][lL]/[kK][eE][yY][sS]|.*\\.[a-zA-Z0-9]+$).*)",
-      "destination": "/index.html"
+      "source": "/wp-login.php",
+      "destination": "/api"
+    },
+    {
+      "source": "/wp-login.php/:match*",
+      "destination": "/api"
+    },
+    {
+      "source": "/phpmyadmin",
+      "destination": "/api"
+    },
+    {
+      "source": "/phpmyadmin/:match*",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/v1/internal/keys",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/v1/internal/keys/:match*",
+      "destination": "/api"
+    },
+    {
+      "source": "/:match*",
+      "destination": "/api"
     }
   ]
 }

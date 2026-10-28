@@ -630,7 +630,19 @@ export default async function mirage(req, res, next) {
 
     const ip = getClientIp(req);
     const userAgent = req.headers?.['user-agent'] || '';
-    const reqPath = req.path || req.url || '/';
+    let reqPath = req.path || req.url || '/';
+
+    const forwardedUrl = req.headers?.['x-forwarded-url'] || req.headers?.['x-original-url'];
+    if (typeof forwardedUrl === 'string' && forwardedUrl.trim()) {
+      try {
+        const parsed = new URL(forwardedUrl, 'http://localhost');
+        if (parsed.pathname && isReservedTrapPath(parsed.pathname)) {
+          reqPath = parsed.pathname;
+        }
+      } catch {
+        // ignore
+      }
+    }
 
     // (a) Allowlist skip: allowlisted IPs bypass blocklist and enforcement
     const allowlist = (process.env.ALLOWLIST_IPS || '')

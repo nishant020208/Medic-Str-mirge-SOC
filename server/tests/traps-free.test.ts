@@ -28,28 +28,63 @@ afterAll(async () => {
 
 describe('Trap Paths Must Be Free & Unswallowed by SPA Fallback', () => {
   const trapPaths = [
-    '/admin-old',
-    '/.env',
-    '/backup.zip',
-    '/wp-login.php',
-    '/phpmyadmin',
-    '/api/v1/internal/keys',
-    '/admin-old/',
-    '/ADMIN-OLD',
+    { path: '/admin-old', expectedMarker: 'Asclepeion Admin Console', expectedType: 'text/html' },
+    { path: '/.env', expectedMarker: 'DATABASE_URL', expectedType: 'text/plain' },
+    { path: '/backup.zip', expectedMarker: 'PK', expectedType: 'application/zip' },
+    { path: '/wp-login.php', expectedMarker: 'WordPress', expectedType: 'text/html' },
+    { path: '/phpmyadmin', expectedMarker: 'phpMyAdmin', expectedType: 'text/html' },
+    { path: '/api/v1/internal/keys', expectedMarker: 'key_live_oracle_priest_9021', expectedType: 'application/json' },
   ];
 
-  for (const path of trapPaths) {
-    it(`Path "${path}" returns convincing decoy and is never swallowed by SPA`, async () => {
+  for (const { path, expectedMarker, expectedType } of trapPaths) {
+    it(`Path "${path}" returns convincing decoy and fails if SPA shell is returned`, async () => {
       const res = await fetch(`${baseUrl}${path}`);
       const text = await res.text();
+      const contentType = res.headers.get('content-type') || '';
 
-      expect(res.status).toBe(200);
+      // Must NOT be swallowed by client SPA fallback
       expect(text).not.toContain('<div id="root">');
-      expect(text).not.toContain('React');
+      expect(text).not.toContain('Temple of Asclepius | Consecrated Ancient Pharmacopeia');
+      expect(text).not.toContain('assets/index-');
+
+      // Must return decoy response
+      expect(res.status).toBe(200);
+      expect(contentType).toContain(expectedType);
+      expect(text).toContain(expectedMarker);
+    });
+
+    it(`Path "${path}" via x-forwarded-url header simulation returns decoy and never SPA shell`, async () => {
+      const res = await fetch(`${baseUrl}/api`, {
+        headers: {
+          'x-forwarded-url': `https://asclepius-gamma.vercel.app${path}`,
+        },
+      });
+      const text = await res.text();
+      const contentType = res.headers.get('content-type') || '';
+
+      expect(text).not.toContain('<div id="root">');
+      expect(text).not.toContain('Temple of Asclepius | Consecrated Ancient Pharmacopeia');
+      expect(res.status).toBe(200);
+      expect(contentType).toContain(expectedType);
+      expect(text).toContain(expectedMarker);
     });
   }
 
-  it('Legitimate client SPA route "/" returns 200 with HTML', async () => {
+  it('Case-insensitive and trailing slash trap variants return decoy', async () => {
+    const resSlash = await fetch(`${baseUrl}/admin-old/`);
+    expect(resSlash.status).toBe(200);
+    const textSlash = await resSlash.text();
+    expect(textSlash).toContain('Asclepeion Admin Console');
+    expect(textSlash).not.toContain('<div id="root">');
+
+    const resUpper = await fetch(`${baseUrl}/ADMIN-OLD`);
+    expect(resUpper.status).toBe(200);
+    const textUpper = await resUpper.text();
+    expect(textUpper).toContain('Asclepeion Admin Console');
+    expect(textUpper).not.toContain('<div id="root">');
+  });
+
+  it('Legitimate client SPA route "/" returns 200 with HTML and SPA root', async () => {
     const res = await fetch(`${baseUrl}/`);
     const text = await res.text();
     const contentType = res.headers.get('content-type') || '';
@@ -59,7 +94,7 @@ describe('Trap Paths Must Be Free & Unswallowed by SPA Fallback', () => {
     expect(text).toContain('<!DOCTYPE html>');
   });
 
-  it('Legitimate client SPA route "/shop" returns 200 with HTML', async () => {
+  it('Legitimate client SPA route "/shop" returns 200 with HTML and SPA root', async () => {
     const res = await fetch(`${baseUrl}/shop`);
     const text = await res.text();
     const contentType = res.headers.get('content-type') || '';

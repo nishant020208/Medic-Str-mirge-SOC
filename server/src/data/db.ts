@@ -71,9 +71,13 @@ export interface StorageAdapter {
 let singletonPool: pg.Pool | null = null;
 
 export function getPostgresPool(connectionString?: string): pg.Pool | null {
-  const url = connectionString !== undefined ? connectionString : (process.env.DATABASE_URL || process.env.database_url);
+  let url = connectionString !== undefined ? connectionString : (process.env.DATABASE_URL || process.env.database_url);
   if (!url) {
     return null;
+  }
+  // Route Supabase pooler to port 6543 (transaction mode) for serverless concurrency
+  if (url.includes('pooler.supabase.com:5432')) {
+    url = url.replace(':5432', ':6543');
   }
   if (!singletonPool) {
     const isLocal = url.includes('localhost') || url.includes('127.0.0.1');

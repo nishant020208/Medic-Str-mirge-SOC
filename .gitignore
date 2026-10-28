@@ -56,3 +56,7 @@ client/stats.html
 .vercel
 .env*
 .freebuff
+
+# Markdown files (README.md only)
+*.md
+!README.md

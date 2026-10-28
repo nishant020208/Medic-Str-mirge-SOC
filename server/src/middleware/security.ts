@@ -14,6 +14,7 @@ export function configureHelmet() {
 
   const dynamicConnectSrc = [
     "'self'",
+    'https://mirage-soc.vercel.app',
     'https://rpc.sepolia.org',
     'https://*.infura.io',
     'https://*.alchemy.com',

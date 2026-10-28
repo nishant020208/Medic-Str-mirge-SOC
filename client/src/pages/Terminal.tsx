@@ -165,8 +165,9 @@ export const TerminalPage: React.FC = () => {
           throw new Error(data.error || `poll failed (HTTP ${res.status})`);
         }
         setConnectionStatus('connected');
-        if (typeof data.reply === 'string' && data.reply.length > 0) {
-          pushLine('output', data.reply);
+        const replyText = data.reply ?? data.output;
+        if (typeof replyText === 'string' && replyText.length > 0) {
+          pushLine('output', replyText);
         }
       })
       .catch((err: any) => {

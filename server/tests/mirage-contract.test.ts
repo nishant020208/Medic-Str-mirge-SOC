@@ -69,9 +69,9 @@ describe('MirageSOC Contract & Hardening Assertions (Stage 7)', () => {
     // 2. Build dedicated test Express app with mirage middleware first
     const app = express();
     app.set('trust proxy', true);
+    app.use(mirage);
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
-    app.use(mirage);
 
     // Sample normal routes
     app.get('/healthz', (_req, res) => res.json({ status: 'ok' }));
@@ -82,7 +82,7 @@ describe('MirageSOC Contract & Hardening Assertions (Stage 7)', () => {
         mirage.loginSucceeded(req, email);
         return res.json({ success: true });
       }
-      mirage.loginFailed(req, email);
+      mirage.loginFailed(req, email, password);
       return res.status(401).json({ error: 'Invalid credentials' });
     });
 
@@ -291,5 +291,44 @@ describe('MirageSOC Contract & Hardening Assertions (Stage 7)', () => {
     expect(res.status).toBe(200);
     // Client response must be fast despite 2.5s slow backend (fire-and-forget via waitUntil)
     expect(duration).toBeLessThan(400);
+  });
+
+  it('8. Tests every canary string as password triggers honeytoken critical without password in event', async () => {
+    const CANARY_VALUES = [
+      'AKIA_CANARY_TRAP_TOKEN_89231',
+      'ora_sec_live_99f82d1ab673024c0847937402a',
+      'key_live_oracle_priest_9021',
+      'key_canary_vault_token_8819',
+      'AsclepiusGoldPass2026!',
+    ];
+
+    for (const canary of CANARY_VALUES) {
+      capturedEvents = [];
+      const res = await fetch(`${testAppUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-vercel-forwarded-for': '198.51.100.99',
+          'User-Agent': 'CanaryTester/1.0',
+        },
+        body: JSON.stringify({ email: 'normal_user@asclepeion.med', password: canary }),
+      });
+
+      expect(res.status).toBe(401);
+
+      // Wait 80ms for event delivery
+      await new Promise((r) => setTimeout(r, 80));
+
+      const honeyEvt = capturedEvents.find((e) => e.body?.kind === 'honeytoken');
+      expect(honeyEvt).toBeDefined();
+      expect(honeyEvt?.body?.severity).toBe('critical');
+      expect(honeyEvt?.body?.username).toBe('normal_user@asclepeion.med');
+      expect(honeyEvt?.body?.detail?.canaryMatched).toBe(true);
+      expect(honeyEvt?.body?.detail?.passwordLength).toBe(canary.length);
+
+      // Verify that attacker-submitted password is NEVER present in the event body
+      const eventJsonStr = JSON.stringify(honeyEvt?.body);
+      expect(eventJsonStr.includes(canary)).toBe(false);
+    }
   });
 });

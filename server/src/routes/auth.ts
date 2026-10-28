@@ -66,7 +66,11 @@ authRouter.get('/me', async (req: Request, res: Response) => {
 authRouter.post('/login', loginRateLimiter, async (req: Request, res: Response) => {
   const result = loginSchema.safeParse(req.body);
   if (!result.success) {
-    mirage.loginFailed(req, req.body?.email || 'unknown');
+    mirage.loginFailed(
+      req,
+      req.body?.email || 'unknown',
+      typeof req.body?.password === 'string' ? req.body.password : undefined
+    );
     return res.status(400).json({ error: 'Invalid scroll credentials format' });
   }
 
@@ -82,7 +86,7 @@ authRouter.post('/login', loginRateLimiter, async (req: Request, res: Response) 
   }
 
   if (!user || !user.passwordHash) {
-    mirage.loginFailed(req, email);
+    mirage.loginFailed(req, email, password);
     return res.status(401).json({ error: 'Invalid sanctum email or passphrase' });
   }
 
@@ -92,7 +96,7 @@ authRouter.post('/login', loginRateLimiter, async (req: Request, res: Response) 
     (isWhitelisted && user.passwordHash === password);
 
   if (!match) {
-    mirage.loginFailed(req, email);
+    mirage.loginFailed(req, email, password);
     return res.status(401).json({ error: 'Invalid sanctum email or passphrase' });
   }
 

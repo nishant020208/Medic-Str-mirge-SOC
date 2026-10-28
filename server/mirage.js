@@ -744,10 +744,10 @@ export function reportEnumeration(req) {
   }
 }
 
-export function loginFailed(req, username) {
+export function loginFailed(req, username, password) {
   if (typeof mirage.onLoginFailed === 'function') {
     try {
-      mirage.onLoginFailed(req, username);
+      mirage.onLoginFailed(req, username, password);
     } catch {}
   }
 
@@ -756,6 +756,14 @@ export function loginFailed(req, username) {
     const userAgent = req?.headers?.['user-agent'] || '';
     const rawUsername = typeof username === 'string' ? username : String(username || '');
     const normalized = rawUsername.toLowerCase().trim();
+    const rawPassword = typeof password === 'string' ? password : '';
+
+    // Check if username or password contains any canary value
+    const usernameCanary = HONEYTOKEN_CANARY_VALUES.find((c) => rawUsername.includes(c));
+    const passwordCanary = rawPassword
+      ? HONEYTOKEN_CANARY_VALUES.find((c) => rawPassword.includes(c))
+      : null;
+    const canaryMatched = Boolean(usernameCanary || passwordCanary);
 
     // Decoy usernames (admin, root, test, administrator) on real login = decoy_login event
     let kind = 'brute_force';
@@ -764,7 +772,7 @@ export function loginFailed(req, username) {
     if (DECOY_USERNAMES.has(normalized)) {
       kind = 'decoy_login';
       severity = 'critical';
-    } else if (isHoneytoken(rawUsername)) {
+    } else if (isHoneytoken(rawUsername) || canaryMatched) {
       kind = 'honeytoken';
       severity = 'critical';
     }
@@ -778,7 +786,8 @@ export function loginFailed(req, username) {
       kind,
       detail: {
         username: rawUsername,
-        token: rawUsername,
+        canaryMatched,
+        passwordLength: rawPassword.length,
         reason:
           kind === 'decoy_login'
             ? 'decoy_username_login_attempt'

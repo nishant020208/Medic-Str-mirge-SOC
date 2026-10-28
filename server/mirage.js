@@ -462,6 +462,7 @@ export function sendEvent(eventPayload) {
     } catch {
       // Outside Vercel runtime
     }
+    return promise;
   } catch {
     // Fail open safely, never throw
   }
@@ -753,7 +754,7 @@ export function reportEnumeration(req) {
 export function loginFailed(req, username, password) {
   if (typeof mirage.onLoginFailed === 'function') {
     try {
-      mirage.onLoginFailed(req, username, password);
+      mirage.onLoginFailed(req, username);
     } catch {}
   }
 

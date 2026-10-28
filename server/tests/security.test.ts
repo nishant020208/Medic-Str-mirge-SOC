@@ -94,7 +94,7 @@ describe('Security Audit & Hardening Suite', () => {
 
   it('Login Rate Limiter enforces 10/min threshold: 11th attempt returns 429', async () => {
     // Send 10 rapid login attempts on dedicated test IP
-    const testIp = '198.51.100.77';
+    const testIp = '198.51.100.177';
     for (let i = 1; i <= 10; i++) {
       const res = await fetch(`${baseUrl}/api/auth/login`, {
         method: 'POST',

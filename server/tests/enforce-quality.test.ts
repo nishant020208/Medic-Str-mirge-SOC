@@ -235,7 +235,7 @@ describe('Stage 4: Enforce-Mode Quality & Precision Benchmark', () => {
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
-        'x-forwarded-for': '198.51.100.177',
+        'x-forwarded-for': '198.51.100.188',
       },
       body: JSON.stringify({
         email: 'pharmacist@medistore.test',

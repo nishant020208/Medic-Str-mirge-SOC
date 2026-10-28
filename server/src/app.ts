@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import session from 'express-session';
 import pgSession from 'connect-pg-simple';
@@ -173,12 +174,25 @@ app.use('/api/orders', ordersRouter);
 app.use('/api/oracle', oracleRouter);
 app.use('/api/terminal', terminalRouter);
 
-// Express must not serve static files on Vercel (Vercel CDN serves client/dist).
-// Keep static serving only for local production preview.
-if (!process.env.VERCEL) {
-  const clientDistPath = path.resolve(__dirname, '../../client/dist');
+function getClientDistPath(): string | null {
+  const candidates = [
+    path.resolve(process.cwd(), 'client/dist'),
+    path.resolve(__dirname, '../../client/dist'),
+    path.resolve(__dirname, '../client/dist'),
+    path.resolve('/var/task/client/dist'),
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return null;
+}
+
+const resolvedDistPath = getClientDistPath();
+
+// Static assets serving (active locally and as serverless fallback)
+if (resolvedDistPath) {
   app.use(
-    express.static(clientDistPath, {
+    express.static(resolvedDistPath, {
       maxAge: '1y',
       immutable: true,
       setHeaders: (res, filePath) => {
@@ -190,34 +204,51 @@ if (!process.env.VERCEL) {
       },
     })
   );
-
-  // SPA fallback ONLY for GET/HEAD requests without extension, not /api, not reserved trap paths
-  app.get('*', (req, res, next) => {
-    if (req.method !== 'GET' && req.method !== 'HEAD') {
-      return next();
-    }
-
-    if (req.path.startsWith('/api')) {
-      return next();
-    }
-
-    if (path.extname(req.path) !== '' || (req.path.slice(1).includes('.') && !req.path.endsWith('/'))) {
-      return next();
-    }
-
-    if (isReservedTrapPath(req.path)) {
-      return next();
-    }
-
-    const indexPath = path.join(clientDistPath, 'index.html');
-    res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
-    res.sendFile(indexPath, (err) => {
-      if (err) {
-        next();
-      }
-    });
-  });
 }
+
+// SPA fallback ONLY for GET/HEAD requests without extension, not /api, not reserved trap paths
+app.get('*', (req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    return next();
+  }
+
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+
+  if (path.extname(req.path) !== '' || (req.path.slice(1).includes('.') && !req.path.endsWith('/'))) {
+    return next();
+  }
+
+  let checkPath = req.path;
+  const forwardedUrl = req.headers?.['x-forwarded-url'] || req.headers?.['x-original-url'];
+  if (typeof forwardedUrl === 'string' && forwardedUrl.trim()) {
+    try {
+      const parsed = new URL(forwardedUrl, 'http://localhost');
+      if (parsed.pathname) checkPath = parsed.pathname;
+    } catch {
+      // ignore
+    }
+  }
+
+  if (isReservedTrapPath(checkPath)) {
+    return next();
+  }
+
+  const distPath = getClientDistPath();
+  if (distPath) {
+    const indexPath = path.join(distPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+      return res.sendFile(indexPath, (err) => {
+        if (err) {
+          next();
+        }
+      });
+    }
+  }
+  next();
+});
 
 // 404 handler for unmatched backend paths, trap paths, and unknown assets
 // Every one must return 404 (plain "Not found", NOT index.html, NOT the React app)

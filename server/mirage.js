@@ -644,6 +644,23 @@ export default async function mirage(req, res, next) {
       }
     }
 
+    // (c) Trap path -> convincing FAKE response + event (serves decoys regardless of IP allowlist)
+    if (isReservedTrapPath(reqPath)) {
+      sendEvent({
+        ip,
+        userAgent,
+        method: req.method,
+        path: reqPath,
+        kind: 'trap_hit',
+        detail: {
+          path: reqPath,
+          reason: 'reserved_trap_path',
+        },
+        severity: 'high',
+      });
+      return serveFakeTrapResponse(reqPath, res);
+    }
+
     // (a) Allowlist skip: allowlisted IPs bypass blocklist and enforcement
     const allowlist = (process.env.ALLOWLIST_IPS || '')
       .split(',')
@@ -674,23 +691,6 @@ export default async function mirage(req, res, next) {
         detail: { reason: 'blocked_ip_monitor_pass', ip },
         severity: 'high',
       });
-    }
-
-    // (c) Trap path -> convincing FAKE response + event
-    if (isReservedTrapPath(reqPath)) {
-      sendEvent({
-        ip,
-        userAgent,
-        method: req.method,
-        path: reqPath,
-        kind: 'trap_hit',
-        detail: {
-          path: reqPath,
-          reason: 'reserved_trap_path',
-        },
-        severity: 'high',
-      });
-      return serveFakeTrapResponse(reqPath, res);
     }
 
     // (d) Enforce signatures: SQLi, XSS, path traversal, cmdi, scanners, empty UA, TRACE/CONNECT, oversized payload

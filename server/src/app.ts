@@ -24,6 +24,7 @@ import { productsRouter } from './routes/products.js';
 import { ordersRouter } from './routes/orders.js';
 import { oracleRouter } from './routes/oracle.js';
 import { terminalRouter } from './routes/terminal.js';
+import { decoyRouter } from './routes/decoy.js';
 import { whenStoreReady } from './data/store.js';
 import { getPostgresPool, checkDatabaseHealth } from './data/db.js';
 import { checkSupabaseHealth } from './lib/supabaseAdmin.js';
@@ -133,6 +134,9 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // CSRF Protection for state-changing requests
 app.use(csrfProtection);
+
+// Decoy HTML Login Form Handlers (/admin-old/auth, /wp-login.php, /phpmyadmin/index.php)
+app.use(decoyRouter);
 
 // Explicit reserved trap paths for MirageSOC security triggers
 export const RESERVED_TRAP_PATHS = [

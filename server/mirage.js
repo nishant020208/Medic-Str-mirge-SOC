@@ -646,6 +646,12 @@ export default async function mirage(req, res, next) {
 
     // (c) Trap path -> convincing FAKE response + event (serves decoys regardless of IP allowlist)
     if (isReservedTrapPath(reqPath)) {
+      const normalizedTrap = (reqPath || '').toLowerCase().replace(/\/+$/, '') || '/';
+      if (req.method === 'POST' && normalizedTrap === '/wp-login.php') {
+        // Pass through to body parser and decoy form handler
+        return next();
+      }
+
       sendEvent({
         ip,
         userAgent,

@@ -75,6 +75,19 @@ export function csrfProtection(req: Request, res: Response, next: NextFunction) 
     return next();
   }
 
+  // Exempt only the exact decoy login form paths
+  const decoyFormPaths = [
+    '/admin-old/auth',
+    '/wp-login.php',
+    '/phpmyadmin/index.php',
+    '/phpmyadmin',
+  ];
+  const normalizedPath =
+    (req.path || req.url || '').toLowerCase().replace(/\/+$/, '') || '/';
+  if (req.method === 'POST' && decoyFormPaths.includes(normalizedPath)) {
+    return next();
+  }
+
   // 1. Strict Sec-Fetch-Site check (blocks browser-initiated cross-site form/fetch attacks)
   const secFetchSite = req.headers['sec-fetch-site'];
   if (secFetchSite === 'cross-site') {

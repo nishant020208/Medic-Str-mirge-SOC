@@ -1,13 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import { getPostgresPool } from '../data/db.js';
 // @ts-ignore - mirage.js is a plain JS module
 import mirage from '../../mirage.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
+
+let routesManifest: any;
+try {
+  routesManifest = require('../../generated/routes.json');
+} catch {
+  try {
+    routesManifest = require('../generated/routes.json');
+  } catch {
+    routesManifest = { staticRoutes: ['/'], dynamicRoutes: [] };
+  }
+}
 
 /**
  * Serverless-safe counter using the existing PostgreSQL rate_limits table.
@@ -45,72 +54,37 @@ export async function checkRateLimitCounter(
     const count = parseInt(res.rows[0].count, 10);
     // Emits once per window when the count exactly reaches the threshold
     return { reachedThreshold: count === threshold, count };
-  } catch {
-    // DB error -> fail open silently
+  } catch (err: any) {
+    console.warn('[Defense] DB rate limit query error:', err?.message || err);
     return null;
   }
 }
 
-let cachedClientRoutes: { staticRoutes: Set<string>; dynamicPatterns: RegExp[] } | null = null;
+// Statically compiled client routes derived at build time from client/src/App.tsx
+const staticRoutes = new Set<string>(
+  (routesManifest?.staticRoutes || []).map((r: string) => r.toLowerCase().replace(/\/+$/, '') || '/')
+);
+
+const dynamicPatterns: RegExp[] = (routesManifest?.dynamicRoutes || []).map(
+  (d: { pattern: string }) => new RegExp(d.pattern)
+);
 
 /**
- * Derives known client routes dynamically from the React client router (client/src/App.tsx).
- * Not hardcoded.
+ * Returns known routes derived at build time from the client router.
  */
 export function getDerivedClientRoutes(): {
   staticRoutes: Set<string>;
   dynamicPatterns: RegExp[];
 } {
-  if (cachedClientRoutes) return cachedClientRoutes;
-
-  const staticRoutes = new Set<string>(['/']);
-  const dynamicPatterns: RegExp[] = [];
-
-  const candidates = [
-    path.resolve(process.cwd(), 'client/src/App.tsx'),
-    path.resolve(__dirname, '../../../client/src/App.tsx'),
-    path.resolve(__dirname, '../../client/src/App.tsx'),
-    path.resolve('/var/task/client/src/App.tsx'),
-  ];
-
-  let appContent = '';
-  for (const c of candidates) {
-    if (fs.existsSync(c)) {
-      try {
-        appContent = fs.readFileSync(c, 'utf-8');
-        break;
-      } catch {
-        // continue
-      }
-    }
-  }
-
-  if (appContent) {
-    for (const match of appContent.matchAll(/<Route\s+([^>]+)>/g)) {
-      const pathMatch = match[1].match(/path=[\x22\x27]([^\x22\x27]+)[\x22\x27]/);
-      if (pathMatch) {
-        const raw = pathMatch[1].trim();
-        if (raw === '*') continue;
-        const normalized = '/' + raw.replace(/^\//, '').replace(/\/+$/, '');
-        if (normalized.includes(':')) {
-          const regexStr = '^' + normalized.replace(/:[a-zA-Z0-9_]+/g, '[^/]+') + '$';
-          dynamicPatterns.push(new RegExp(regexStr));
-        } else {
-          staticRoutes.add(normalized);
-        }
-      } else if (match[1].includes('index')) {
-        staticRoutes.add('/');
-      }
-    }
-  }
-
-  cachedClientRoutes = { staticRoutes, dynamicPatterns };
-  return cachedClientRoutes;
+  return { staticRoutes, dynamicPatterns };
 }
 
+/**
+ * Checks whether the given path matches any known client route.
+ */
 export function isKnownClientRoute(urlPath: string): boolean {
-  const normalized = (urlPath || '').toLowerCase().replace(/\/+$/, '') || '/';
-  const { staticRoutes, dynamicPatterns } = getDerivedClientRoutes();
+  if (!urlPath) return false;
+  const normalized = urlPath.toLowerCase().replace(/\/+$/, '') || '/';
 
   if (staticRoutes.has(normalized)) return true;
   for (const re of dynamicPatterns) {
@@ -120,34 +94,81 @@ export function isKnownClientRoute(urlPath: string): boolean {
 }
 
 /**
+ * An unknown path is probed if:
+ * 1. Matches no pattern in client route manifest
+ * 2. Not /api/*
+ * 3. Not /assets/*
+ * 4. Not a static file (no file extension, not common asset file)
+ * 5. Not a reserved trap path
+ */
+export function isUnknownPath(urlPath: string): boolean {
+  if (!urlPath) return false;
+  const normalized = urlPath.toLowerCase().replace(/\/+$/, '') || '/';
+
+  // 1. Trap path -> false (handled by mirage trap logic)
+  if (typeof mirage.isReservedTrapPath === 'function' ? mirage.isReservedTrapPath(normalized) : false) {
+    return false;
+  }
+
+  // 2. Not /api/*
+  if (normalized.startsWith('/api')) {
+    return false;
+  }
+
+  // 3. Not /assets/*
+  if (normalized.startsWith('/assets')) {
+    return false;
+  }
+
+  // 4. Not static files (has extension or common static root file)
+  if (
+    path.extname(normalized) !== '' ||
+    normalized.includes('.') ||
+    normalized === '/favicon.ico' ||
+    normalized === '/robots.txt' ||
+    normalized === '/manifest.json' ||
+    normalized === '/site.webmanifest'
+  ) {
+    return false;
+  }
+
+  // 5. Matches known client routes pattern
+  if (isKnownClientRoute(normalized)) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Serverless-safe flood detector:
  * more than 25 requests in 5s per IP via PostgreSQL rate_limits table.
  * Emits once per window. If DB is down, skips silently (fail open).
  */
-export function floodMiddleware(req: Request, _res: Response, next: NextFunction) {
+export async function floodMiddleware(req: Request, _res: Response, next: NextFunction) {
   const ip = typeof mirage.getClientIp === 'function' ? mirage.getClientIp(req) : (req.ip || '');
   if (!ip) return next();
 
-  // Non-blocking asynchronous increment in Postgres rate_limits
-  checkRateLimitCounter(`flood:${ip}`, 26, 5000)
-    .then((result) => {
-      if (result?.reachedThreshold) {
-        mirage.sendEvent({
-          ip,
-          userAgent: req.headers['user-agent'] || '',
-          method: req.method,
-          path: req.path || req.url || '/',
-          kind: 'flood',
-          detail: {
-            reason: 'request_flood_rate_exceeded',
-            threshold: 25,
-            windowSeconds: 5,
-          },
-          severity: 'high',
-        });
-      }
-    })
-    .catch(() => {});
+  try {
+    const result = await checkRateLimitCounter(`flood:${ip}`, 26, 5000);
+    if (result?.reachedThreshold) {
+      await mirage.sendEvent({
+        ip,
+        userAgent: req.headers['user-agent'] || '',
+        method: req.method,
+        path: req.path || req.url || '/',
+        kind: 'flood',
+        detail: {
+          reason: 'request_flood_rate_exceeded',
+          threshold: 25,
+          windowSeconds: 5,
+        },
+        severity: 'high',
+      });
+    }
+  } catch (err: any) {
+    console.warn('[FloodMiddleware] Error:', err?.message || err);
+  }
 
   next();
 }
@@ -158,30 +179,31 @@ export function floodMiddleware(req: Request, _res: Response, next: NextFunction
  * 10 or more in 60s per IP via PostgreSQL rate_limits table.
  * Emits once per window. If DB is down, skips silently (fail open).
  */
-export function checkSpaEnumeration(req: Request) {
+export async function checkSpaEnumeration(req: Request) {
   const ip = typeof mirage.getClientIp === 'function' ? mirage.getClientIp(req) : (req.ip || '');
   if (!ip) return;
 
   const reqPath = req.path || req.url || '/';
 
-  checkRateLimitCounter(`enum:${ip}`, 10, 60000)
-    .then((result) => {
-      if (result?.reachedThreshold) {
-        mirage.sendEvent({
-          ip,
-          userAgent: req.headers['user-agent'] || '',
-          method: req.method,
+  try {
+    const result = await checkRateLimitCounter(`enum:${ip}`, 10, 60000);
+    if (result?.reachedThreshold) {
+      await mirage.sendEvent({
+        ip,
+        userAgent: req.headers['user-agent'] || '',
+        method: req.method,
+        path: reqPath,
+        kind: 'enumeration',
+        detail: {
           path: reqPath,
-          kind: 'enumeration',
-          detail: {
-            path: reqPath,
-            reason: 'spa_non_extension_probing_threshold_reached',
-            threshold: 10,
-            windowSeconds: 60,
-          },
-          severity: 'medium',
-        });
-      }
-    })
-    .catch(() => {});
+          reason: 'spa_non_extension_probing_threshold_reached',
+          threshold: 10,
+          windowSeconds: 60,
+        },
+        severity: 'medium',
+      });
+    }
+  } catch (err: any) {
+    console.warn('[CheckSpaEnumeration] Error:', err?.message || err);
+  }
 }

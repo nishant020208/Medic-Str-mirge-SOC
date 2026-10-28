@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-10-28T12:38:51.019Z",
+  "staticRoutes": [
+    "/",
+    "/shop",
+    "/cart",
+    "/checkout",
+    "/login",
+    "/register",
+    "/dashboard",
+    "/oracle",
+    "/quest",
+    "/terminal",
+    "/auth/callback"
+  ],
+  "dynamicRoutes": [
+    {
+      "route": "/shop/:id",
+      "pattern": "^/shop/[^/]+$"
+    },
+    {
+      "route": "/order-confirmation/:id",
+      "pattern": "^/order-confirmation/[^/]+$"
+    }
+  ],
+  "allRoutes": [
+    "/",
+    "/shop",
+    "/shop/:id",
+    "/cart",
+    "/checkout",
+    "/order-confirmation/:id",
+    "/login",
+    "/register",
+    "/dashboard",
+    "/oracle",
+    "/quest",
+    "/terminal",
+    "/auth/callback"
+  ]
+}

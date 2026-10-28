@@ -29,6 +29,7 @@ import {
   floodMiddleware,
   checkSpaEnumeration,
   isKnownClientRoute,
+  isUnknownPath,
 } from './middleware/defense.js';
 import { whenStoreReady } from './data/store.js';
 import { getPostgresPool, checkDatabaseHealth } from './data/db.js';
@@ -219,7 +220,7 @@ if (resolvedDistPath) {
 }
 
 // SPA fallback ONLY for GET/HEAD requests without extension, not /api, not reserved trap paths
-app.get('*', (req, res, next) => {
+app.get('*', async (req, res, next) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     return next();
   }
@@ -248,9 +249,9 @@ app.get('*', (req, res, next) => {
   }
 
   // Serverless-safe enumeration detection: unknown non-extension paths
-  // Derived dynamically from client/src/App.tsx router. SPA is still served!
-  if (!isKnownClientRoute(checkPath)) {
-    checkSpaEnumeration(req);
+  // Derived at build-time from client route manifest. SPA is still served!
+  if (isUnknownPath(checkPath)) {
+    await checkSpaEnumeration(req);
   }
 
   const distPath = getClientDistPath();
@@ -270,10 +271,22 @@ app.get('*', (req, res, next) => {
 
 // 404 handler for unmatched backend paths, trap paths, and unknown assets
 // Every one must return 404 (plain "Not found", NOT index.html, NOT the React app)
-app.use((req, res) => {
-  if (typeof (mirage as any).reportEnumeration === 'function') {
-    (mirage as any).reportEnumeration(req);
+app.use(async (req, res) => {
+  let checkPath = req.path || req.url || '/';
+  const forwardedUrl = req.headers?.['x-forwarded-url'] || req.headers?.['x-original-url'];
+  if (typeof forwardedUrl === 'string' && forwardedUrl.trim()) {
+    try {
+      const parsed = new URL(forwardedUrl, 'http://localhost');
+      if (parsed.pathname) checkPath = parsed.pathname;
+    } catch {
+      // ignore
+    }
   }
+
+  if (isUnknownPath(checkPath)) {
+    await checkSpaEnumeration(req);
+  }
+
   res.status(404).type('text/plain').send('Not found');
 });
 

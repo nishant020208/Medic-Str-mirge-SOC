@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "node ../scripts/generate-routes-manifest.js && tsc",
     "start": "node dist/index.js",
     "lint": "tsc --noEmit",
     "seed": "tsx src/data/seed.ts"

@@ -25,6 +25,11 @@ import { ordersRouter } from './routes/orders.js';
 import { oracleRouter } from './routes/oracle.js';
 import { terminalRouter } from './routes/terminal.js';
 import { decoyRouter } from './routes/decoy.js';
+import {
+  floodMiddleware,
+  checkSpaEnumeration,
+  isKnownClientRoute,
+} from './middleware/defense.js';
 import { whenStoreReady } from './data/store.js';
 import { getPostgresPool, checkDatabaseHealth } from './data/db.js';
 import { checkSupabaseHealth } from './lib/supabaseAdmin.js';
@@ -42,6 +47,9 @@ app.set('trust proxy', true);
 // Rule 2: Mount mirage as the VERY FIRST middleware
 // BEFORE static files, API routes, body parsers and the SPA fallback
 app.use(mirage);
+
+// Serverless-safe flood detection via Postgres rate_limits (non-blocking)
+app.use(floodMiddleware);
 
 // Logging with morgan, capturing req.ip
 app.use(morganLogger);
@@ -237,6 +245,12 @@ app.get('*', (req, res, next) => {
 
   if (isReservedTrapPath(checkPath)) {
     return next();
+  }
+
+  // Serverless-safe enumeration detection: unknown non-extension paths
+  // Derived dynamically from client/src/App.tsx router. SPA is still served!
+  if (!isKnownClientRoute(checkPath)) {
+    checkSpaEnumeration(req);
   }
 
   const distPath = getClientDistPath();

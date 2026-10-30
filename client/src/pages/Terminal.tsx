@@ -1,50 +1,56 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Terminal as TerminalIcon, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
+import { Terminal as TerminalIcon, Wifi, WifiOff, ShieldAlert } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { SEO } from '../components/SEO';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 
 interface TerminalLine {
   id: string;
-  type: 'input' | 'output' | 'system' | 'error';
+  type: 'input' | 'output' | 'system' | 'error' | 'warning';
   text: string;
 }
 
 /**
- * Oracle Administrative Console — polling transport.
+ * Hospital & Pharmacy Deception Terminal Honeypot.
  *
- * No WebSockets anywhere: every typed line is a `POST` to the endpoint in
- * VITE_TERMINAL_API_URL (a MirageSOC backend, or the local stub at
- * /api/terminal). When that variable is empty the badge reads
- * "Console Offline" and only the local built-in commands work.
- * Command history lives client-side and is sent with each request so the
- * stateless server can keep the fake filesystem consistent.
+ * Simulates Ubuntu 22.04.4 LTS hospital operations gateway running HL7 integration
+ * and HIPAA encrypted vault storage. Transparently logs adversary commands to MirageSOC.
  */
 export const TerminalPage: React.FC = () => {
-  const apiBase = import.meta.env.VITE_TERMINAL_API_URL;
+  const apiBase = import.meta.env.VITE_TERMINAL_API_URL || '/api/terminal';
   const [lines, setLines] = useState<TerminalLine[]>([
     {
       id: 'init-1',
       type: 'system',
-      text: 'MediStore Asclepeion Operating Core [Version 4.2.0-hellenic-prod]',
+      text: 'Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 6.5.0-28-generic x86_64)',
     },
     {
       id: 'init-2',
       type: 'system',
-      text: '(c) 1250 BCE - 2026 CE Oracle Telecommunications. All rights reserved.',
+      text: ' * System: asclepius-medistore-prod (Hospital Internal Gateway)',
     },
     {
       id: 'init-3',
+      type: 'warning',
+      text: ' * HL7 Service: Active (Port 2575)',
+    },
+    {
+      id: 'init-4',
       type: 'system',
-      text: 'Type "help" for a list of available sanctum commands.',
+      text: ' * Vault Status: HIPAA Encrypted Storage Mounted',
+    },
+    {
+      id: 'init-5',
+      type: 'warning',
+      text: 'Notice: All activity on this medical network is monitored and logged.',
     },
   ]);
   const [inputVal, setInputVal] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [connectionStatus, setConnectionStatus] = useState<
-    'connected' | 'disconnected' | 'offline' | 'connecting'
-  >(apiBase ? 'connecting' : 'offline');
+    'connected' | 'disconnected' | 'connecting'
+  >('connected');
   const [polling, setPolling] = useState(false);
 
   const terminalEndRef = useRef<HTMLDivElement | null>(null);
@@ -62,29 +68,11 @@ export const TerminalPage: React.FC = () => {
     scrollToBottom();
   }, [lines]);
 
-  // Polling channel bootstrap (replaces the old WebSocket lifecycle)
-  useEffect(() => {
-    if (!apiBase) {
-      setConnectionStatus('offline');
-      pushLine(
-        'error',
-        '[SYSTEM NOTICE] VITE_TERMINAL_API_URL is unset. Console is currently offline. The oracle channel sleeps.'
-      );
-      return;
-    }
-
-    setConnectionStatus('connecting');
-    pushLine('system', `[POLLING CHANNEL CONFIGURED] Endpoint: ${apiBase}`);
-    // No persistent connection to establish — status flips to "connected"
-    // on the first successful poll and back to "disconnected" on failure.
-  }, [apiBase]);
-
   const handleCommand = (cmd: string) => {
     const trimmed = cmd.trim();
     if (!trimmed) return;
 
-    // Snapshot history BEFORE the current command is appended — the server
-    // replays it to reconstruct the fake current directory.
+    // Snapshot history before appending current command
     const pastHistory = [...history];
 
     // Add to input line
@@ -93,7 +81,7 @@ export const TerminalPage: React.FC = () => {
       {
         id: Math.random().toString(),
         type: 'input',
-        text: `deploy@medistore-prod:~$ ${trimmed}`,
+        text: `deploy@asclepius-medistore-prod:~$ ${trimmed}`,
       },
     ]);
 
@@ -104,49 +92,9 @@ export const TerminalPage: React.FC = () => {
 
     const firstWord = trimmed.toLowerCase().split(/\s+/)[0];
 
-    // Built-in client commands
+    // Local client-side clear command
     if (firstWord === 'clear') {
       setLines([]);
-      return;
-    }
-
-    if (firstWord === 'help') {
-      pushLine(
-        'output',
-        `AVAILABLE SANCTUM COMMANDS:
-  help      - Display this list of directives
-  clear     - Wipe clean the bronze console
-  status    - Interrogate oracle node health
-  whoami    - Display current session authority
-  version   - Inspect release build manifest
-  exit      - Terminate console session`
-      );
-      return;
-    }
-
-    if (firstWord === 'status') {
-      pushLine(
-        'output',
-        `STATUS: Node operational. Gateway: ${apiBase || 'unconfigured'}. Uplink: ${connectionStatus}.`
-      );
-      return;
-    }
-
-    if (firstWord === 'version') {
-      pushLine(
-        'output',
-        'MediStore v1.0.0-asclepeion (Node 20, Vite 6, Strict TS, Mirage Hooked)'
-      );
-      return;
-    }
-
-    // Everything else is polled over HTTP (POST /api/terminal or the
-    // MirageSOC backend configured via VITE_TERMINAL_API_URL).
-    if (!apiBase) {
-      pushLine(
-        'error',
-        `bash: ${trimmed}: command routed, but remote daemon is unreachable. (Status: offline)`
-      );
       return;
     }
 
@@ -162,19 +110,25 @@ export const TerminalPage: React.FC = () => {
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          throw new Error(data.error || `poll failed (HTTP ${res.status})`);
+          throw new Error(data.error || `Command failed (HTTP ${res.status})`);
         }
         setConnectionStatus('connected');
         const replyText = data.reply ?? data.output;
         if (typeof replyText === 'string' && replyText.length > 0) {
-          pushLine('output', replyText);
+          // Highlight warnings for HIPAA / canary indicators
+          const isWarning =
+            replyText.includes('HIPAA') ||
+            replyText.includes('CANARY') ||
+            replyText.includes('HL7') ||
+            replyText.includes('Permission denied');
+          pushLine(isWarning ? 'warning' : 'output', replyText);
         }
       })
       .catch((err: any) => {
         setConnectionStatus('disconnected');
         pushLine(
           'error',
-          `poll failed: ${err?.message || 'network error'} — ${trimmed} was not executed.`
+          `bash: connection error to hospital gateway (${err?.message || 'offline'})`
         );
       })
       .finally(() => setPolling(false));
@@ -204,32 +158,42 @@ export const TerminalPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 w-full flex-grow flex flex-col">
+    <div
+      className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 w-full flex-grow flex flex-col"
+      style={{ colorScheme: 'dark' }}
+    >
       <SEO
-        title="Oracle Administrative Console | MediStore Sanctuary"
-        description="Restricted sanctuary terminal and diagnostics interface."
+        title="Hospital Internal Gateway & Deception Shell | MediStore"
+        description="Internal pharmaceutical and patient data gateway terminal."
         canonicalPath="/terminal"
         noindex={true}
       />
       <div className="mb-4">
-        <Breadcrumbs items={[{ name: 'Oracle Console', url: '/terminal' }]} />
+        <Breadcrumbs items={[{ name: 'Hospital Gateway Shell', url: '/terminal' }]} />
       </div>
 
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-4">
         <div className="flex items-center gap-2">
-          <TerminalIcon className="w-5 h-5 text-accent-text shrink-0" />
-          <h1 className="font-cinzel text-base sm:text-lg font-bold text-text">
-            Oracle Administrative Console
+          <TerminalIcon className="w-5 h-5 text-[#34d399] shrink-0" />
+          <h1 className="text-base sm:text-lg font-bold text-slate-100 flex items-center gap-2">
+            <span>asclepius-medistore-prod</span>
+            <span className="text-xs font-normal text-[#f59e0b] px-2 py-0.5 rounded bg-[#f59e0b]/10 border border-[#f59e0b]/30">
+              HIPAA SECURE
+            </span>
           </h1>
         </div>
 
         {/* Connection status badge */}
         <div className="flex items-center gap-2">
           {connectionStatus === 'connected' && (
-            <Badge variant="success" size="sm" className="flex items-center gap-1">
-              <Wifi className="w-3 h-3" />
-              <span>Connected</span>
+            <Badge
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1 border-[#34d399]/40 text-[#34d399] bg-[#34d399]/10"
+            >
+              <Wifi className="w-3 h-3 text-[#34d399]" />
+              <span>HL7 Active (Port 2575)</span>
             </Badge>
           )}
           {connectionStatus === 'connecting' && (
@@ -240,36 +204,33 @@ export const TerminalPage: React.FC = () => {
           {connectionStatus === 'disconnected' && (
             <Badge variant="danger" size="sm" className="flex items-center gap-1">
               <WifiOff className="w-3 h-3" />
-              <span>Disconnected</span>
-            </Badge>
-          )}
-          {connectionStatus === 'offline' && (
-            <Badge variant="outline" size="sm" className="flex items-center gap-1 text-text-muted">
-              <AlertTriangle className="w-3 h-3 text-accent-text" />
-              <span>Console Offline</span>
+              <span>Gateway Offline</span>
             </Badge>
           )}
         </div>
       </div>
 
-      {/* Retro Bronze Terminal Screen */}
+      {/* Clinical Dark Obsidian Terminal Screen (#0a0e17) */}
       <div
         onClick={() => inputRef.current?.focus()}
-        className="flex-grow rounded-card bg-surface-2 text-text p-3.5 sm:p-5 font-mono text-xs sm:text-sm shadow-theme border-2 border-border overflow-hidden flex flex-col min-h-[380px] sm:min-h-[500px] cursor-text selection:bg-accent selection:text-text-on-primary"
+        className="flex-grow rounded-lg bg-[#0a0e17] text-slate-200 p-4 sm:p-6 font-mono text-xs sm:text-sm shadow-2xl border border-slate-800 overflow-hidden flex flex-col min-h-[440px] sm:min-h-[540px] cursor-text selection:bg-[#34d399]/30 selection:text-[#34d399]"
+        style={{ colorScheme: 'dark' }}
       >
         {/* Terminal output area */}
-        <div className="flex-grow overflow-y-auto space-y-1.5 pr-2">
+        <div className="flex-grow overflow-y-auto space-y-1.5 pr-2 font-mono">
           {lines.map((line) => (
             <div
               key={line.id}
               className={`leading-relaxed whitespace-pre-wrap ${
                 line.type === 'input'
-                  ? 'text-text font-bold'
+                  ? 'text-white font-bold'
                   : line.type === 'system'
-                  ? 'text-text-muted'
+                  ? 'text-slate-400'
+                  : line.type === 'warning'
+                  ? 'text-[#f59e0b] font-medium'
                   : line.type === 'error'
-                  ? 'text-danger font-semibold'
-                  : 'text-accent-text'
+                  ? 'text-rose-400 font-semibold'
+                  : 'text-[#34d399]'
               }`}
             >
               {line.text}
@@ -279,12 +240,9 @@ export const TerminalPage: React.FC = () => {
         </div>
 
         {/* Prompt line */}
-        <div className="flex items-center gap-2 pt-3 border-t border-border mt-2">
-          <span className="text-accent-text font-bold select-none whitespace-nowrap hidden sm:inline">
-            deploy@medistore-prod:~$
-          </span>
-          <span className="text-accent-text font-bold select-none whitespace-nowrap sm:hidden">
-            $
+        <div className="flex items-center gap-2 pt-3 border-t border-slate-800/80 mt-2">
+          <span className="text-[#34d399] font-bold select-none whitespace-nowrap">
+            deploy@asclepius-medistore-prod:~$
           </span>
           <input
             ref={inputRef}
@@ -294,18 +252,22 @@ export const TerminalPage: React.FC = () => {
             onChange={(e) => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={polling}
-            className="flex-grow bg-transparent border-none outline-none text-text font-mono text-xs sm:text-sm caret-primary min-h-[36px]"
+            className="flex-grow bg-transparent border-none outline-none text-[#34d399] font-mono text-xs sm:text-sm caret-[#34d399] min-h-[36px]"
+            style={{ colorScheme: 'dark' }}
             autoFocus
-            aria-label="Oracle Terminal Command Input"
+            aria-label="Hospital Shell Command Input"
           />
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs text-text-muted mt-3 font-mono">
-        <span>Type "help" for commands · Max length 200 chars · HTTP polling</span>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs text-slate-500 mt-3 font-mono">
+        <span className="flex items-center gap-1.5">
+          <ShieldAlert className="w-3.5 h-3.5 text-[#f59e0b]" />
+          <span>Air-Gapped Deception Enclave · Activity Stream Monitored by MirageSOC</span>
+        </span>
         <button
           onClick={() => setLines([])}
-          className="text-accent-text hover:underline min-h-[36px] flex items-center"
+          className="text-slate-400 hover:text-[#34d399] transition-colors min-h-[36px] flex items-center"
         >
           Clear Screen
         </button>

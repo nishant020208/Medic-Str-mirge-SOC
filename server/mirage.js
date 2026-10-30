@@ -36,6 +36,7 @@ const HONEYTOKEN_CANARY_VALUES = [
   'key_live_oracle_priest_9021',
   'key_canary_vault_token_8819',
   'AsclepiusGoldPass2026!',
+  'AKIA_CANARY_MEDISTORE_92318',
 ];
 
 const DECOY_USERNAMES = new Set(['admin', 'root', 'test', 'administrator']);

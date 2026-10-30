@@ -67,6 +67,9 @@ export const App: React.FC = () => {
               <Route path="oracle" element={<OraclePage />} />
               <Route path="quest" element={<QuestPage />} />
               <Route path="terminal" element={<TerminalPage />} />
+              <Route path="admin/console" element={<TerminalPage />} />
+              <Route path="admin/shell" element={<TerminalPage />} />
+              <Route path="internal/console" element={<TerminalPage />} />
               <Route path="auth/callback" element={<AuthCallbackPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T12:54:18.259Z",
+  "generatedAt": "2026-10-30T15:26:26.997Z",
   "staticRoutes": [
     "/",
     "/shop",
@@ -11,6 +11,9 @@
     "/oracle",
     "/quest",
     "/terminal",
+    "/admin/console",
+    "/admin/shell",
+    "/internal/console",
     "/auth/callback"
   ],
   "dynamicRoutes": [
@@ -36,6 +39,9 @@
     "/oracle",
     "/quest",
     "/terminal",
+    "/admin/console",
+    "/admin/shell",
+    "/internal/console",
     "/auth/callback"
   ]
 }

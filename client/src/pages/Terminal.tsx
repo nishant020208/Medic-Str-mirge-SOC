@@ -158,10 +158,7 @@ export const TerminalPage: React.FC = () => {
   };
 
   return (
-    <div
-      className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 w-full flex-grow flex flex-col"
-      style={{ colorScheme: 'dark' }}
-    >
+    <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 w-full flex-grow flex flex-col">
       <SEO
         title="Hospital Internal Gateway & Deception Shell | MediStore"
         description="Internal pharmaceutical and patient data gateway terminal."
@@ -176,9 +173,9 @@ export const TerminalPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-4">
         <div className="flex items-center gap-2">
           <TerminalIcon className="w-5 h-5 text-[#34d399] shrink-0" />
-          <h1 className="text-base sm:text-lg font-bold text-slate-100 flex items-center gap-2">
+          <h1 className="text-base sm:text-lg font-bold text-text flex items-center gap-2">
             <span>asclepius-medistore-prod</span>
-            <span className="text-xs font-normal text-[#f59e0b] px-2 py-0.5 rounded bg-[#f59e0b]/10 border border-[#f59e0b]/30">
+            <span className="text-xs font-semibold text-[#f59e0b] px-2.5 py-0.5 rounded-full bg-[#f59e0b]/15 border border-[#f59e0b]/40 tracking-wide">
               HIPAA SECURE
             </span>
           </h1>
@@ -190,7 +187,7 @@ export const TerminalPage: React.FC = () => {
             <Badge
               variant="outline"
               size="sm"
-              className="flex items-center gap-1 border-[#34d399]/40 text-[#34d399] bg-[#34d399]/10"
+              className="flex items-center gap-1 border-[#34d399]/40 text-[#34d399] bg-[#34d399]/10 font-medium"
             >
               <Wifi className="w-3 h-3 text-[#34d399]" />
               <span>HL7 Active (Port 2575)</span>
@@ -213,23 +210,39 @@ export const TerminalPage: React.FC = () => {
       {/* Clinical Dark Obsidian Terminal Screen (#0a0e17) */}
       <div
         onClick={() => inputRef.current?.focus()}
-        className="flex-grow rounded-lg bg-[#0a0e17] text-slate-200 p-4 sm:p-6 font-mono text-xs sm:text-sm shadow-2xl border border-slate-800 overflow-hidden flex flex-col min-h-[440px] sm:min-h-[540px] cursor-text selection:bg-[#34d399]/30 selection:text-[#34d399]"
+        className="flex-grow rounded-xl bg-[#0a0e17] text-[#e2e8f0] font-mono shadow-2xl border border-[#1e293b] ring-1 ring-white/10 overflow-hidden flex flex-col min-h-[460px] sm:min-h-[560px] cursor-text selection:bg-[#34d399]/30 selection:text-[#34d399]"
         style={{ colorScheme: 'dark' }}
       >
+        {/* Terminal Window Chrome / Header */}
+        <div className="flex items-center justify-between px-4 py-2.5 bg-[#0f172a] border-b border-[#1e293b] select-none">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-[#ef4444] inline-block shadow-sm"></span>
+            <span className="w-3 h-3 rounded-full bg-[#eab308] inline-block shadow-sm"></span>
+            <span className="w-3 h-3 rounded-full bg-[#22c55e] inline-block shadow-sm"></span>
+            <span className="ml-2 text-xs text-[#94a3b8] font-medium hidden sm:inline">
+              deploy@asclepius-medistore-prod:~ (bash — 80x24)
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] text-[#34d399] bg-[#34d399]/10 px-2 py-0.5 rounded border border-[#34d399]/30 font-semibold tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-pulse"></span>
+            <span>HL7 / HIPAA GATEWAY</span>
+          </div>
+        </div>
+
         {/* Terminal output area */}
-        <div className="flex-grow overflow-y-auto space-y-1.5 pr-2 font-mono">
+        <div className="flex-grow overflow-y-auto p-4 sm:p-6 space-y-2 text-xs sm:text-sm">
           {lines.map((line) => (
             <div
               key={line.id}
               className={`leading-relaxed whitespace-pre-wrap ${
                 line.type === 'input'
-                  ? 'text-white font-bold'
+                  ? 'text-[#f8fafc] font-semibold'
                   : line.type === 'system'
-                  ? 'text-slate-400'
+                  ? 'text-[#cbd5e1] font-medium'
                   : line.type === 'warning'
                   ? 'text-[#f59e0b] font-medium'
                   : line.type === 'error'
-                  ? 'text-rose-400 font-semibold'
+                  ? 'text-[#f87171] font-semibold'
                   : 'text-[#34d399]'
               }`}
             >
@@ -240,7 +253,7 @@ export const TerminalPage: React.FC = () => {
         </div>
 
         {/* Prompt line */}
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-800/80 mt-2">
+        <div className="flex items-center gap-2 px-4 sm:px-6 py-3 border-t border-[#1e293b] bg-[#0a0e17]">
           <span className="text-[#34d399] font-bold select-none whitespace-nowrap">
             deploy@asclepius-medistore-prod:~$
           </span>
@@ -252,22 +265,23 @@ export const TerminalPage: React.FC = () => {
             onChange={(e) => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={polling}
-            className="flex-grow bg-transparent border-none outline-none text-[#34d399] font-mono text-xs sm:text-sm caret-[#34d399] min-h-[36px]"
+            className="flex-grow bg-transparent border-none outline-none text-[#34d399] font-mono text-xs sm:text-sm caret-[#34d399] min-h-[36px] placeholder:text-[#64748b]"
             style={{ colorScheme: 'dark' }}
             autoFocus
             aria-label="Hospital Shell Command Input"
+            placeholder={polling ? 'Executing command...' : 'Type a command...'}
           />
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs text-slate-500 mt-3 font-mono">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs text-text-muted mt-3 font-mono">
         <span className="flex items-center gap-1.5">
-          <ShieldAlert className="w-3.5 h-3.5 text-[#f59e0b]" />
+          <ShieldAlert className="w-3.5 h-3.5 text-[#f59e0b] shrink-0" />
           <span>Air-Gapped Deception Enclave · Activity Stream Monitored by MirageSOC</span>
         </span>
         <button
           onClick={() => setLines([])}
-          className="text-slate-400 hover:text-[#34d399] transition-colors min-h-[36px] flex items-center"
+          className="text-text-muted hover:text-[#34d399] transition-colors min-h-[36px] flex items-center font-medium underline-offset-4 hover:underline"
         >
           Clear Screen
         </button>

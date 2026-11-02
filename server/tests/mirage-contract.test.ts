@@ -162,19 +162,56 @@ describe('MirageSOC Contract & Hardening Assertions (Stage 7)', () => {
     }
   });
 
-  it('2. Blocklisted IP gets 403 JSON "Access blocked"', async () => {
+  it('2. Blocklisted IP gets 403 JSON "Access blocked" and fires blocked_attempt event once per request', async () => {
     const blockedIp = '203.0.113.55';
     blocklistFixture = { ips: [blockedIp], fingerprints: [], ttl: 3 };
 
+    const startTime = Date.now();
     const res = await fetch(`${testAppUrl}/api/products`, {
       headers: {
         'x-vercel-forwarded-for': blockedIp,
       },
     });
+    const elapsedMs = Date.now() - startTime;
 
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body).toEqual({ error: 'Access blocked' });
+    expect(elapsedMs).toBeLessThan(100);
+
+    // Wait briefly for fire-and-forget event
+    await new Promise((r) => setTimeout(r, 60));
+
+    const blockedAttempts = capturedEvents.filter(
+      (e) => e.body?.kind === 'blocked_attempt'
+    );
+    expect(blockedAttempts).toHaveLength(1);
+    expect(blockedAttempts[0].body).toMatchObject({
+      kind: 'blocked_attempt',
+      ip: blockedIp,
+      method: 'GET',
+      path: '/api/products',
+      severity: 'medium',
+      detail: {
+        reason: 'blocked_ip_probe',
+        ip: blockedIp,
+        whileBlocked: true,
+        method: 'GET',
+        path: '/api/products',
+      },
+    });
+
+    // Second request to verify it fires exactly once per request
+    const res2 = await fetch(`${testAppUrl}/api/products`, {
+      headers: {
+        'x-vercel-forwarded-for': blockedIp,
+      },
+    });
+    expect(res2.status).toBe(403);
+    await new Promise((r) => setTimeout(r, 60));
+    expect(
+      capturedEvents.filter((e) => e.body?.kind === 'blocked_attempt')
+    ).toHaveLength(2);
   });
 
   it('3. MirageSOC down/slow = real app still works (fail-open invariant)', async () => {

@@ -687,6 +687,21 @@ export default async function mirage(req, res, next) {
 
     if (isBlocked) {
       if (mode === 'enforce') {
+        sendEvent({
+          ip,
+          userAgent,
+          method: req.method,
+          path: reqPath,
+          kind: 'blocked_attempt',
+          detail: {
+            reason: 'blocked_ip_probe',
+            ip,
+            whileBlocked: true,
+            method: req.method,
+            path: reqPath,
+          },
+          severity: 'medium',
+        });
         return res.status(403).json({ error: 'Access blocked' });
       }
       // In monitor mode: report but allow request
